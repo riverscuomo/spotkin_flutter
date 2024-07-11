@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Flutter Web",
+        "request": "launch",
+        "type": "dart",
+        "args": [
+          "--web-port",
+          "8888"
+        ]
+      }
+    ]
+  }
