@@ -1,6 +1,7 @@
 .env
 assets/config.json
 
+.firebase/
 
 # Miscellaneous
 *.class
