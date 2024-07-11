@@ -1,4 +1,4 @@
-package com.example.spotnik_flutter
+package com.example.spotkin_flutter
 
 import io.flutter.embedding.android.FlutterActivity
 

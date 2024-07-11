@@ -1,4 +1,4 @@
-# spotnik_flutter
+# spotkin_flutter
 
 A new Flutter project.
 

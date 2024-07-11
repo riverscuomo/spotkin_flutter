@@ -1,6 +1,6 @@
 {
-    "name": "spotnik_flutter",
-    "short_name": "spotnik_flutter",
+    "name": "spotkin_flutter",
+    "short_name": "spotkin_flutter",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
