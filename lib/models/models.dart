@@ -1,0 +1,1 @@
+export 'package:spotkin_flutter/models/playlist.dart';
