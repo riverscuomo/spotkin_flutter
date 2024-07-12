@@ -44,7 +44,7 @@ jobs:
             "SPOTIFY_REDIRECT_URI": "$SPOTIFY_REDIRECT_URI",
             "SPOTIFY_SCOPE": "$SPOTIFY_SCOPE",
             "BACKEND_URL": "$BACKEND_URL"
-        }' > assets/config.json
+        }' > web/assets/config.json
     
 
     - name: Build Spotkin web app
