@@ -29,21 +29,14 @@ jobs:
         ./update_version.sh
 
     
-    - name: Generate config files
-      env:
-        SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
-        SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
-        SPOTIFY_REDIRECT_URI: ${{ secrets.SPOTIFY_REDIRECT_URI }}
-        SPOTIFY_SCOPE: ${{ secrets.SPOTIFY_SCOPE }}
-        BACKEND_URL: ${{ secrets.BACKEND_URL }}
+    - name: Generate production config
       run: |
-        mkdir -p assets
         echo '{
-            "SPOTIFY_CLIENT_ID": "$SPOTIFY_CLIENT_ID",
-            "SPOTIFY_CLIENT_SECRET": "$SPOTIFY_CLIENT_SECRET",
-            "SPOTIFY_REDIRECT_URI": "$SPOTIFY_REDIRECT_URI",
-            "SPOTIFY_SCOPE": "$SPOTIFY_SCOPE",
-            "BACKEND_URL": "$BACKEND_URL"
+        "SPOTIFY_CLIENT_ID": "${{ secrets.SPOTIFY_CLIENT_ID }}",
+        "SPOTIFY_CLIENT_SECRET": "${{ secrets.SPOTIFY_CLIENT_SECRET }}",
+        "SPOTIFY_REDIRECT_URI": "${{ secrets.SPOTIFY_REDIRECT_URI }}",
+        "SPOTIFY_SCOPE": "${{ secrets.SPOTIFY_SCOPE }}",
+        "BACKEND_URL": "${{ secrets.BACKEND_URL }}"
         }' > assets/config.json
     
 
@@ -51,5 +44,5 @@ jobs:
       run: |
         flutter config --enable-web
         flutter pub get
-        flutter build web --release #--no-tree-shake-icons
+        flutter build web --release
         firebase deploy --only hosting --project spotkin-fd416 --token ${{ secrets.FIREBASE_TOKEN }}
