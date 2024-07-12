@@ -40,11 +40,11 @@ jobs:
         mkdir -p assets
         cat << EOF > assets/config.json
         {
-        "SPOTIFY_CLIENT_ID": "$SPOTIFY_CLIENT_ID",
-        "SPOTIFY_CLIENT_SECRET": "$SPOTIFY_CLIENT_SECRET",
-        "SPOTIFY_REDIRECT_URI": "$SPOTIFY_REDIRECT_URI",
-        "SPOTIFY_SCOPE": "$SPOTIFY_SCOPE",
-        "BACKEND_URL": "$BACKEND_URL"
+        "SPOTIFY_CLIENT_ID": "${SPOTIFY_CLIENT_ID}",
+        "SPOTIFY_CLIENT_SECRET": "${SPOTIFY_CLIENT_SECRET}",
+        "SPOTIFY_REDIRECT_URI": "${SPOTIFY_REDIRECT_URI}",
+        "SPOTIFY_SCOPE": "${SPOTIFY_SCOPE}",
+        "BACKEND_URL": "${BACKEND_URL}"
         }
         EOF
     
