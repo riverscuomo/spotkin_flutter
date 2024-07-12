@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart' show rootBundle;
@@ -22,7 +23,7 @@ void main() async {
 
 Future<Map<String, dynamic>> loadConfig() async {
   // load different config if in production mode
-  String configFileName = isProduction ? 'assets/config_prod.json' : 'assets/config.json';
+  String configFileName = (isProduction || kReleaseMode ) ? 'assets/config_prod.json' : 'assets/config.json';
   String configString = await rootBundle.loadString(configFileName);
   return jsonDecode(configString);
 }

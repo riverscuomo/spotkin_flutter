@@ -16,7 +16,7 @@ echo "Updating version number for $(basename $(pwd))"
 cp web/index.html web/index.html.bak
 
 # Replace the main.dart.js reference with the new version number
-sed "s/flutter.js?v=[0-9]*/main.dart.js?v=$timestamp/" web/index.html.bak > web/index.html
+sed "s/main.js?v=[0-9]*/main.dart.js?v=$timestamp/" web/index.html.bak > web/index.html
 
 # Remove the backup file
 rm web/index.html.bak
