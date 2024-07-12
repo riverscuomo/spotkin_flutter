@@ -18,8 +18,10 @@ void main() async {
 
 Future<Map<String, dynamic>> loadConfig() async {
   String configString = await rootBundle.loadString('assets/config.json');
-  print(configString);
-  return jsonDecode(configString);
+  print('Loaded config string: $configString');
+  Map<String, dynamic> config = jsonDecode(configString);
+  print('Parsed config: $config');
+  return config;
 }
 
 Future<String> loadSampleJobs() async {
@@ -83,19 +85,25 @@ class _MyHomePageState extends State<MyHomePage> {
   late final String sampleJobs;
 
   @override
-  void initState() {
-    super.initState();
-    clientId = widget.config['SPOTIFY_CLIENT_ID']!;
-    clientSecret = widget.config['SPOTIFY_CLIENT_SECRET']!;
-    redirectUri = widget.config['SPOTIFY_REDIRECT_URI']!;
-    scope = widget.config['SPOTIFY_SCOPE']!;
-    backendUrl = widget.config['BACKEND_URL']!;
-    sampleJobs = widget.sampleJobs;
+void initState() {
+  super.initState();
+  clientId = widget.config['SPOTIFY_CLIENT_ID']!;
+  clientSecret = widget.config['SPOTIFY_CLIENT_SECRET']!;
+  redirectUri = widget.config['SPOTIFY_REDIRECT_URI']!;
+  scope = widget.config['SPOTIFY_SCOPE']!;
+  backendUrl = widget.config['BACKEND_URL']!;
+  sampleJobs = widget.sampleJobs;
 
-    if (widget.initialAuthCode != null) {
-      _exchangeCodeForToken(widget.initialAuthCode!);
-    }
+  print('Loaded config:');
+  print('Client ID: $clientId');
+  print('Redirect URI: $redirectUri');
+  print('Scope: $scope');
+  print('Backend URL: $backendUrl');
+
+  if (widget.initialAuthCode != null) {
+    _exchangeCodeForToken(widget.initialAuthCode!);
   }
+}
 
   Future<void> _exchangeCodeForToken(String code) async {
     final tokenEndpoint = Uri.parse('https://accounts.spotify.com/api/token');
@@ -135,12 +143,16 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _initiateSpotifyLogin() {
-    final spotifyAuthUrl =
-        'https://accounts.spotify.com/authorize?client_id=$clientId&response_type=code&redirect_uri=${Uri.encodeComponent(redirectUri)}&scope=$scope';
+  final spotifyAuthUrl = Uri.https('accounts.spotify.com', '/authorize', {
+    'client_id': clientId,
+    'response_type': 'code',
+    'redirect_uri': redirectUri,
+    'scope': scope,
+  });
 
-    print('Redirecting to: $spotifyAuthUrl');
-    html.window.location.href = spotifyAuthUrl;
-  }
+  print('Redirecting to: $spotifyAuthUrl');
+  html.window.location.href = spotifyAuthUrl.toString();
+}
 
   @override
   Widget build(BuildContext context) {

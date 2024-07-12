@@ -37,14 +37,18 @@ jobs:
         SPOTIFY_SCOPE: ${{ secrets.SPOTIFY_SCOPE }}
         BACKEND_URL: ${{ secrets.BACKEND_URL }}
       run: |
-        echo '{
-        "SPOTIFY_CLIENT_ID": "'$SPOTIFY_CLIENT_ID'",
-        "SPOTIFY_CLIENT_SECRET": "'$SPOTIFY_CLIENT_SECRET'",
-        "SPOTIFY_REDIRECT_URI": "'$SPOTIFY_REDIRECT_URI'",
-        "SPOTIFY_SCOPE": "'$SPOTIFY_SCOPE'",
-        "BACKEND_URL": "'$BACKEND_URL'"
-        }' > assets/config.json
-
+        mkdir -p assets
+        cat << EOF > assets/config.json
+        {
+        "SPOTIFY_CLIENT_ID": "$SPOTIFY_CLIENT_ID",
+        "SPOTIFY_CLIENT_SECRET": "$SPOTIFY_CLIENT_SECRET",
+        "SPOTIFY_REDIRECT_URI": "$SPOTIFY_REDIRECT_URI",
+        "SPOTIFY_SCOPE": "$SPOTIFY_SCOPE",
+        "BACKEND_URL": "$BACKEND_URL"
+        }
+        EOF
+    
+        # Debug: Print the contents of the config file (be careful with secrets!)
         echo "Generated config file contents:"
         cat assets/config.json
     
