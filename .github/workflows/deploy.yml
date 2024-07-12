@@ -26,11 +26,11 @@ jobs:
       run: |
         chmod +x update_version.sh
         echo "Updating version number for spotkin_flutter web app"
-        update_version.sh
+        ./update_version.sh
 
     - name: Build Spotkin web app
       run: |
         flutter config --enable-web
         flutter pub get
         flutter build web --release #--no-tree-shake-icons
-        firebase deploy --only hosting --project rivers-private
+        firebase deploy --only hosting --project rivers-private --token ${{ secrets.FIREBASE_TOKEN }}
