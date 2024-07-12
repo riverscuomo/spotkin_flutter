@@ -39,13 +39,12 @@ jobs:
       run: |
         mkdir -p assets
         echo '{
-        "SPOTIFY_CLIENT_ID": "$SPOTIFY_CLIENT_ID",
-        "SPOTIFY_CLIENT_SECRET": "$SPOTIFY_CLIENT_SECRET",
-        "SPOTIFY_REDIRECT_URI": "$SPOTIFY_REDIRECT_URI",
-        "SPOTIFY_SCOPE": "$SPOTIFY_SCOPE",
-        "BACKEND_URL": "$BACKEND_URL"
-        }' > assets/config_prod.json
-        cp assets/config_prod.json assets/config.json
+            "SPOTIFY_CLIENT_ID": "$SPOTIFY_CLIENT_ID",
+            "SPOTIFY_CLIENT_SECRET": "$SPOTIFY_CLIENT_SECRET",
+            "SPOTIFY_REDIRECT_URI": "$SPOTIFY_REDIRECT_URI",
+            "SPOTIFY_SCOPE": "$SPOTIFY_SCOPE",
+            "BACKEND_URL": "$BACKEND_URL"
+        }' > assets/config.json
     
 
     - name: Build Spotkin web app

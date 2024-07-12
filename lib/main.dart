@@ -22,9 +22,7 @@ void main() async {
 }
 
 Future<Map<String, dynamic>> loadConfig() async {
-  // load different config if in production mode
-  String configFileName = (isProduction || kReleaseMode ) ? 'assets/config_prod.json' : 'assets/config_dev.json';
-  String configString = await rootBundle.loadString(configFileName);
+  String configString = await rootBundle.loadString('assets/config.json');
   return jsonDecode(configString);
 }
 
