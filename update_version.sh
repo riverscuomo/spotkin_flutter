@@ -15,8 +15,9 @@ echo "Updating version number for $(basename $(pwd))"
 # Make a backup of the original index.html file
 cp web/index.html web/index.html.bak
 
-# Replace the flutter.js reference with a versioned one
-sed "s|<script src=\"flutter.js\" defer></script>|<script src=\"flutter.js?v=$timestamp\" defer></script>|" web/index.html.bak > web/index.html
+# Replace the flutter.js and main.dart.js references with versioned ones
+sed -i "s|flutter.js|flutter.js?v=$timestamp|g" web/index.html
+sed -i "s|main.dart.js|main.dart.js?v=$timestamp|g" web/index.html
 
 # Update the serviceWorkerVersion
 sed -i "s|const serviceWorkerVersion = null;|const serviceWorkerVersion = '$timestamp';|" web/index.html
