@@ -10,6 +10,8 @@ import 'screens/screens.dart';
 
 const bool isProduction = bool.fromEnvironment('dart.vm.product');
 
+
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   setUrlStrategy(PathUrlStrategy()); // Use path URL strategy
