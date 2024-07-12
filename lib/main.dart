@@ -8,6 +8,7 @@ import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 import 'screens/screens.dart';
 
+const bool isProduction = bool.fromEnvironment('dart.vm.product');
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,8 +17,11 @@ void main() async {
   String sampleJobs = await loadSampleJobs();
   runApp(MyApp(config, sampleJobs));
 }
+
 Future<Map<String, dynamic>> loadConfig() async {
-  String configString = await rootBundle.loadString('assets/config.json');
+  // load different config if in production mode
+  String configFileName = isProduction ? 'assets/config_prod.json' : 'assets/config.json';
+  String configString = await rootBundle.loadString(configFileName);
   return jsonDecode(configString);
 }
 

@@ -1,5 +1,6 @@
 .env
 assets/config.json
+assets/config_prod.json
 
 .firebase/
 
