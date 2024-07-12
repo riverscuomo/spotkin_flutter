@@ -1,0 +1,36 @@
+name: Deploy to Firebase Hosting
+
+on:
+  push:
+    branches:
+      - main # Change this to the name of your default branch if it's not 'main'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v1
+      with:
+        flutter-version: '3.19.1' # Explicitly specify Flutter version
+
+    - name: Install Firebase CLI
+      run: |
+        curl -sL https://firebase.tools | bash   
+
+    - name: Update version numbers
+      run: |
+        chmod +x update_version.sh
+        echo "Updating version number for spotkin_flutter web app"
+        update_version.sh
+
+    - name: Build Spotkin web app
+      run: |
+        flutter config --enable-web
+        flutter pub get
+        flutter build web --release #--no-tree-shake-icons
+        firebase deploy --only hosting --project rivers-private
