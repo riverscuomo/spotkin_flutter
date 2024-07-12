@@ -144,10 +144,10 @@ void initState() {
 
   void _initiateSpotifyLogin() {
   final spotifyAuthUrl = Uri.https('accounts.spotify.com', '/authorize', {
-    'client_id': clientId,
+    'client_id': Uri.encodeFull(clientId),
     'response_type': 'code',
-    'redirect_uri': redirectUri,
-    'scope': scope,
+    'redirect_uri': Uri.encodeFull(redirectUri),
+    'scope': Uri.encodeFull(scope),
   });
 
   print('Redirecting to: $spotifyAuthUrl');
