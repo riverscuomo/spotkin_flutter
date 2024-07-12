@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart' show rootBundle;
@@ -9,7 +8,6 @@ import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 import 'screens/screens.dart';
 
-const bool isProduction = bool.fromEnvironment('dart.vm.product');
 
 
 
