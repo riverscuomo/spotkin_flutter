@@ -8,9 +8,6 @@ import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 import 'screens/screens.dart';
 
-
-
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   setUrlStrategy(PathUrlStrategy()); // Use path URL strategy
@@ -21,6 +18,7 @@ void main() async {
 
 Future<Map<String, dynamic>> loadConfig() async {
   String configString = await rootBundle.loadString('assets/config.json');
+  print(configString);
   return jsonDecode(configString);
 }
 
@@ -42,7 +40,8 @@ class MyApp extends StatelessWidget {
       onGenerateRoute: (settings) {
         if (settings.name == '/') {
           return MaterialPageRoute(
-            builder: (context) => MyHomePage(config: config, sampleJobs: sampleJobs),
+            builder: (context) =>
+                MyHomePage(config: config, sampleJobs: sampleJobs),
           );
         }
         // Handle Spotify callback
@@ -68,7 +67,8 @@ class MyHomePage extends StatefulWidget {
   final String sampleJobs;
   final String? initialAuthCode;
 
-  MyHomePage({required this.config, required this.sampleJobs, this.initialAuthCode});
+  MyHomePage(
+      {required this.config, required this.sampleJobs, this.initialAuthCode});
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -115,7 +115,7 @@ class _MyHomePageState extends State<MyHomePage> {
       final tokenData = json.decode(response.body);
       final accessToken = tokenData['access_token'];
       print('Access Token: $accessToken');
-      
+
       // Navigate to UpdatePlaylistsScreen
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
