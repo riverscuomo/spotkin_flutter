@@ -44,6 +44,9 @@ jobs:
         "SPOTIFY_SCOPE": "'$SPOTIFY_SCOPE'",
         "BACKEND_URL": "'$BACKEND_URL'"
         }' > assets/config.json
+
+        echo "Generated config file contents:"
+        cat assets/config.json
     
 
     - name: Build Spotkin web app
