@@ -148,7 +148,7 @@ class _MyHomePageState extends State<MyHomePage> {
       'client_id': Uri.encodeFull(clientId),
       'response_type': 'code',
       'redirect_uri': Uri.encodeFull(redirectUri),
-      'scope': Uri.encodeFull(scope),
+      'scope': scope,
     });
 
     print('Redirecting to: $spotifyAuthUrl');
