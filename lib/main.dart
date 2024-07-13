@@ -5,8 +5,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:html' as html;
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'screens/screens.dart';
+
+final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,6 +29,10 @@ Future<Map<String, dynamic>> loadConfig() async {
 
 Future<String> loadSampleJobs() async {
   return await rootBundle.loadString('assets/sample_jobs.json');
+}
+
+Future<String?> _getAccessToken() async {
+  return await _secureStorage.read(key: 'accessToken');
 }
 
 class MyApp extends StatelessWidget {
@@ -83,6 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
   late final String scope;
   late final String backendUrl;
   late final String sampleJobs;
+  late final String accessToken;
 
   @override
   void initState() {
@@ -103,6 +111,21 @@ class _MyHomePageState extends State<MyHomePage> {
     if (widget.initialAuthCode != null) {
       _exchangeCodeForToken(widget.initialAuthCode!);
     }
+
+    print('Loaded sample jobs:');
+    _getAccessToken().then((value) {
+      if (value != null) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => UpdatePlaylistsScreen(
+              accessToken: value,
+              backendUrl: backendUrl,
+              sampleJobs: sampleJobs,
+            ),
+          ),
+        );
+      }
+    });
   }
 
   Future<void> _exchangeCodeForToken(String code) async {
@@ -122,10 +145,11 @@ class _MyHomePageState extends State<MyHomePage> {
     if (response.statusCode == 200) {
       final tokenData = json.decode(response.body);
       final accessToken = tokenData['access_token'];
+      await _secureStorage.write(key: 'accessToken', value: accessToken);
       print('Access Token: $accessToken');
-      print('now navigating to UpdatePlaylistsScreen');
 
       // Navigate to UpdatePlaylistsScreen
+      print('now navigating to UpdatePlaylistsScreen');
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (context) => UpdatePlaylistsScreen(
