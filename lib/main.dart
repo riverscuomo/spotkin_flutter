@@ -112,7 +112,6 @@ class _MyHomePageState extends State<MyHomePage> {
       _exchangeCodeForToken(widget.initialAuthCode!);
     }
 
-    print('Loaded sample jobs:');
     _getAccessToken().then((value) {
       if (value != null) {
         Navigator.of(context).pushReplacement(
