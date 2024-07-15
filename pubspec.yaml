@@ -31,7 +31,6 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_secure_storage: ^8.0.0
-  http: ^0.13.3
   flutter_dotenv: ^5.0.2
   http: ^1.2.0
   oauth2: ^2.0.0
