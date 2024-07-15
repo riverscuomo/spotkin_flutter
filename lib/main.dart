@@ -168,9 +168,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _initiateSpotifyLogin() {
     final spotifyAuthUrl = Uri.https('accounts.spotify.com', '/authorize', {
-      'client_id': Uri.encodeFull(clientId),
+      'client_id': clientId,
       'response_type': 'code',
-      'redirect_uri': Uri.encodeFull(redirectUri),
+      'redirect_uri': redirectUri,
       'scope': scope,
     });
 
