@@ -3,8 +3,7 @@
 A Flutter web front-end for Spotkin. <https://github.com/riverscuomo/spotkin>
 It should replace the spreadsheet method <https://docs.google.com/spreadsheets/d/1z5MejG6EKg8rf8vYKeFhw9XT_3PxkDFOrPSEKT_jYqI/edit?gid=1936655481#gid=1936655481>
 
-Currently deployed at <https://spotkin-fd416.web.app> though the Spotify login is not working (due to the redirect URI not being set up correctly?).
-Running locally works, however.
+Currently deployed at <https://spotkin-fd416.web.app> and jobs are hardcoded to update a sample playlist <https://open.spotify.com/playlist/7Li5tNS13DgGF0FAgwjATf?si=d7a5093ab6a94da5>
 I run it with these launch settings in vscode:
 
 ```
