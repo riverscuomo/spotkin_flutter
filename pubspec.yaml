@@ -31,8 +31,9 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_dotenv: ^5.0.2
-  http: ^0.13.3
+  http: ^1.2.0
   oauth2: ^2.0.0
+  spotify: ^0.13.7
   uni_links: ^0.5.1
   url_launcher: ^6.0.9
 
