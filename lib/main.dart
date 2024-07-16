@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart' show rootBundle;
@@ -22,9 +21,8 @@ void main() async {
 
 Future<Map<String, dynamic>> loadConfig() async {
   String configString = await rootBundle.loadString('assets/config.json');
-  print('Loaded configString: $configString');
+  // print('Loaded config: $configString');
   Map<String, dynamic> config = jsonDecode(configString);
-  print('Loaded configJson: $config');
   return config;
 }
 
@@ -85,11 +83,9 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   late final String clientId;
   late final String clientSecret;
-  final String redirectUri =
-      kReleaseMode ? 'https://spotkin-fd416.web.app' : 'http://localhost:8888';
-  final String scope =
-      "playlist-modify-private playlist-modify-public user-library-read playlist-read-private user-library-modify user-read-recently-played";
-  final String backendUrl = "https://spotkin-1b998975756a.herokuapp.com";
+  late final String redirectUri;
+  late final String scope;
+  late final String backendUrl;
   late final String jobs;
   late final String accessToken;
 
@@ -98,14 +94,13 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     clientId = widget.config['SPOTIFY_CLIENT_ID']!;
     clientSecret = widget.config['SPOTIFY_CLIENT_SECRET']!;
-    // redirectUri = widget.config['SPOTIFY_REDIRECT_URI']!;
-    // scope = widget.config['SPOTIFY_SCOPE']!;
-    // backendUrl = widget.config['BACKEND_URL']!;
+    redirectUri = widget.config['SPOTIFY_REDIRECT_URI']!;
+    scope = widget.config['SPOTIFY_SCOPE']!;
+    backendUrl = widget.config['BACKEND_URL']!;
     jobs = widget.jobs;
 
-    print('Loaded config:');
-    print('Redirect URI: $redirectUri');
-    print('here>: $clientSecret');
+    // print('Loaded config:');
+    // print('Redirect URI: $redirectUri');
 
     if (widget.initialAuthCode != null) {
       _exchangeCodeForToken(widget.initialAuthCode!);
