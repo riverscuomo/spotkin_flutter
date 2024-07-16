@@ -1,7 +1,7 @@
 #!/bin/bash
-
+echo "Starting script"
 # Navigate to the build directory
-cd build/web
+cd web
 
 # Generate a version hash based on the current timestamp
 VERSION=$(date +%s | md5sum | cut -d' ' -f1)
