@@ -1,24 +1,35 @@
 #!/bin/bash
-# This is for website deployment
+echo "Starting script"
+# Navigate to the build directory
+cd web
 
-# Get the current timestamp
-timestamp=$(date +%s)
+# Generate a version hash based on the current timestamp
+VERSION=$(date +%s | md5sum | cut -d' ' -f1)
 
-# Check if the web/index.html file exists
-if [ ! -f "web/index.html" ]; then
-  echo "web/index.html not found. Exiting."
-  exit 1
-fi
+# Update flutter.js reference in index.html
+sed -i.bak "s/flutter\.js/flutter.js?v=$VERSION/" index.html
 
-echo "Updating version number for $(basename $(pwd))"
+# Update manifest.json reference
+sed -i.bak "s/manifest\.json/manifest.json?v=$VERSION/" index.html
 
-# Make a backup of the original index.html file
-cp web/index.html web/index.html.bak
+# Update favicon reference
+sed -i.bak "s/favicon\.png/favicon.png?v=$VERSION/" index.html
 
-# Replace the main.dart.js reference with the new version number
-sed -i "s/main\.dart\.js?v=[0-9]*/main.dart.js?v=$timestamp/" web/index.html
+# Update Icon-192.png reference
+sed -i.bak "s/Icon-192\.png/Icon-192.png?v=$VERSION/" index.html
 
-# Remove the backup file
-rm web/index.html.bak
+# Optionally, update other asset references
+# sed -i.bak "s/assets\/fonts/assets\/fonts?v=$VERSION/g" index.html
+# sed -i.bak "s/assets\/images/assets\/images?v=$VERSION/g" index.html
 
-echo "Version number updated successfully"
+# Remove the backup file created by sed
+rm index.html.bak
+
+echo "Asset versioning completed. Version: $VERSION"
+
+# Optionally, update the serviceWorkerVersion in index.html
+# This ensures that the service worker is updated with each deployment
+sed -i.bak "s/const serviceWorkerVersion = null;/const serviceWorkerVersion = '$VERSION';/" index.html
+rm index.html.bak
+
+echo "Service worker version updated to: $VERSION"
