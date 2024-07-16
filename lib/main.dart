@@ -105,6 +105,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     print('Loaded config:');
     print('Redirect URI: $redirectUri');
+    print('here>: $clientSecret');
 
     if (widget.initialAuthCode != null) {
       _exchangeCodeForToken(widget.initialAuthCode!);
