@@ -21,9 +21,7 @@ void main() async {
 
 Future<Map<String, dynamic>> loadConfig() async {
   String configString = await rootBundle.loadString('assets/config.json');
-  // print('Loaded config string: $configString');
   Map<String, dynamic> config = jsonDecode(configString);
-  // print('Parsed config: $config');
   return config;
 }
 
@@ -37,9 +35,9 @@ Future<String?> _getAccessToken() async {
 
 class MyApp extends StatelessWidget {
   final Map<String, dynamic> config;
-  final String sampleJobs;
+  final String jobs;
 
-  MyApp(this.config, this.sampleJobs);
+  MyApp(this.config, this.jobs);
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +48,7 @@ class MyApp extends StatelessWidget {
         if (settings.name == '/') {
           return MaterialPageRoute(
             builder: (context) =>
-                MyHomePage(config: config, sampleJobs: sampleJobs),
+                MyHomePage(config: config, jobs: jobs),
           );
         }
         // Handle Spotify callback
@@ -60,7 +58,7 @@ class MyApp extends StatelessWidget {
           return MaterialPageRoute(
             builder: (context) => MyHomePage(
               config: config,
-              sampleJobs: sampleJobs,
+              jobs: jobs,
               initialAuthCode: code,
             ),
           );
