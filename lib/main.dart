@@ -98,9 +98,9 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     clientId = widget.config['SPOTIFY_CLIENT_ID']!;
     clientSecret = widget.config['SPOTIFY_CLIENT_SECRET']!;
-    redirectUri = widget.config['SPOTIFY_REDIRECT_URI']!;
-    scope = widget.config['SPOTIFY_SCOPE']!;
-    backendUrl = widget.config['BACKEND_URL']!;
+    // redirectUri = widget.config['SPOTIFY_REDIRECT_URI']!;
+    // scope = widget.config['SPOTIFY_SCOPE']!;
+    // backendUrl = widget.config['BACKEND_URL']!;
     jobs = widget.jobs;
 
     print('Loaded config:');
