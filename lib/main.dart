@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart' show rootBundle;
@@ -9,7 +10,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'screens/screens.dart';
 
-final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
+const FlutterSecureStorage _secureStorage = FlutterSecureStorage();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,6 +22,7 @@ void main() async {
 
 Future<Map<String, dynamic>> loadConfig() async {
   String configString = await rootBundle.loadString('assets/config.json');
+  print('Loaded config: $configString');
   Map<String, dynamic> config = jsonDecode(configString);
   return config;
 }
@@ -47,8 +49,7 @@ class MyApp extends StatelessWidget {
       onGenerateRoute: (settings) {
         if (settings.name == '/') {
           return MaterialPageRoute(
-            builder: (context) =>
-                MyHomePage(config: config, jobs: jobs),
+            builder: (context) => MyHomePage(config: config, jobs: jobs),
           );
         }
         // Handle Spotify callback
@@ -74,8 +75,7 @@ class MyHomePage extends StatefulWidget {
   final String jobs;
   final String? initialAuthCode;
 
-  MyHomePage(
-      {required this.config, required this.jobs, this.initialAuthCode});
+  MyHomePage({required this.config, required this.jobs, this.initialAuthCode});
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -84,9 +84,12 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   late final String clientId;
   late final String clientSecret;
-  late final String redirectUri;
-  late final String scope;
-  late final String backendUrl;
+  final String redirectUri = kReleaseMode
+      ? 'https://spotkin-1b998975756a.herokuapp.com'
+      : 'http://localhost:8888';
+  final String scope =
+      "playlist-modify-private playlist-modify-public user-library-read playlist-read-private user-library-modify user-read-recently-played";
+  final String backendUrl="https://spotkin-1b998975756a.herokuapp.com";
   late final String jobs;
   late final String accessToken;
 
@@ -156,7 +159,7 @@ class _MyHomePageState extends State<MyHomePage> {
     } else {
       print('Failed to exchange code for token: ${response.body}');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to authenticate with Spotify')),
+        const SnackBar(content: Text('Failed to authenticate with Spotify')),
       );
     }
   }
@@ -176,11 +179,11 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Spotify Auth Demo')),
+      appBar: AppBar(title: const Text('Spotify Auth Demo')),
       body: Center(
         child: ElevatedButton(
           onPressed: _initiateSpotifyLogin,
-          child: Text('Login with Spotify'),
+          child: const Text('Login with Spotify'),
         ),
       ),
     );
