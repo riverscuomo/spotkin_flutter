@@ -85,7 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
   late final String clientId;
   late final String clientSecret;
   final String redirectUri = kReleaseMode
-      ? 'https://spotkin-1b998975756a.herokuapp.com'
+      ? 'https://spotkin-fd416.web.app'
       : 'http://localhost:8888';
   final String scope =
       "playlist-modify-private playlist-modify-public user-library-read playlist-read-private user-library-modify user-read-recently-played";
