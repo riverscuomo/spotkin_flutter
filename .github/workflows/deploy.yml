@@ -34,8 +34,8 @@ jobs:
         mkdir -p assets
         cat << EOF > assets/config.json
         {
-        "SPOTIFY_CLIENT_ID": "${{ secrets.SPOTIFY_CLIENT_ID  }}",
         "SPOTIFY_CLIENT_SECRET": "${{ secrets.SPOTIFY_CLIENT_SECRET }}",
+        "SPOTIFY_CLIENT_ID": "${{ secrets.SPOTIFY_CLIENT_ID  }}",        
         "SPOTIFY_REDIRECT_URI": "${{ secrets.SPOTIFY_REDIRECT_URI }}",
         "SPOTIFY_SCOPE": "${{ secrets.SPOTIFY_SCOPE }}",
         "BACKEND_URL": "${{ secrets.BACKEND_URL }}"
