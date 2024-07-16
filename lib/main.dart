@@ -15,19 +15,19 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   setUrlStrategy(PathUrlStrategy()); // Use path URL strategy
   Map<String, dynamic> config = await loadConfig();
-  String sampleJobs = await loadSampleJobs();
-  runApp(MyApp(config, sampleJobs));
+  String jobs = await loadJobs();
+  runApp(MyApp(config, jobs));
 }
 
 Future<Map<String, dynamic>> loadConfig() async {
   String configString = await rootBundle.loadString('assets/config.json');
-  print('Loaded config string: $configString');
+  // print('Loaded config string: $configString');
   Map<String, dynamic> config = jsonDecode(configString);
-  print('Parsed config: $config');
+  // print('Parsed config: $config');
   return config;
 }
 
-Future<String> loadSampleJobs() async {
+Future<String> loadJobs() async {
   return await rootBundle.loadString('assets/sample_jobs.json');
 }
 
@@ -73,11 +73,11 @@ class MyApp extends StatelessWidget {
 
 class MyHomePage extends StatefulWidget {
   final Map<String, dynamic> config;
-  final String sampleJobs;
+  final String jobs;
   final String? initialAuthCode;
 
   MyHomePage(
-      {required this.config, required this.sampleJobs, this.initialAuthCode});
+      {required this.config, required this.jobs, this.initialAuthCode});
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -89,7 +89,7 @@ class _MyHomePageState extends State<MyHomePage> {
   late final String redirectUri;
   late final String scope;
   late final String backendUrl;
-  late final String sampleJobs;
+  late final String jobs;
   late final String accessToken;
 
   @override
@@ -100,13 +100,10 @@ class _MyHomePageState extends State<MyHomePage> {
     redirectUri = widget.config['SPOTIFY_REDIRECT_URI']!;
     scope = widget.config['SPOTIFY_SCOPE']!;
     backendUrl = widget.config['BACKEND_URL']!;
-    sampleJobs = widget.sampleJobs;
+    jobs = widget.jobs;
 
     print('Loaded config:');
-    print('Client ID: $clientId');
     print('Redirect URI: $redirectUri');
-    print('Scope: $scope');
-    print('Backend URL: $backendUrl');
 
     if (widget.initialAuthCode != null) {
       _exchangeCodeForToken(widget.initialAuthCode!);
@@ -119,7 +116,7 @@ class _MyHomePageState extends State<MyHomePage> {
             builder: (context) => UpdatePlaylistsScreen(
               accessToken: value,
               backendUrl: backendUrl,
-              sampleJobs: sampleJobs,
+              jobs: jobs,
             ),
           ),
         );
@@ -154,7 +151,7 @@ class _MyHomePageState extends State<MyHomePage> {
           builder: (context) => UpdatePlaylistsScreen(
             accessToken: accessToken,
             backendUrl: backendUrl,
-            sampleJobs: sampleJobs,
+            jobs: jobs,
           ),
         ),
       );

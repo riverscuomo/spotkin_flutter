@@ -6,12 +6,12 @@ import 'package:http/http.dart' as http;
 class UpdatePlaylistsScreen extends StatefulWidget {
   final String accessToken;
   final String backendUrl;
-  final String sampleJobs;
+  final String jobs;
 
   UpdatePlaylistsScreen({
     required this.accessToken,
     required this.backendUrl,
-    required this.sampleJobs,
+    required this.jobs,
   });
 
   @override
@@ -28,7 +28,7 @@ class _UpdatePlaylistsScreenState extends State<UpdatePlaylistsScreen> {
       jobResults.clear();
     });
 
-    List<dynamic> jobs = json.decode(widget.sampleJobs);
+    List<dynamic> jobs = json.decode(widget.jobs);
 
     for (var job in jobs) {
       try {
