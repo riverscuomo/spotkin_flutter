@@ -47,7 +47,8 @@ class SpotifyService {
       final accessToken = tokenData['access_token'];
       await _secureStorage.write(key: _accessTokenKey, value: accessToken);
       print('Access Token: $accessToken');
-      _spotify = SpotifyApi(SpotifyApiCredentials(clientId, clientSecret, accessToken: accessToken));
+      _spotify = SpotifyApi(SpotifyApiCredentials(clientId, clientSecret,
+          accessToken: accessToken));
     } else {
       print('Failed to exchange code for token: ${response.body}');
       throw Exception('Failed to authenticate with Spotify');
@@ -75,12 +76,14 @@ class SpotifyService {
     if (accessToken == null) {
       throw Exception('Not authenticated');
     }
-    _spotify = SpotifyApi(SpotifyApiCredentials(clientId, clientSecret, accessToken: accessToken));
+    _spotify = SpotifyApi(SpotifyApiCredentials(clientId, clientSecret,
+        accessToken: accessToken));
     final playlists = await _spotify.playlists.getUsersPlaylists(userId).all();
     return playlists.toList();
   }
 
-  Future<void> updatePlaylist(String playlistId, {String? name, String? description}) async {
+  Future<void> updatePlaylist(String playlistId,
+      {String? name, String? description}) async {
     final accessToken = await getAccessToken();
     if (accessToken == null) {
       throw Exception('Not authenticated');

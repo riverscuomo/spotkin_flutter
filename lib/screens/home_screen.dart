@@ -59,7 +59,6 @@ class _HomeScreenState extends State<HomeScreen> {
           builder: (context) => UpdatePlaylistsScreen(
             accessToken: accessToken,
             backendUrl: widget.config['BACKEND_URL']!,
-            jobs: widget.jobs,
           ),
         ),
       );

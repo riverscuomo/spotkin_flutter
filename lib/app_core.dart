@@ -8,6 +8,7 @@ library spotkin;
 // export '../core.dart';
 // export '../data/data.dart';
 // export '../enums/enums.dart';
+export '../forms/forms.dart';
 // export '../helpers/helpers.dart';
 // export '../mixins/mixins.dart';
 export '../models/models.dart';

@@ -26,7 +26,6 @@ Future<String> loadJobs() async {
   return await rootBundle.loadString('assets/sample_jobs.json');
 }
 
-
 class MyApp extends StatelessWidget {
   final Map<String, dynamic> config;
   final String jobs;
