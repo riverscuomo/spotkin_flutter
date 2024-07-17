@@ -25,10 +25,7 @@ Future<Map<String, dynamic>> loadConfig() async {
 Future<String> loadJobs() async {
   return await rootBundle.loadString('assets/sample_jobs.json');
 }
-// const FlutterSecureStorage _secureStorage = FlutterSecureStorage();
-// Future<String?> _getAccessToken() async {
-//   return await _secureStorage.read(key: 'accessToken');
-// }
+
 
 class MyApp extends StatelessWidget {
   final Map<String, dynamic> config;

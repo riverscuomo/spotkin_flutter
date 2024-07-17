@@ -1,25 +1,9 @@
 import 'dart:convert';
 import 'dart:html' as html;
+import 'package:spotkin_flutter/app_core.dart';
 
-class Job {
-  String id;
-  String title;
-  String description;
 
-  Job({required this.id, required this.title, required this.description});
 
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'title': title,
-    'description': description,
-  };
-
-  factory Job.fromJson(Map<String, dynamic> json) => Job(
-    id: json['id'],
-    title: json['title'],
-    description: json['description'],
-  );
-}
 
 class JobService {
   static const String _storageKey = 'jobs';
@@ -27,8 +11,7 @@ class JobService {
   List<Job> getJobs() {
     final String? storedJobs = html.window.localStorage[_storageKey];
     if (storedJobs == null) return [];
-    final List<dynamic> decodedJobs = jsonDecode(storedJobs);
-    return decodedJobs.map((job) => Job.fromJson(job)).toList();
+    return parseJobs(storedJobs);
   }
 
   void saveJobs(List<Job> jobs) {
@@ -44,16 +27,25 @@ class JobService {
 
   void updateJob(Job updatedJob) {
     final jobs = getJobs();
-    final index = jobs.indexWhere((job) => job.id == updatedJob.id);
+    final index = jobs.indexWhere((job) => job.playlistId == updatedJob.playlistId);
     if (index != -1) {
       jobs[index] = updatedJob;
       saveJobs(jobs);
     }
   }
 
-  void deleteJob(String id) {
+  void deleteJob(String playlistId) {
     final jobs = getJobs();
-    jobs.removeWhere((job) => job.id == id);
+    jobs.removeWhere((job) => job.playlistId == playlistId);
     saveJobs(jobs);
+  }
+
+  Job? getJobByPlaylistId(String playlistId) {
+    final jobs = getJobs();
+    try {
+      return jobs.firstWhere((job) => job.playlistId == playlistId);
+    } catch (e) {
+      return null; // Return null if no job is found with the given playlistId
+    }
   }
 }
