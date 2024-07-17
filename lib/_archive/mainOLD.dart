@@ -43,7 +43,7 @@
 //         if (settings.name == '/') {
 //           return MaterialPageRoute(
 //             builder: (context) =>
-//                 MyHomePage(config: config, sampleJobs: sampleJobs),
+//                 HomeScreen(config: config, sampleJobs: sampleJobs),
 //           );
 //         }
 //         // Handle Spotify callback
@@ -51,7 +51,7 @@
 //           final uri = Uri.parse(settings.name!);
 //           final code = uri.queryParameters['code'];
 //           return MaterialPageRoute(
-//             builder: (context) => MyHomePage(
+//             builder: (context) => HomeScreen(
 //               config: config,
 //               sampleJobs: sampleJobs,
 //               initialAuthCode: code,
@@ -64,19 +64,19 @@
 //   }
 // }
 
-// class MyHomePage extends StatefulWidget {
+// class HomeScreen extends StatefulWidget {
 //   final Map<String, dynamic> config;
 //   final String sampleJobs;
 //   final String? initialAuthCode;
 
-//   MyHomePage(
+//   HomeScreen(
 //       {required this.config, required this.sampleJobs, this.initialAuthCode});
 
 //   @override
-//   _MyHomePageState createState() => _MyHomePageState();
+//   _HomeScreenState createState() => _HomeScreenState();
 // }
 
-// class _MyHomePageState extends State<MyHomePage> {
+// class _HomeScreenState extends State<HomeScreen> {
 //   late final String clientId;
 //   late final String clientSecret;
 //   late final String redirectUri;
