@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'package:spotkin_flutter/app_core.dart';
 import 'package:spotkin_flutter/models/ingredient.dart';
-
+import 'dart:convert';
+import 'package:spotkin_flutter/models/ingredient.dart';
 
 class Job {
   final String name;
@@ -19,15 +20,15 @@ class Job {
   Job({
     required this.name,
     required this.playlistId,
-    required this.description,
-    required this.removeLowEnergy,
-    required this.lastTrackIds,
-    required this.bannedArtistNames,
-    required this.bannedSongTitles,
-    required this.bannedTrackIds,
-    required this.bannedGenres,
-    required this.exceptionsToBannedGenres,
-    required this.recipe,
+     this.description = '',
+     this.removeLowEnergy = false,
+     this.lastTrackIds  = const [],
+     this.bannedArtistNames = const [],
+     this.bannedSongTitles  = const [],
+     this.bannedTrackIds = const [],
+     this.bannedGenres  = const [],
+     this.exceptionsToBannedGenres = const [],
+     this.recipe = const [],
   });
 
   factory Job.fromJson(Map<String, dynamic> json) {

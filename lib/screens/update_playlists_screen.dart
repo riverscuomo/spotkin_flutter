@@ -78,7 +78,7 @@ class _UpdatePlaylistsScreenState extends State<UpdatePlaylistsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Update Your Playlist')),
+      appBar: AppBar(title: jobs.isEmpty ? const Text('Create Your Spotkin') : const Text('Update Your Spotkin')),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -94,7 +94,10 @@ class _UpdatePlaylistsScreenState extends State<UpdatePlaylistsScreen> {
               const SizedBox(height: 20),
               // Text('Existing Jobs', style: Theme.of(context).textTheme.headline6),
               jobs.isEmpty
-                  ? const Center(child: Text('No jobs yet. Create one above!'))
+                  ? 
+                  
+                  SizedBox()
+                  // const Center(child: Text('No jobs yet. Create one above!'))
                   : Column(
                       children: [
                         ...jobs.asMap().entries.map((entry) {
@@ -102,7 +105,7 @@ class _UpdatePlaylistsScreenState extends State<UpdatePlaylistsScreen> {
                         }).toList(),
                         const SizedBox(height: 20),
                         ExpansionTile(
-                          title: const Text('Playlist Settings'),
+                          title: const Text('Settings'),
                           initiallyExpanded: false,
                           children: [
                             ...jobs.asMap().entries.map((entry) {
@@ -113,17 +116,20 @@ class _UpdatePlaylistsScreenState extends State<UpdatePlaylistsScreen> {
                       ],
                     ),
               const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: jobs.isEmpty || isProcessing ? null : _processJobs,
+             jobs.isNotEmpty ? ElevatedButton(
+                onPressed:  isProcessing ? null : _processJobs,
                 child:
-                    Text(isProcessing ? 'Processing...' : 'Update Playlists'),
-              ),
+                    Text(isProcessing ? 'Processing...' : 'Update Spotkin On Spotify'),
+              ) : SizedBox(),
               const SizedBox(height: 20),
-              Text('Job Results', style: Theme.of(context).textTheme.headline6),
+              
               jobResults.isEmpty
-                  ? const Center(child: Text('No jobs processed yet.'))
+                  ? 
+                  SizedBox()
+                  // const Center(child: Text('No jobs processed yet.'))
                   : Column(
-                      children: jobResults.map((result) {
+                      children: [Text('Job Results', style: Theme.of(context).textTheme.headline6),
+                      ...jobResults.map((result) {
                         return ListTile(
                           title: Text(result['name']),
                           subtitle: Text(result['result']),
@@ -137,6 +143,7 @@ class _UpdatePlaylistsScreenState extends State<UpdatePlaylistsScreen> {
                           ),
                         );
                       }).toList(),
+                      ]
                     ),
             ],
           ),
@@ -193,7 +200,7 @@ class _UpdatePlaylistsScreenState extends State<UpdatePlaylistsScreen> {
             ),
             TextFormField(
               initialValue: job.playlistId,
-              decoration: const InputDecoration(labelText: 'Playlist ID'),
+              decoration: const InputDecoration(labelText: 'Playlist link'),
               onChanged: (value) =>
                   _updateJob(index, job.copyWith(playlistId: value)),
             ),
