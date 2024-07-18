@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:spotkin_flutter/app_core.dart';
 
-import '../forms/ingredient_management_widget.dart';
-import '../forms/job_form.dart';
 
 class UpdatePlaylistsScreen extends StatefulWidget {
   final String accessToken;
@@ -55,7 +53,7 @@ class _UpdatePlaylistsScreenState extends State<UpdatePlaylistsScreen> {
     });
   }
 
-  void _updateJob(int index, Job updatedJob) {
+  void updateJob(int index, Job updatedJob) {
   print("Updating job at index $index: ${updatedJob.name}");
   print("Recipe count: ${updatedJob.recipe.length}");
   for (var ingredient in updatedJob.recipe) {
@@ -109,7 +107,11 @@ class _UpdatePlaylistsScreenState extends State<UpdatePlaylistsScreen> {
                           initiallyExpanded: false,
                           children: [
                             ...jobs.asMap().entries.map((entry) {
-                              return _buildSettingsCard(entry.value, entry.key);
+                              return SettingsCard(
+                                index: entry.key,
+                                job: entry.value,
+                                updateJob: updateJob,
+                              );
                             }).toList(),
                           ],
                         ),
@@ -196,20 +198,20 @@ class _UpdatePlaylistsScreenState extends State<UpdatePlaylistsScreen> {
               initialValue: job.name,
               decoration: const InputDecoration(labelText: 'Name'),
               onChanged: (value) =>
-                  _updateJob(index, job.copyWith(name: value)),
+                  updateJob(index, job.copyWith(name: value)),
             ),
             TextFormField(
               initialValue: job.playlistId,
               decoration: const InputDecoration(labelText: 'Playlist link'),
               onChanged: (value) =>
-                  _updateJob(index, job.copyWith(playlistId: value)),
+                  updateJob(index, job.copyWith(playlistId: value)),
             ),
             IngredientManagementWidget(
               initialIngredients: job.recipe,
               onIngredientsChanged: (updatedIngredients) {
                 setState(() {
                   job = job.copyWith(recipe: updatedIngredients);
-                  _updateJob(index, job);
+                  updateJob(index, job);
                 });
               },
             )
@@ -219,85 +221,4 @@ class _UpdatePlaylistsScreenState extends State<UpdatePlaylistsScreen> {
     );
   }
 
-  Widget _buildSettingsCard(Job job, int index) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextFormField(
-              initialValue: job.description,
-              decoration: const InputDecoration(labelText: 'Description'),
-              onChanged: (value) =>
-                  _updateJob(index, job.copyWith(description: value)),
-            ),
-            SwitchListTile(
-              title: const Text('Remove Low Energy'),
-              value: job.removeLowEnergy,
-              onChanged: (bool value) =>
-                  _updateJob(index, job.copyWith(removeLowEnergy: value)),
-            ),
-            TextFormField(
-              initialValue: job.lastTrackIds.join(', '),
-              decoration: const InputDecoration(labelText: 'Last Track IDs'),
-              onChanged: (value) => _updateJob(
-                  index,
-                  job.copyWith(
-                      lastTrackIds:
-                          value.split(',').map((e) => e.trim()).toList())),
-            ),
-            TextFormField(
-              initialValue: job.bannedArtistNames.join(', '),
-              decoration:
-                  const InputDecoration(labelText: 'Banned Artist Names'),
-              onChanged: (value) => _updateJob(
-                  index,
-                  job.copyWith(
-                      bannedArtistNames:
-                          value.split(',').map((e) => e.trim()).toList())),
-            ),
-            TextFormField(
-              initialValue: job.bannedSongTitles.join(', '),
-              decoration:
-                  const InputDecoration(labelText: 'Banned Song Titles'),
-              onChanged: (value) => _updateJob(
-                  index,
-                  job.copyWith(
-                      bannedSongTitles:
-                          value.split(',').map((e) => e.trim()).toList())),
-            ),
-            TextFormField(
-              initialValue: job.bannedTrackIds.join(', '),
-              decoration: const InputDecoration(labelText: 'Banned Track IDs'),
-              onChanged: (value) => _updateJob(
-                  index,
-                  job.copyWith(
-                      bannedTrackIds:
-                          value.split(',').map((e) => e.trim()).toList())),
-            ),
-            TextFormField(
-              initialValue: job.bannedGenres.join(', '),
-              decoration: const InputDecoration(labelText: 'Banned Genres'),
-              onChanged: (value) => _updateJob(
-                  index,
-                  job.copyWith(
-                      bannedGenres:
-                          value.split(',').map((e) => e.trim()).toList())),
-            ),
-            TextFormField(
-              initialValue: job.exceptionsToBannedGenres.join(', '),
-              decoration: const InputDecoration(
-                  labelText: 'Exceptions to Banned Genres'),
-              onChanged: (value) => _updateJob(
-                  index,
-                  job.copyWith(
-                      exceptionsToBannedGenres:
-                          value.split(',').map((e) => e.trim()).toList())),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
