@@ -84,23 +84,14 @@ class _UpdatePlaylistsScreenState extends State<UpdatePlaylistsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (jobs.isEmpty) _buildJobForm(),
-              // else
-              //   ElevatedButton(
-              //     onPressed: () => _showAddJobDialog(context),
-              //     child: const Text('Add New Job'),
-              //   ),
               const SizedBox(height: 20),
-              // Text('Existing Jobs', style: Theme.of(context).textTheme.headline6),
               jobs.isEmpty
-                  ? 
-                  
-                  SizedBox()
-                  // const Center(child: Text('No jobs yet. Create one above!'))
+                  ? const SizedBox()
                   : Column(
                       children: [
                         ...jobs.asMap().entries.map((entry) {
                           return _buildRecipeCard(entry.value, entry.key);
-                        }).toList(),
+                        }),
                         const SizedBox(height: 20),
                         ExpansionTile(
                           title: const Text('Settings'),
@@ -112,7 +103,7 @@ class _UpdatePlaylistsScreenState extends State<UpdatePlaylistsScreen> {
                                 job: entry.value,
                                 updateJob: updateJob,
                               );
-                            }).toList(),
+                            }),
                           ],
                         ),
                       ],
@@ -122,12 +113,12 @@ class _UpdatePlaylistsScreenState extends State<UpdatePlaylistsScreen> {
                 onPressed:  isProcessing ? null : _processJobs,
                 child:
                     Text(isProcessing ? 'Processing...' : 'Update Spotkin On Spotify'),
-              ) : SizedBox(),
+              ) : const SizedBox(),
               const SizedBox(height: 20),
               
               jobResults.isEmpty
                   ? 
-                  SizedBox()
+                  const SizedBox()
                   // const Center(child: Text('No jobs processed yet.'))
                   : Column(
                       children: [Text('Job Results', style: Theme.of(context).textTheme.headline6),
@@ -144,7 +135,7 @@ class _UpdatePlaylistsScreenState extends State<UpdatePlaylistsScreen> {
                                 : Colors.red,
                           ),
                         );
-                      }).toList(),
+                      }),
                       ]
                     ),
             ],
