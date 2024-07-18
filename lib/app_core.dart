@@ -9,7 +9,7 @@ library spotkin;
 // export '../data/data.dart';
 // export '../enums/enums.dart';
 export 'widgets/widgets.dart';
-// export '../helpers/helpers.dart';
+export '../helpers/helpers.dart';
 // export '../mixins/mixins.dart';
 export '../models/models.dart';
 // export '../providers/providers.dart';

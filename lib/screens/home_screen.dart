@@ -4,10 +4,10 @@ import 'package:spotkin_flutter/app_core.dart';
 
 class HomeScreen extends StatefulWidget {
   final Map<String, dynamic> config;
-  final String jobs;
   final String? initialAuthCode;
 
-  HomeScreen({required this.config, required this.jobs, this.initialAuthCode});
+  HomeScreen({required this.config, 
+   this.initialAuthCode});
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -57,6 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (context) => UpdatePlaylistsScreen(
+            config: widget.config,
             accessToken: accessToken,
             backendUrl: widget.config['BACKEND_URL']!,
           ),

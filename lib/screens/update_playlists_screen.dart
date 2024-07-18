@@ -3,10 +3,12 @@ import 'package:spotkin_flutter/app_core.dart';
 
 
 class UpdatePlaylistsScreen extends StatefulWidget {
+    final Map<String, dynamic> config;
   final String accessToken;
   final String backendUrl;
 
   UpdatePlaylistsScreen({
+    required this.config,
     required this.accessToken,
     required this.backendUrl,
   });
@@ -21,6 +23,7 @@ class _UpdatePlaylistsScreenState extends State<UpdatePlaylistsScreen> {
   bool isProcessing = false;
   late ApiService _apiService;
   late StorageService _storageService;
+  late final SpotifyService spotifyService;
 
   @override
   void initState() {
@@ -30,6 +33,12 @@ class _UpdatePlaylistsScreenState extends State<UpdatePlaylistsScreen> {
       backendUrl: widget.backendUrl,
     );
     _storageService = StorageService();
+    spotifyService = SpotifyService(
+      clientId: widget.config['SPOTIFY_CLIENT_ID']!,
+      clientSecret: widget.config['SPOTIFY_CLIENT_SECRET']!,
+      redirectUri: widget.config['SPOTIFY_REDIRECT_URI']!,
+      scope: widget.config['SPOTIFY_SCOPE']!,
+    );
     _loadJobs();
   }
 
@@ -47,24 +56,39 @@ class _UpdatePlaylistsScreenState extends State<UpdatePlaylistsScreen> {
 
     final results = await _apiService.processJobs(jobs);
 
-    setState(() {
-      jobResults = results;
-      isProcessing = false;
-    });
+    if (results.isNotEmpty) {
+
+      // If the token has expired, re-authenticate
+      if (results[0].containsKey('status') && results[0]['status'] == 'Error') {
+        print(results[0]['result'].runtimeType);
+        final result = results[0]['result'] as String;
+        print('Error processing jobs: $result');
+        if (result.startsWith("Status 401")) {
+          print('Token expired, authenticate again...');
+          spotifyService.initiateSpotifyLogin();      
+          return; 
+       }       
+      }
+      setState(() {
+          jobResults = results;
+          isProcessing = false;
+        });
+    }
   }
 
   void updateJob(int index, Job updatedJob) {
-  print("Updating job at index $index: ${updatedJob.name}");
-  print("Recipe count: ${updatedJob.recipe.length}");
-  for (var ingredient in updatedJob.recipe) {
-    print("Ingredient: ${ingredient.sourcePlaylistId}, Quantity: ${ingredient.quantity}");
+    print("Updating job at index $index: ${updatedJob.name}");
+    print("Recipe count: ${updatedJob.recipe.length}");
+    for (var ingredient in updatedJob.recipe) {
+      print(
+          "Ingredient: ${ingredient.sourcePlaylistId}, Quantity: ${ingredient.quantity}");
+    }
+    setState(() {
+      jobs[index] = updatedJob;
+      _storageService.saveJobs(jobs);
+    });
+    print("Jobs saved after update");
   }
-  setState(() {
-    jobs[index] = updatedJob;
-    _storageService.saveJobs(jobs);
-  });
-  print("Jobs saved after update");
-}
 
   void _addNewJob(Job newJob) {
     setState(() {
@@ -76,17 +100,18 @@ class _UpdatePlaylistsScreenState extends State<UpdatePlaylistsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: jobs.isEmpty ? const Text('Create Your Spotkin') : const Text('Update Your Spotkin')),
+      appBar: AppBar(
+          title: jobs.isEmpty
+              ? const Text('Create Your Spotkin')
+              : const Text('Update Your Spotkin')),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (jobs.isEmpty) _buildJobForm(),
-              const SizedBox(height: 20),
               jobs.isEmpty
-                  ? const SizedBox()
+                  ? _buildJobForm()
                   : Column(
                       children: [
                         ...jobs.asMap().entries.map((entry) {
@@ -109,19 +134,21 @@ class _UpdatePlaylistsScreenState extends State<UpdatePlaylistsScreen> {
                       ],
                     ),
               const SizedBox(height: 20),
-             jobs.isNotEmpty ? ElevatedButton(
-                onPressed:  isProcessing ? null : _processJobs,
-                child:
-                    Text(isProcessing ? 'Processing...' : 'Update Spotkin On Spotify'),
-              ) : const SizedBox(),
+              jobs.isNotEmpty
+                  ? ElevatedButton(
+                      onPressed: isProcessing ? null : _processJobs,
+                      child: Text(isProcessing
+                          ? 'Processing...'
+                          : 'Update Spotkin On Spotify'),
+                    )
+                  : const SizedBox(),
               const SizedBox(height: 20),
-              
               jobResults.isEmpty
-                  ? 
-                  const SizedBox()
+                  ? const SizedBox()
                   // const Center(child: Text('No jobs processed yet.'))
-                  : Column(
-                      children: [Text('Job Results', style: Theme.of(context).textTheme.headline6),
+                  : Column(children: [
+                      Text('Job Results',
+                          style: Theme.of(context).textTheme.headline6),
                       ...jobResults.map((result) {
                         return ListTile(
                           title: Text(result['name']),
@@ -136,16 +163,13 @@ class _UpdatePlaylistsScreenState extends State<UpdatePlaylistsScreen> {
                           ),
                         );
                       }),
-                      ]
-                    ),
+                    ]),
             ],
           ),
         ),
       ),
     );
   }
-
- 
 
   void _showAddJobDialog(BuildContext context) {
     showDialog(
@@ -166,7 +190,7 @@ class _UpdatePlaylistsScreenState extends State<UpdatePlaylistsScreen> {
     );
   }
 
-   Widget _buildJobForm() {
+  Widget _buildJobForm() {
     return JobForm(
       onSubmit: (Job newJob) {
         _addNewJob(newJob);
@@ -177,8 +201,10 @@ class _UpdatePlaylistsScreenState extends State<UpdatePlaylistsScreen> {
   Widget _buildRecipeCard(Job job, int index) {
     if (job.recipe.isEmpty) {
       print('Job ${job.name}  recipe is empty');
-    } else{
-    print('Job ${job.name} recipe first ingredient before passing to widget: ${job.recipe[0].sourcePlaylistId} ${job.recipe[0].quantity}');}
+    } else {
+      print(
+          'Job ${job.name} recipe first ingredient before passing to widget: ${job.recipe[0].sourcePlaylistId} ${job.recipe[0].quantity}');
+    }
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(8),
@@ -188,12 +214,12 @@ class _UpdatePlaylistsScreenState extends State<UpdatePlaylistsScreen> {
             TextFormField(
               initialValue: job.name,
               decoration: const InputDecoration(labelText: 'Name'),
-              onChanged: (value) =>
-                  updateJob(index, job.copyWith(name: value)),
+              onChanged: (value) => updateJob(index, job.copyWith(name: value)),
             ),
             TextFormField(
               initialValue: job.playlistId,
-              decoration: const InputDecoration(labelText: 'Playlist link'),
+              decoration:
+                  const InputDecoration(labelText: 'Target playlist link'),
               onChanged: (value) =>
                   updateJob(index, job.copyWith(playlistId: value)),
             ),
@@ -211,5 +237,4 @@ class _UpdatePlaylistsScreenState extends State<UpdatePlaylistsScreen> {
       ),
     );
   }
-
 }

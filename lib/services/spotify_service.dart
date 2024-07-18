@@ -71,6 +71,35 @@ class SpotifyService {
     return await _secureStorage.read(key: _accessTokenKey);
   }
 
+  // refresh token
+  Future<void> refreshAccessToken() async {
+    final refreshToken = await _secureStorage.read(key: 'refreshToken');
+    final tokenEndpoint = Uri.parse('https://accounts.spotify.com/api/token');
+    final response = await http.post(
+      tokenEndpoint,
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: {
+        'grant_type': 'refresh_token',
+        'refresh_token': refreshToken,
+        'client_id': clientId,
+        'client_secret': clientSecret,
+      },
+    );
+    print(response);
+
+    if (response.statusCode == 200) {
+      final tokenData = json.decode(response.body);
+      final accessToken = tokenData['access_token'];
+      await _secureStorage.write(key: _accessTokenKey, value: accessToken);
+      print('Access Token: $accessToken');
+      _spotify = SpotifyApi(SpotifyApiCredentials(clientId, clientSecret,
+          accessToken: accessToken));
+    } else {
+      print('Failed to refresh token: ${response.body}');
+      throw Exception('Failed to refresh token');
+    }
+  }
+
   Future<List<PlaylistSimple>> getUserPlaylists(String userId) async {
     final accessToken = await getAccessToken();
     if (accessToken == null) {

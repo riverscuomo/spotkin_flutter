@@ -63,7 +63,11 @@ class _IngredientManagementWidgetState extends State<IngredientManagementWidget>
                 child: TextFormField(
                   key: ValueKey('sourcePlaylistId_$idx'),
                   initialValue: ingredient.sourcePlaylistId,
-                  decoration: const InputDecoration(labelText: 'Source Playlist ID'),
+                  decoration: const InputDecoration(
+                    labelText: 'Source playlist link',
+                    hintText: 'Enter Spotify playlist link or ID',
+                  ),
+                  validator: Utils.validateSpotifyPlaylistInput,
                   onChanged: (value) {
                     _updateIngredient(idx, ingredient.copyWith(sourcePlaylistId: value));
                   },
@@ -88,15 +92,6 @@ class _IngredientManagementWidgetState extends State<IngredientManagementWidget>
             ],
           );
         }),
-        // ElevatedButton(
-        //   onPressed: () {
-        //     setState(() {
-        //       _ingredients.add(Ingredient(sourcePlaylistName: '', sourcePlaylistId: '', quantity: 0));
-        //       widget.onIngredientsChanged(_ingredients);
-        //     });
-        //   },
-        //   child: Text('Add Ingredient'),
-        // ),
       ],
     );
   }

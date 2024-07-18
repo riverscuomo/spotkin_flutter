@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
+import 'helpers/load_config.dart';
 import 'screens/home_screen.dart';
 
 void main() async {
@@ -13,13 +14,6 @@ void main() async {
   Map<String, dynamic> config = await loadConfig();
   String jobs = await loadJobs();
   runApp(MyApp(config, jobs));
-}
-
-Future<Map<String, dynamic>> loadConfig() async {
-  String configString = await rootBundle.loadString('assets/config.json');
-  // print('Loaded config: $configString');
-  Map<String, dynamic> config = jsonDecode(configString);
-  return config;
 }
 
 Future<String> loadJobs() async {
@@ -40,7 +34,7 @@ class MyApp extends StatelessWidget {
       onGenerateRoute: (settings) {
         if (settings.name == '/') {
           return MaterialPageRoute(
-            builder: (context) => HomeScreen(config: config, jobs: jobs),
+            builder: (context) => HomeScreen(config: config),
           );
         }
         // Handle Spotify callback
@@ -50,7 +44,6 @@ class MyApp extends StatelessWidget {
           return MaterialPageRoute(
             builder: (context) => HomeScreen(
               config: config,
-              jobs: jobs,
               initialAuthCode: code,
             ),
           );
