@@ -2,22 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:spotkin_flutter/app_core.dart';
 
 
-class UpdatePlaylistsScreen extends StatefulWidget {
+class UpdateScreen extends StatefulWidget {
     final Map<String, dynamic> config;
   final String accessToken;
   final String backendUrl;
 
-  UpdatePlaylistsScreen({
+  UpdateScreen({
     required this.config,
     required this.accessToken,
     required this.backendUrl,
   });
 
   @override
-  _UpdatePlaylistsScreenState createState() => _UpdatePlaylistsScreenState();
+  _UpdateScreenState createState() => _UpdateScreenState();
 }
 
-class _UpdatePlaylistsScreenState extends State<UpdatePlaylistsScreen> {
+class _UpdateScreenState extends State<UpdateScreen> {
   List<Job> jobs = [];
   List<Map<String, dynamic>> jobResults = [];
   bool isProcessing = false;
@@ -85,6 +85,7 @@ class _UpdatePlaylistsScreenState extends State<UpdatePlaylistsScreen> {
     }
     setState(() {
       jobs[index] = updatedJob;
+      
       _storageService.saveJobs(jobs);
     });
     print("Jobs saved after update");

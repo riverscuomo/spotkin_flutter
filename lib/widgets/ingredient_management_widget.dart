@@ -89,9 +89,19 @@ class _IngredientManagementWidgetState extends State<IngredientManagementWidget>
                 icon: const Icon(Icons.delete),
                 onPressed: () => _removeIngredient(idx),
               ),
+              
             ],
           );
         }),
+        ElevatedButton(
+          onPressed: () {
+            setState(() {
+              _ingredients.add(Ingredient(sourcePlaylistName: '', sourcePlaylistId: '', quantity: 0));
+              widget.onIngredientsChanged(_ingredients);
+            });
+          },
+          child: const Text('Add Ingredient'),
+        ),
       ],
     );
   }

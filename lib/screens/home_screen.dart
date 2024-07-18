@@ -36,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _handleAuthCode(String code) async {
     try {
       await spotifyService.exchangeCodeForToken(code);
-      _navigateToUpdatePlaylistsScreen();
+      _navigateToUpdateScreen();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Failed to authenticate with Spotify')),
@@ -47,16 +47,16 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _checkExistingAuth() async {
     final accessToken = await spotifyService.getAccessToken();
     if (accessToken != null) {
-      _navigateToUpdatePlaylistsScreen();
+      _navigateToUpdateScreen();
     }
   }
 
-  void _navigateToUpdatePlaylistsScreen() async {
+  void _navigateToUpdateScreen() async {
     final accessToken = await spotifyService.getAccessToken();
     if (accessToken != null) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => UpdatePlaylistsScreen(
+          builder: (context) => UpdateScreen(
             config: widget.config,
             accessToken: accessToken,
             backendUrl: widget.config['BACKEND_URL']!,

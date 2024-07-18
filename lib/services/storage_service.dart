@@ -29,6 +29,10 @@ class StorageService {
     html.window.localStorage[_storageKey] = encodedJobs;
     print("Jobs saved to localStorage");
     for (var job in jobs) {
+      if (job.lastTrackIds.isNotEmpty) {
+        // remove any empty strings from the list
+        job.lastTrackIds.removeWhere((element) => element.isEmpty);
+      }
       print("Saved Job: ${job.name}, Playlist ID: ${job.playlistId}, Recipe count: ${job.recipe.length}");
     }
   }

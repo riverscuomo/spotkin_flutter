@@ -121,3 +121,67 @@ class SettingsCard extends StatelessWidget {
     );
   }
 }
+
+
+class TrackIdsInput extends StatefulWidget {
+  final Job job;
+  final int index;
+  final Function(int, Job) updateJob;
+
+  TrackIdsInput({required this.job, required this.index, required this.updateJob});
+
+  @override
+  _TrackIdsInputState createState() => _TrackIdsInputState();
+}
+
+class _TrackIdsInputState extends State<TrackIdsInput> {
+  late TextEditingController _controller;
+  List<String> _currentIds = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.job.lastTrackIds.join(', '));
+    _currentIds = widget.job.lastTrackIds;
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _updateIds(String value) {
+    setState(() {
+      _currentIds = value
+          .split(',')
+          .map((e) => e.trim())
+          .where((e) => e.isNotEmpty)
+          .toList();
+      
+      widget.updateJob(
+        widget.index,
+        widget.job.copyWith(lastTrackIds: _currentIds),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextFormField(
+          controller: _controller,
+          decoration: const InputDecoration(
+            labelText: 'Last Track IDs',
+            hintText: 'Enter track IDs separated by commas',
+          ),
+          onChanged: _updateIds,
+        ),
+        SizedBox(height: 8),
+        Text('Current IDs: ${_currentIds.join(", ")}'),
+      ],
+    );
+  }
+}
