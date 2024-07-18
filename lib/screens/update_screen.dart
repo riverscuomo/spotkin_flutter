@@ -148,8 +148,8 @@ class _UpdateScreenState extends State<UpdateScreen> {
                   ? const SizedBox()
                   // const Center(child: Text('No jobs processed yet.'))
                   : Column(children: [
-                      Text('Job Results',
-                          style: Theme.of(context).textTheme.headline6),
+                      // Text('Job Results',
+                      //     style: Theme.of(context).textTheme.headline6),
                       ...jobResults.map((result) {
                         return ListTile(
                           title: Text(result['name']),
