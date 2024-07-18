@@ -144,7 +144,7 @@ class _JobFormState extends State<JobForm> {
           const SizedBox(height: 10),
           ElevatedButton(
             onPressed: _submitForm,
-            child: const Text('Add Job'),
+            child: const Text('Create'),
           ),
         ],
       ),
