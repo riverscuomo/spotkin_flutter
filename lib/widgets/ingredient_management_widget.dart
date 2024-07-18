@@ -88,15 +88,15 @@ class _IngredientManagementWidgetState extends State<IngredientManagementWidget>
             ],
           );
         }),
-        ElevatedButton(
-          onPressed: () {
-            setState(() {
-              _ingredients.add(Ingredient(sourcePlaylistName: '', sourcePlaylistId: '', quantity: 0));
-              widget.onIngredientsChanged(_ingredients);
-            });
-          },
-          child: Text('Add Ingredient'),
-        ),
+        // ElevatedButton(
+        //   onPressed: () {
+        //     setState(() {
+        //       _ingredients.add(Ingredient(sourcePlaylistName: '', sourcePlaylistId: '', quantity: 0));
+        //       widget.onIngredientsChanged(_ingredients);
+        //     });
+        //   },
+        //   child: Text('Add Ingredient'),
+        // ),
       ],
     );
   }
