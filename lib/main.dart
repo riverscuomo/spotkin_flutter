@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Spotify Web Auth',
-      theme: ThemeData(primarySwatch: Colors.blue),
+      theme: spotifyThemeData,
       onGenerateRoute: (settings) {
         if (settings.name == '/') {
           return MaterialPageRoute(
@@ -53,3 +53,65 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
+
+
+
+final spotifyThemeData = ThemeData(
+  primarySwatch: Colors.green,
+  brightness: Brightness.dark,
+  scaffoldBackgroundColor: const Color(0xFF121212),
+  appBarTheme: const AppBarTheme(
+    backgroundColor: Color(0xFF121212),
+    elevation: 0,
+    iconTheme: IconThemeData(color: Colors.white),
+    titleTextStyle: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+  ),
+  textTheme: const TextTheme(
+    headline6: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+    bodyText2: TextStyle(color: Colors.white70),
+    subtitle1: TextStyle(color: Colors.white54),
+  ),
+  inputDecorationTheme: InputDecorationTheme(
+    fillColor: const Color(0xFF212121),
+    filled: true,
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(4),
+      borderSide: BorderSide.none,
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(4),
+      borderSide: const BorderSide(color: Colors.white24),
+    ),
+    labelStyle: const TextStyle(color: Colors.white54),
+  ),
+  iconTheme: const IconThemeData(color: Colors.white),
+  dividerTheme: const DividerThemeData(
+    color: Colors.white10,
+    thickness: 1,
+  ),
+  elevatedButtonTheme: ElevatedButtonThemeData(
+    style: ButtonStyle(
+      backgroundColor: MaterialStateProperty.all(Colors.green),
+      foregroundColor: MaterialStateProperty.all(Colors.white),
+      shape: MaterialStateProperty.all(
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+      ),
+    ),
+  ),
+  listTileTheme: const ListTileThemeData(
+    tileColor: Color(0xFF212121),
+    textColor: Colors.white,
+    iconColor: Colors.white54,
+  ),
+  expansionTileTheme: const ExpansionTileThemeData(
+    backgroundColor: Color(0xFF212121),
+    collapsedBackgroundColor: Color(0xFF212121),
+    textColor: Colors.white,
+    collapsedTextColor: Colors.white,
+    iconColor: Colors.white,
+    collapsedIconColor: Colors.white,
+  ),
+);
