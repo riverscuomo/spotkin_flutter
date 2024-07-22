@@ -46,7 +46,7 @@ class _JobFormState extends State<JobForm> {
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
-      final playlistId = Utils.parseSpotifyPlaylistId(_playlistIdController.text);
+      final playlistId = Utils.extractPlaylistId(_playlistIdController.text);
       final newJob = Job(
         name: _nameController.text,
         playlistId: playlistId ,

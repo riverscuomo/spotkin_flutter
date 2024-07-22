@@ -1,7 +1,7 @@
 
 class Utils {
 
-  static String parseSpotifyPlaylistId(String playlistUrl) {
+  static String extractPlaylistId(String playlistUrl) {
   Uri uri = Uri.parse(playlistUrl);
   
   if (uri.host != 'open.spotify.com' || !uri.pathSegments.contains('playlist')) {

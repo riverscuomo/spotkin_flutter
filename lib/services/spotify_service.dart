@@ -107,7 +107,7 @@ class SpotifyService {
     _spotify = SpotifyApi(SpotifyApiCredentials(clientId, clientSecret, accessToken: accessToken));
   }
 
-   Future<Playlist> getPlaylist(String playlistId) async {
+   Future<Playlist> getPlaylistDetails(String playlistId) async {
     await _ensureAuthenticated();
     try {
       return await _spotify.playlists.get(playlistId);

@@ -220,6 +220,7 @@ class _UpdateScreenState extends State<UpdateScreen> {
             const SizedBox(height: 20),
             IngredientForm(
               initialIngredients: job.recipe,
+              fetchPlaylistName: _fetchPlaylistName,
               onIngredientsChanged: (updatedIngredients) {
                 setState(() {
                   job = job.copyWith(recipe: updatedIngredients);
@@ -231,5 +232,15 @@ class _UpdateScreenState extends State<UpdateScreen> {
         ),
       ),
     );
+  }
+
+    Future<String> _fetchPlaylistName(String playlistId) async {
+    try {
+      final playlist = await spotifyService.getPlaylistDetails(playlistId);
+      return playlist.name ?? 'Unknown Playlist';
+    } catch (e) {
+      print('Error fetching playlist name: $e');
+      return 'Unknown Playlist';
+    }
   }
 }
