@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:spotkin_flutter/app_core.dart';
-import 'package:flutter/material.dart';
+
 
 class IngredientForm extends StatefulWidget {
   final List<Ingredient> initialIngredients;
@@ -19,6 +19,7 @@ class IngredientForm extends StatefulWidget {
 class _IngredientFormState extends State<IngredientForm> {
   final _formKey = GlobalKey<FormState>();
   late List<IngredientFormRow> _ingredientRows;
+  bool _hasChanges = false;
 
   @override
   void initState() {
@@ -36,6 +37,20 @@ class _IngredientFormState extends State<IngredientForm> {
     if (_ingredientRows.isEmpty) {
       _addNewRow();
     }
+    _setupControllerListeners();
+  }
+
+  void _setupControllerListeners() {
+    for (var row in _ingredientRows) {
+      row.playlistController.addListener(_onFormChanged);
+      row.quantityController.addListener(_onFormChanged);
+    }
+  }
+
+  void _onFormChanged() {
+    setState(() {
+      _hasChanges = true;
+    });
   }
 
   @override
@@ -52,29 +67,45 @@ class _IngredientFormState extends State<IngredientForm> {
         playlistController: TextEditingController(),
         quantityController: TextEditingController(),
       ));
+      _setupControllerListeners();
     });
   }
 
   void _removeIngredient(int index) {
     setState(() {
       _ingredientRows.removeAt(index);
+      _onFormChanged();
     });
   }
 
-  void _submitAndAddIngredient() {
+  void _submitForm() {
     if (_formKey.currentState!.validate()) {
-      List<Ingredient> updatedIngredients = _ingredientRows.map((row) => 
-        Ingredient(
-          sourcePlaylistName: '', // You might want to update this if needed
-          sourcePlaylistId: row.playlistController.text,
-          quantity: int.tryParse(row.quantityController.text) ?? 0,
-        )
-      ).toList();
+      List<Ingredient> updatedIngredients = _ingredientRows
+        .where((row) => row.playlistController.text.isNotEmpty || row.quantityController.text.isNotEmpty)
+        .map((row) => 
+          Ingredient(
+            sourcePlaylistName: '', // You might want to update this if needed
+            sourcePlaylistId: row.playlistController.text,
+            quantity: int.tryParse(row.quantityController.text) ?? 0,
+          )
+        ).toList();
 
       widget.onIngredientsChanged(updatedIngredients);
-      _addNewRow();
+      setState(() {
+        _hasChanges = false;
+        // Remove any empty rows after submission
+        _ingredientRows.removeWhere((row) => 
+          row.playlistController.text.isEmpty && row.quantityController.text.isEmpty);
+        // Ensure there's always at least one row
+        if (_ingredientRows.isEmpty) {
+          _addNewRow();
+        }
+      });
     }
   }
+
+  bool get _hasEmptyRow => _ingredientRows.any((row) => 
+    row.playlistController.text.isEmpty && row.quantityController.text.isEmpty);
 
   @override
   Widget build(BuildContext context) {
@@ -120,10 +151,17 @@ class _IngredientFormState extends State<IngredientForm> {
               ],
             );
           }),
-          ElevatedButton(
-            onPressed: _submitAndAddIngredient,
-            child: const Text('Add Ingredient'),
-          ),
+          const SizedBox(height: 10),
+          if (_hasChanges)
+            ElevatedButton(
+              onPressed: _submitForm,
+              child: const Text('Submit'),
+            )
+          else if (!_hasEmptyRow)
+            IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: _addNewRow,
+            ),
         ],
       ),
     );
@@ -132,6 +170,8 @@ class _IngredientFormState extends State<IngredientForm> {
   @override
   void dispose() {
     for (var row in _ingredientRows) {
+      row.playlistController.removeListener(_onFormChanged);
+      row.quantityController.removeListener(_onFormChanged);
       row.playlistController.dispose();
       row.quantityController.dispose();
     }
