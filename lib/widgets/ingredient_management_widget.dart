@@ -84,6 +84,8 @@ class _IngredientFormState extends State<IngredientForm> {
       _onFormChanged();
     });
   }
+  
+  
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
@@ -91,36 +93,32 @@ class _IngredientFormState extends State<IngredientForm> {
       });
 
       try {
-        List<Ingredient> updatedIngredients = [];
+        // Process only the last (newest) ingredient row
+        IngredientFormRow lastRow = _ingredientRows.last;
+        
+        if (lastRow.playlistController.text.isNotEmpty && lastRow.quantityController.text.isNotEmpty) {
+          String playlistId = Utils.extractPlaylistId(lastRow.playlistController.text);
+          String playlistName = await widget.fetchPlaylistName(playlistId);
+          
+          Ingredient newIngredient = Ingredient(
+            sourcePlaylistName: playlistName,
+            sourcePlaylistId: playlistId,
+            quantity: int.tryParse(lastRow.quantityController.text) ?? 0,
+          );
 
-        for (var row in _ingredientRows) {
-          if (row.playlistController.text.isNotEmpty || row.quantityController.text.isNotEmpty) {
-            String playlistId = Utils.extractPlaylistId(row.playlistController.text);
-            String playlistName = await widget.fetchPlaylistName(playlistId);
-            
-            updatedIngredients.add(Ingredient(
-              sourcePlaylistName: playlistName,
-              sourcePlaylistId: playlistId,
-              quantity: int.tryParse(row.quantityController.text) ?? 0,
-            ));
-
-            // Update the row with the fetched playlist name
-            row.playlistName = playlistName;
-          }
+          // Update the row with the fetched playlist name
+          setState(() {
+            lastRow.playlistName = playlistName;
+            // Add the new ingredient to the list
+            widget.onIngredientsChanged([...widget.initialIngredients, newIngredient]);
+          });
         }
 
-        widget.onIngredientsChanged(updatedIngredients);
-        
         setState(() {
           _hasChanges = false;
           _isSubmitting = false;
-          // Remove any empty rows after submission
-          _ingredientRows.removeWhere((row) => 
-            row.playlistController.text.isEmpty && row.quantityController.text.isEmpty);
-          // Ensure there's always at least one row
-          if (_ingredientRows.isEmpty) {
-            _addNewRow();
-          }
+          // Add a new empty row for the next ingredient
+          _addNewRow();
         });
       } catch (e) {
         // Handle any errors that occurred during playlist fetching
@@ -136,6 +134,7 @@ class _IngredientFormState extends State<IngredientForm> {
 
   @override
   Widget build(BuildContext context) {
+    
     return Form(
       key: _formKey,
       child: Column(
@@ -145,18 +144,13 @@ class _IngredientFormState extends State<IngredientForm> {
           ..._ingredientRows.asMap().entries.map((entry) {
             int idx = entry.key;
             IngredientFormRow row = entry.value;
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            return Row(
               children: [
-                if (row.playlistName != null)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: Text(row.playlistName!, style: TextStyle(fontWeight: FontWeight.bold)),
-                  ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextFormField(
+                Expanded(
+                  flex: 3,
+                  child: row.playlistName != null
+                    ? Text(row.playlistName!, style: TextStyle(fontWeight: FontWeight.bold))
+                    : TextFormField(
                         controller: row.playlistController,
                         decoration: const InputDecoration(
                           labelText: 'Source playlist link',
@@ -164,41 +158,41 @@ class _IngredientFormState extends State<IngredientForm> {
                         ),
                         validator: Utils.validateSpotifyPlaylistInput,
                       ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: TextFormField(
-                        controller: row.quantityController,
-                        decoration: const InputDecoration(labelText: 'Quantity'),
-                        keyboardType: TextInputType.number,
-                        validator: (value) {
-                          if (value == null || value.isEmpty || int.tryParse(value) == null) {
-                            return 'Please enter a valid number';
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () => _removeIngredient(idx),
-                    ),
-                  ],
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  flex: 1,
+                  child: TextFormField(
+                    controller: row.quantityController,
+                    decoration: const InputDecoration(labelText: 'Quantity'),
+                    keyboardType: TextInputType.number,
+                    validator: (value) {
+                      if (value == null || value.isEmpty || int.tryParse(value) == null) {
+                        return 'Please enter a valid number';
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: () => _removeIngredient(idx),
                 ),
               ],
             );
           }),
           const SizedBox(height: 10),
-          if (_hasChanges)
-            ElevatedButton(
-              onPressed: _isSubmitting ? null : _submitForm,
-              child: _isSubmitting ? CircularProgressIndicator() : Text('Submit'),
-            )
-          else if (!_hasEmptyRow)
-            IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: _addNewRow,
-            ),
+          // In the build method
+if (_hasChanges && _ingredientRows.last.playlistController.text.isNotEmpty && _ingredientRows.last.quantityController.text.isNotEmpty)
+  ElevatedButton(
+    onPressed: _isSubmitting ? null : _submitForm,
+    child: _isSubmitting ? CircularProgressIndicator() : Text('Submit'),
+  )
+else if (!_hasEmptyRow)
+  IconButton(
+    icon: const Icon(Icons.add),
+    onPressed: _addNewRow,
+  ),
         ],
       ),
     );
