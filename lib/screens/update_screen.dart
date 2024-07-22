@@ -78,17 +78,10 @@ class _UpdateScreenState extends State<UpdateScreen> {
 
   void updateJob(int index, Job updatedJob) {
     print("Updating job at index $index: ${updatedJob.name}");
-    print("Recipe count: ${updatedJob.recipe.length}");
-    for (var ingredient in updatedJob.recipe) {
-      print(
-          "Ingredient: ${ingredient.sourcePlaylistId}, Quantity: ${ingredient.quantity}");
-    }
     setState(() {
       jobs[index] = updatedJob;
-      
       _storageService.saveJobs(jobs);
     });
-    print("Jobs saved after update");
   }
 
   void _addNewJob(Job newJob) {

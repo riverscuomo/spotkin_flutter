@@ -1,5 +1,17 @@
 
 class Utils {
+
+  static String parseSpotifyPlaylistId(String playlistUrl) {
+  Uri uri = Uri.parse(playlistUrl);
+  
+  if (uri.host != 'open.spotify.com' || !uri.pathSegments.contains('playlist')) {
+    throw FormatException('Invalid Spotify playlist URL');
+  }
+  
+  String playlistId = uri.pathSegments.last;
+  return playlistId;
+}
+
   static String? validateSpotifyPlaylistInput(String? value) {
     if (value == null || value.isEmpty) {
       return 'Please enter a Spotify playlist link or ID';

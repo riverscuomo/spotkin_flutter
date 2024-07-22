@@ -53,7 +53,7 @@ class _IngredientManagementWidgetState extends State<IngredientManagementWidget>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Ingredients', style: Theme.of(context).textTheme.subtitle1),
+        Text('Ingredients', style: Theme.of(context).textTheme.titleMedium),
         ..._ingredients.asMap().entries.map((entry) {
           int idx = entry.key;
           Ingredient ingredient = entry.value;
