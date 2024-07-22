@@ -29,9 +29,9 @@ class _JobFormState extends State<JobForm> {
           ),
           TextFormField(
             controller: _playlistIdController,
-            decoration: const InputDecoration(labelText: 'Target playlist link'),
+            decoration: const InputDecoration(labelText: 'Target playlist'),
             validator: (value) =>
-                value?.isEmpty ?? true ? 'Please enter a playlist ID' : null,
+                value?.isEmpty ?? true ? 'Please enter a Spotify playlist link' : null,
           ),
         
           const SizedBox(height: 10),

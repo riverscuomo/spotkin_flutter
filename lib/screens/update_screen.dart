@@ -217,7 +217,8 @@ class _UpdateScreenState extends State<UpdateScreen> {
               onChanged: (value) =>
                   updateJob(index, job.copyWith(playlistId: value)),
             ),
-            IngredientManagementWidget(
+            const SizedBox(height: 20),
+            IngredientForm(
               initialIngredients: job.recipe,
               onIngredientsChanged: (updatedIngredients) {
                 setState(() {
