@@ -10,14 +10,17 @@ class StorageService {
     final String? storedJobs = html.window.localStorage[_storageKey];
     if (storedJobs == null) {
       print("No jobs found in localStorage");
+      // return [Job.empty()];
       return [];
     }
     List<Job> jobs = parseJobs(storedJobs);
     print("Loaded ${jobs.length} jobs from localStorage");
     for (var job in jobs) {
-      print("Job: ${job.name}, Playlist ID: ${job.playlistId}, Recipe count: ${job.recipe.length}");
+      print(
+          "Job: ${job.targetPlaylist.name}, Playlist ID: ${job.targetPlaylist.id}, Recipe count: ${job.recipe.length}");
       for (var ingredient in job.recipe) {
-        print("  Ingredient: ${ingredient.sourcePlaylistId}, Quantity: ${ingredient.quantity}");
+        print(
+            "  Ingredient: ${ingredient.playlist.id}, Quantity: ${ingredient.quantity}");
       }
     }
     return jobs;
@@ -25,7 +28,8 @@ class StorageService {
 
   void saveJobs(List<Job> jobs) {
     print("Saving ${jobs.length} jobs to localStorage");
-    final String encodedJobs = jsonEncode(jobs.map((job) => job.toJson()).toList());
+    final String encodedJobs =
+        jsonEncode(jobs.map((job) => job.toJson()).toList());
     html.window.localStorage[_storageKey] = encodedJobs;
     print("Jobs saved to localStorage");
     for (var job in jobs) {
@@ -33,23 +37,25 @@ class StorageService {
         // remove any empty strings from the list
         job.lastTrackIds.removeWhere((element) => element.isEmpty);
       }
-      print("Saved Job: ${job.name}, Playlist ID: ${job.playlistId}, Recipe count: ${job.recipe.length}");
+      print(
+          "Saved Job: ${job.targetPlaylist.name}, Playlist ID: ${job.targetPlaylist.id}, Recipe count: ${job.recipe.length}");
     }
   }
 
   void addJob(Job job) {
-    print("Adding new job: ${job.name}");
+    print("Adding new job: ${job.targetPlaylist.name}");
     final jobs = getJobs();
     jobs.add(job);
     saveJobs(jobs);
   }
 
-  void updateJob(Job updatedJob) {
-    print("Updating job: ${updatedJob.name}");
+  void updateJob(Job job) {
+    print("Updating job: ${job.targetPlaylist.name}");
     final jobs = getJobs();
-    final index = jobs.indexWhere((job) => job.playlistId == updatedJob.playlistId);
+    final index = jobs
+        .indexWhere((job) => job.targetPlaylist.id == job.targetPlaylist.id);
     if (index != -1) {
-      jobs[index] = updatedJob;
+      jobs[index] = job;
       saveJobs(jobs);
       print("Job updated successfully");
     } else {
@@ -60,7 +66,7 @@ class StorageService {
   void deleteJob(String playlistId) {
     print("Deleting job with playlist ID: $playlistId");
     final jobs = getJobs();
-    jobs.removeWhere((job) => job.playlistId == playlistId);
+    jobs.removeWhere((job) => job.targetPlaylist.id == playlistId);
     saveJobs(jobs);
   }
 
@@ -68,8 +74,9 @@ class StorageService {
     print("Searching for job with playlist ID: $playlistId");
     final jobs = getJobs();
     try {
-      Job job = jobs.firstWhere((job) => job.playlistId == playlistId);
-      print("Job found: ${job.name}, Recipe count: ${job.recipe.length}");
+      Job job = jobs.firstWhere((job) => job.targetPlaylist.id == playlistId);
+      print(
+          "Job found: ${job.targetPlaylist.name}, Recipe count: ${job.recipe.length}");
       return job;
     } catch (e) {
       print("No job found with playlist ID: $playlistId");

@@ -23,27 +23,30 @@ class ApiService {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
               },
-              body: json.encode(job.toJson()),
+              body: json.encode(job.toJsonForPostRequest()),
             )
             .timeout(Duration(seconds: 60));
 
         if (response.statusCode == 200) {
           final responseData = json.decode(response.body);
           results.add({
-            'name': job.name,
+            'name': job.targetPlaylist.name,
             'status': 'Success',
             'result': responseData['message']
           });
         } else {
           results.add({
-            'name': job.name,
+            'name': job.targetPlaylist.name,
             'status': 'Error',
             'result': 'Status ${response.statusCode}: ${response.body}'
           });
         }
       } catch (e) {
-        results
-            .add({'name': job.name, 'status': 'Error', 'result': e.toString()});
+        results.add({
+          'name': job.targetPlaylist.name,
+          'status': 'Error',
+          'result': e.toString()
+        });
       }
     }
 

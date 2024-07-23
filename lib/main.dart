@@ -1,17 +1,19 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
+import 'package:spotkin_flutter/app_core.dart';
 
 import 'helpers/load_config.dart';
-import 'screens/home_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   setUrlStrategy(PathUrlStrategy()); // Use path URL strategy
   Map<String, dynamic> config = await loadConfig();
+  setupServiceLocator(config: config);
+  // await getIt.allReady(); // Wait for all async registrations
   String jobs = await loadJobs();
   runApp(MyApp(config, jobs));
 }
@@ -34,7 +36,7 @@ class MyApp extends StatelessWidget {
       onGenerateRoute: (settings) {
         if (settings.name == '/') {
           return MaterialPageRoute(
-            builder: (context) => HomeScreen(config: config),
+            builder: (context) => AuthScreen(config: config),
           );
         }
         // Handle Spotify callback
@@ -42,7 +44,7 @@ class MyApp extends StatelessWidget {
           final uri = Uri.parse(settings.name!);
           final code = uri.queryParameters['code'];
           return MaterialPageRoute(
-            builder: (context) => HomeScreen(
+            builder: (context) => AuthScreen(
               config: config,
               initialAuthCode: code,
             ),
@@ -54,9 +56,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-
-
-
 final spotifyThemeData = ThemeData(
   primarySwatch: Colors.green,
   brightness: Brightness.dark,
@@ -65,7 +64,8 @@ final spotifyThemeData = ThemeData(
     backgroundColor: Color(0xFF121212),
     elevation: 0,
     iconTheme: IconThemeData(color: Colors.white),
-    titleTextStyle: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+    titleTextStyle: TextStyle(
+        color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
   ),
   textTheme: const TextTheme(
     headline6: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),

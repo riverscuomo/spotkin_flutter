@@ -19,5 +19,10 @@
         "titleBar.inactiveBackground": "#75007599",
         "titleBar.inactiveForeground": "#e7e7e799"
     },
-    "peacock.color": "#750075"
+    "peacock.color": "#750075",
+    "editor.formatOnSave": true,
+    "[dart]": {
+        "editor.formatOnSave": true
+    },
+    "dart.lineLength": 80,
 }

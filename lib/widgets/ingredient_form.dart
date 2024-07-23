@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:spotify/spotify.dart';
+import 'package:flutter/widgets.dart';
 import 'package:spotkin_flutter/app_core.dart';
 
-
+import 'ingredient_form_row.dart';
+import 'playlist_name_field.dart';
 
 class IngredientForm extends StatefulWidget {
   final List<Ingredient> initialIngredients;
   final Function(List<Ingredient>) onIngredientsChanged;
-  final Future<String> Function(String playlistId) fetchPlaylistName;
+  // final Future<String> Function(String playlistId) fetchPlaylistName;
 
   const IngredientForm({
     Key? key,
     required this.initialIngredients,
     required this.onIngredientsChanged,
-    required this.fetchPlaylistName,
+    // required this.fetchPlaylistName,
   }) : super(key: key);
 
   @override
@@ -25,28 +26,45 @@ class _IngredientFormState extends State<IngredientForm> {
   late List<IngredientFormRow> _ingredientRows;
   bool _hasChanges = false;
   bool _isSubmitting = false;
+  final SpotifyService spotifyService = getIt<SpotifyService>();
 
   @override
   void initState() {
     super.initState();
     _initIngredientRows();
   }
- bool get _hasEmptyRow => _ingredientRows.any((row) => 
-    row.playlistController.text.isEmpty && row.quantityController.text.isEmpty);
+
+  @override
+  void dispose() {
+    for (var row in _ingredientRows) {
+      row.playlistController.removeListener(_onFormChanged);
+      row.quantityController.removeListener(_onFormChanged);
+      row.playlistController.dispose();
+      row.quantityController.dispose();
+    }
+    super.dispose();
+  }
+
+  bool get _hasEmptyRow => _ingredientRows.any((row) =>
+      row.playlistController.text.isEmpty &&
+      row.quantityController.text.isEmpty);
 
   void _initIngredientRows() {
-    _ingredientRows = widget.initialIngredients.map((ingredient) => 
-      IngredientFormRow(
-        playlistController: TextEditingController(text: ingredient.sourcePlaylistId),
-        quantityController: TextEditingController(text: ingredient.quantity.toString()),
-        playlistName: ingredient.sourcePlaylistName,
-      )
-    ).toList();
+    _ingredientRows = widget.initialIngredients
+        .map((ingredient) => IngredientFormRow(
+              playlistController:
+                  TextEditingController(text: ingredient.playlist.name),
+              quantityController:
+                  TextEditingController(text: ingredient.quantity.toString()),
+              playlist: ingredient.playlist,
+            ))
+        .toList();
     if (_ingredientRows.isEmpty) {
       _addNewRow();
     }
     _setupControllerListeners();
   }
+
   void _setupControllerListeners() {
     for (var row in _ingredientRows) {
       row.playlistController.addListener(_onFormChanged);
@@ -84,8 +102,7 @@ class _IngredientFormState extends State<IngredientForm> {
       _onFormChanged();
     });
   }
-  
-  
+
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
@@ -95,22 +112,29 @@ class _IngredientFormState extends State<IngredientForm> {
       try {
         // Process only the last (newest) ingredient row
         IngredientFormRow lastRow = _ingredientRows.last;
-        
-        if (lastRow.playlistController.text.isNotEmpty && lastRow.quantityController.text.isNotEmpty) {
-          String playlistId = Utils.extractPlaylistId(lastRow.playlistController.text);
-          String playlistName = await widget.fetchPlaylistName(playlistId);
-          
+
+        if (lastRow.playlistController.text.isNotEmpty &&
+            lastRow.quantityController.text.isNotEmpty) {
+          String playlistId =
+              Utils.extractPlaylistId(lastRow.playlistController.text);
+
+          final playlist = await spotifyService.fetchPlaylist(playlistId);
+          // String playlistName = playlist.name ?? 'Unknown Playlist';
+
           Ingredient newIngredient = Ingredient(
-            sourcePlaylistName: playlistName,
-            sourcePlaylistId: playlistId,
+            // playlistName: playlistName,
+            // playlistId: playlistId,
+            playlist: playlist,
             quantity: int.tryParse(lastRow.quantityController.text) ?? 0,
           );
 
           // Update the row with the fetched playlist name
           setState(() {
-            lastRow.playlistName = playlistName;
+            // lastRow.playlistName = playlistName;
+            lastRow.playlist = playlist;
             // Add the new ingredient to the list
-            widget.onIngredientsChanged([...widget.initialIngredients, newIngredient]);
+            widget.onIngredientsChanged(
+                [...widget.initialIngredients, newIngredient]);
           });
         }
 
@@ -132,9 +156,29 @@ class _IngredientFormState extends State<IngredientForm> {
     }
   }
 
+  Widget buildQuantityDropdown(IngredientFormRow row) {
+    return DropdownButtonFormField<int>(
+      value: int.tryParse(row.quantityController.text) ?? 5,
+      items: List.generate(21, (index) {
+        return DropdownMenuItem<int>(
+          value: index,
+          child: Text(index.toString()),
+        );
+      }),
+      onChanged: (value) {
+        row.quantityController.text = value.toString();
+      },
+      validator: (value) {
+        if (value == null) {
+          return 'Please select a quantity';
+        }
+        return null;
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    
     return Form(
       key: _formKey,
       child: Column(
@@ -148,75 +192,37 @@ class _IngredientFormState extends State<IngredientForm> {
               children: [
                 Expanded(
                   flex: 3,
-                  child: row.playlistName != null
-                    ? Text(row.playlistName!, style: TextStyle(fontWeight: FontWeight.bold))
-                    : TextFormField(
-                        controller: row.playlistController,
-                        decoration: const InputDecoration(
-                          labelText: 'Source playlist link',
-                          hintText: 'Enter Spotify playlist link or ID',
-                        ),
-                        validator: Utils.validateSpotifyPlaylistInput,
-                      ),
+                  child: PlaylistNameField(
+                    playlistController: row.playlistController,
+                    playlistName: row.playlist?.name,
+                    quantityController: row.quantityController,
+                  ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
                   flex: 1,
-                  child: TextFormField(
-                    controller: row.quantityController,
-                    decoration: const InputDecoration(labelText: 'Quantity'),
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value == null || value.isEmpty || int.tryParse(value) == null) {
-                        return 'Please enter a valid number';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () => _removeIngredient(idx),
+                  child: buildQuantityDropdown(row),
                 ),
               ],
             );
           }),
           const SizedBox(height: 10),
           // In the build method
-if (_hasChanges && _ingredientRows.last.playlistController.text.isNotEmpty && _ingredientRows.last.quantityController.text.isNotEmpty)
-  ElevatedButton(
-    onPressed: _isSubmitting ? null : _submitForm,
-    child: _isSubmitting ? CircularProgressIndicator() : Text('Submit'),
-  )
-else if (!_hasEmptyRow)
-  IconButton(
-    icon: const Icon(Icons.add),
-    onPressed: _addNewRow,
-  ),
+          if (_hasChanges &&
+              _ingredientRows.last.playlistController.text.isNotEmpty &&
+              _ingredientRows.last.quantityController.text.isNotEmpty)
+            ElevatedButton(
+              onPressed: _isSubmitting ? null : _submitForm,
+              child:
+                  _isSubmitting ? CircularProgressIndicator() : Text('Submit'),
+            )
+          else if (!_hasEmptyRow)
+            IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: _addNewRow,
+            ),
         ],
       ),
     );
   }
-  @override
-  void dispose() {
-    for (var row in _ingredientRows) {
-      row.playlistController.removeListener(_onFormChanged);
-      row.quantityController.removeListener(_onFormChanged);
-      row.playlistController.dispose();
-      row.quantityController.dispose();
-    }
-    super.dispose();
-  }
-}
-
-class IngredientFormRow {
-  final TextEditingController playlistController;
-  final TextEditingController quantityController;
-  String? playlistName;
-
-  IngredientFormRow({
-    required this.playlistController,
-    required this.quantityController,
-    this.playlistName,
-  });
 }

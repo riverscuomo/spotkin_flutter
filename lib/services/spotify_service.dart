@@ -50,7 +50,8 @@ class SpotifyService {
       await _secureStorage.write(key: _accessTokenKey, value: accessToken);
       await _secureStorage.write(key: _refreshTokenKey, value: refreshToken);
       print('Access Token: $accessToken');
-      _spotify = SpotifyApi(SpotifyApiCredentials(clientId, clientSecret, accessToken: accessToken));
+      _spotify = SpotifyApi(SpotifyApiCredentials(clientId, clientSecret,
+          accessToken: accessToken));
     } else {
       print('Failed to exchange code for token: ${response.body}');
       throw Exception('Failed to authenticate with Spotify');
@@ -92,7 +93,8 @@ class SpotifyService {
       final accessToken = tokenData['access_token'];
       await _secureStorage.write(key: _accessTokenKey, value: accessToken);
       print('Access Token refreshed: $accessToken');
-      _spotify = SpotifyApi(SpotifyApiCredentials(clientId, clientSecret, accessToken: accessToken));
+      _spotify = SpotifyApi(SpotifyApiCredentials(clientId, clientSecret,
+          accessToken: accessToken));
     } else {
       print('Failed to refresh token: ${response.body}');
       throw Exception('Failed to refresh token');
@@ -104,10 +106,11 @@ class SpotifyService {
     if (accessToken == null) {
       throw Exception('Not authenticated');
     }
-    _spotify = SpotifyApi(SpotifyApiCredentials(clientId, clientSecret, accessToken: accessToken));
+    _spotify = SpotifyApi(SpotifyApiCredentials(clientId, clientSecret,
+        accessToken: accessToken));
   }
 
-   Future<Playlist> getPlaylistDetails(String playlistId) async {
+  Future<Playlist> fetchPlaylist(String playlistId) async {
     await _ensureAuthenticated();
     try {
       return await _spotify.playlists.get(playlistId);
@@ -117,13 +120,14 @@ class SpotifyService {
     }
   }
 
-   Future<List<PlaylistSimple>> getUserPlaylists(String userId) async {
+  Future<List<PlaylistSimple>> getUserPlaylists(String userId) async {
     await _ensureAuthenticated();
     final playlists = await _spotify.playlists.getUsersPlaylists(userId).all();
     return playlists.toList();
   }
 
-  Future<void> updatePlaylist(String playlistId, {String? name, String? description}) async {
+  Future<void> updatePlaylist(String playlistId,
+      {String? name, String? description}) async {
     await _ensureAuthenticated();
     // await _spotify.playlists.changePlaylistDetails(playlistId, name: name, description: description);
   }
