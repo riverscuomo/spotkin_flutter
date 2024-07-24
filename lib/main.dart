@@ -33,6 +33,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Spotify Web Auth',
       theme: spotifyThemeData,
+      debugShowCheckedModeBanner: false,
       onGenerateRoute: (settings) {
         if (settings.name == '/') {
           return MaterialPageRoute(

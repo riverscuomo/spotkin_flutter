@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:spotkin_flutter/app_core.dart';
 
+import 'search_screen.dart';
+
 class HomeScreen extends StatefulWidget {
   final Map<String, dynamic> config;
   final String accessToken;
@@ -139,6 +141,17 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Text('Spotkin'),
         automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SearchScreen()),
+              );
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(

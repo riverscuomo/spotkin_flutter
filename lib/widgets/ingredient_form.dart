@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:spotkin_flutter/app_core.dart';
 
 import 'ingredient_form_row.dart';
-import 'playlist_name_field.dart';
 
 class IngredientForm extends StatefulWidget {
   final List<Ingredient> initialIngredients;
@@ -157,23 +155,30 @@ class _IngredientFormState extends State<IngredientForm> {
   }
 
   Widget buildQuantityDropdown(IngredientFormRow row) {
-    return DropdownButtonFormField<int>(
-      value: int.tryParse(row.quantityController.text) ?? 5,
-      items: List.generate(21, (index) {
-        return DropdownMenuItem<int>(
-          value: index,
-          child: Text(index.toString()),
-        );
-      }),
-      onChanged: (value) {
-        row.quantityController.text = value.toString();
-      },
-      validator: (value) {
-        if (value == null) {
-          return 'Please select a quantity';
-        }
-        return null;
-      },
+    return SizedBox(
+      width: 80, // Adjust the width as needed
+      child: DropdownButtonFormField<int>(
+        value: int.tryParse(row.quantityController.text) ?? 5,
+        items: List.generate(21, (index) {
+          return DropdownMenuItem<int>(
+            value: index,
+            child: Text(index.toString()),
+          );
+        }),
+        onChanged: (value) {
+          row.quantityController.text = value.toString();
+        },
+        validator: (value) {
+          if (value == null) {
+            return 'Please select a quantity';
+          }
+          return null;
+        },
+        decoration: const InputDecoration(
+          isDense: true,
+          contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        ),
+      ),
     );
   }
 
@@ -184,26 +189,19 @@ class _IngredientFormState extends State<IngredientForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Ingredients', style: Theme.of(context).textTheme.titleMedium),
+          Text('Source Playlists',
+              style: Theme.of(context).textTheme.titleMedium),
           ..._ingredientRows.asMap().entries.map((entry) {
             int idx = entry.key;
             IngredientFormRow row = entry.value;
-            return Row(
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: PlaylistNameField(
-                    playlistController: row.playlistController,
-                    playlistName: row.playlist?.name,
-                    quantityController: row.quantityController,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  flex: 1,
-                  child: buildQuantityDropdown(row),
-                ),
-              ],
+            return ListTile(
+              title: Text(row.playlist?.name ?? 'Unknown Playlist'),
+              // PlaylistNameField(
+              //   playlistController: row.playlistController,
+              //   playlistName: row.playlist?.name,
+              //   quantityController: row.quantityController,
+              // ),
+              trailing: buildQuantityDropdown(row),
             );
           }),
           const SizedBox(height: 10),
@@ -213,14 +211,44 @@ class _IngredientFormState extends State<IngredientForm> {
               _ingredientRows.last.quantityController.text.isNotEmpty)
             ElevatedButton(
               onPressed: _isSubmitting ? null : _submitForm,
-              child:
-                  _isSubmitting ? CircularProgressIndicator() : Text('Submit'),
+              child: _isSubmitting
+                  ? const CircularProgressIndicator()
+                  : const Text('Submit'),
             )
-          else if (!_hasEmptyRow)
-            IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: _addNewRow,
-            ),
+          // else if (!_hasEmptyRow)
+          //   IconButton(
+          //     icon: const Icon(Icons.search),
+          //     onPressed: () {
+          //       showModalBottomSheet(
+          //         context: context,
+          //         builder: (BuildContext context) {
+          //           return Container(
+          //             padding: const EdgeInsets.all(16),
+          //             child: Column(
+          //               mainAxisSize: MainAxisSize.min,
+          //               children: <Widget>[
+          //                 TextField(
+          //                   decoration: const InputDecoration(
+          //                     hintText: 'Search...',
+          //                     prefixIcon: Icon(Icons.search),
+          //                     border: OutlineInputBorder(),
+          //                   ),
+          //                   onChanged: (value) {
+          //                     // Implement your search logic here
+          //                   },
+          //                 ),
+          //                 const SizedBox(height: 16),
+          //                 ElevatedButton(
+          //                   child: const Text('Close'),
+          //                   onPressed: () => Navigator.pop(context),
+          //                 ),
+          //               ],
+          //             ),
+          //           );
+          //         },
+          //       );
+          //     },
+          //   ),
         ],
       ),
     );
