@@ -148,5 +148,92 @@ class SpotifyService {
     _initializeSpotify();
   }
 
-  // Add more methods as needed...
+  // Future<Map<String, List>> search(String query, {int limit = 20}) async {
+  //   try {
+  //     print('Performing search for query: $query with limit: $limit');
+  //     final searchResults = await _spotify.search.get(query).first(limit);
+
+  //     print('Number of pages: ${searchResults.length}');
+
+  //     final tracks = <Track>[];
+  //     final artists = <Artist>[];
+  //     final playlists = <PlaylistSimple>[];
+
+  //     for (var page in searchResults) {
+  //       print('Page type: ${page.runtimeType}');
+  //       if (page.items != null) {
+  //         print('Items type: ${page.items!.runtimeType}');
+  //         print('Number of items: ${page.items!.length}');
+  //         if (page.items!.isNotEmpty) {
+  //           print('First item type: ${page.items!.first.runtimeType}');
+  //         }
+  //       }
+
+  //       // Attempt to cast items based on their actual type
+  //       if (page.items != null) {
+  //         if (page.items!.isNotEmpty && page.items!.first is Track) {
+  //           tracks.addAll(page.items!.cast<Track>());
+  //         } else if (page.items!.isNotEmpty && page.items!.first is Artist) {
+  //           artists.addAll(page.items!.cast<Artist>());
+  //         } else if (page.items!.isNotEmpty &&
+  //             page.items!.first is PlaylistSimple) {
+  //           playlists.addAll(page.items!.cast<PlaylistSimple>());
+  //         }
+  //       }
+  //     }
+
+  //     print('Extracted results:');
+  //     print('Tracks: ${tracks.length}');
+  //     print('Artists: ${artists.length}');
+  //     print('Playlists: ${playlists.length}');
+
+  //     return {
+  //       'tracks': tracks,
+  //       'artists': artists,
+  //       'playlists': playlists,
+  //     };
+  //   } catch (e) {
+  //     print('Error searching Spotify: $e');
+  //     return {
+  //       'tracks': <Track>[],
+  //       'artists': <Artist>[],
+  //       'playlists': <PlaylistSimple>[],
+  //     };
+  //   }
+  // }
+
+  Future<List<dynamic>> search(String query, {int limit = 20}) async {
+    try {
+      print('Performing search for query: $query with limit: $limit');
+      final searchResults = await _spotify.search.get(query).first(limit);
+
+      print('Number of pages: ${searchResults.length}');
+
+      final unifiedResults = <dynamic>[];
+
+      for (var page in searchResults) {
+        if (page.items != null) {
+          unifiedResults.addAll(page.items!);
+        }
+      }
+
+      print('Total number of results: ${unifiedResults.length}');
+
+      return unifiedResults;
+    } catch (e) {
+      print('Error searching Spotify: $e');
+      return [];
+    }
+  }
+
+  Iterable<T> _extractItems<T>(List<Page> pages) {
+    for (var page in pages) {
+      if (page is Page<T>) {
+        print('Extracting items of type $T, count: ${page.items?.length ?? 0}');
+        return page.items ?? [];
+      }
+    }
+    print('No items found of type $T');
+    return [];
+  }
 }
