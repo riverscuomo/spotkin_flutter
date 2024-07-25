@@ -153,20 +153,24 @@ class _SearchScreenState extends State<SearchScreen> {
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          IconButton(
-            icon: Icon(Icons.add, color: Colors.green),
-            onPressed: () {
-              // TODO: Implement add functionality
-              print('Add pressed for: $title');
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.remove, color: Colors.red),
-            onPressed: () {
-              // TODO: Implement remove functionality
-              print('Remove pressed for: $title');
-            },
-          ),
+          item is PlaylistSimple || item is Artist
+              ? IconButton(
+                  icon: Icon(Icons.add, color: Colors.green),
+                  onPressed: () {
+                    // TODO: Implement add functionality
+                    print('Add pressed for: $title');
+                  },
+                )
+              : SizedBox(),
+          item is Track || item is Artist
+              ? IconButton(
+                  icon: Icon(Icons.remove, color: Colors.red),
+                  onPressed: () {
+                    // TODO: Implement remove functionality
+                    print('Remove pressed for: $title');
+                  },
+                )
+              : SizedBox(),
         ],
       ),
     );
