@@ -202,10 +202,15 @@ class SpotifyService {
   //   }
   // }
 
-  Future<List<dynamic>> search(String query, {int limit = 20}) async {
+  Future<Iterable<dynamic>> search(
+    String query, {
+    int limit = 20,
+    required List<SearchType> types,
+  }) async {
     try {
       print('Performing search for query: $query with limit: $limit');
-      final searchResults = await _spotify.search.get(query).first(limit);
+      final searchResults =
+          await _spotify.search.get(query, types: types).first(limit);
 
       print('Number of pages: ${searchResults.length}');
 
