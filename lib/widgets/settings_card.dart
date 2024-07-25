@@ -5,12 +5,51 @@ class SettingsCard extends StatelessWidget {
   final int index;
   final Job job;
   final Function updateJob;
+
   const SettingsCard({
-    super.key,
+    Key? key,
     required this.index,
     required this.job,
     required this.updateJob,
-  });
+  }) : super(key: key);
+
+  void _navigateToListScreen(
+      BuildContext context, String title, List<String> items, String tooltip) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ListManagementScreen(
+          title: title,
+          items: items,
+          tooltip: tooltip,
+          onListUpdated: (updatedList) {
+            Job updatedJob;
+            switch (title) {
+              case 'Banned Artists':
+                updatedJob = job.copyWith(bannedArtistNames: updatedList);
+                break;
+              case 'Banned Songs':
+                updatedJob = job.copyWith(bannedSongTitles: updatedList);
+                break;
+              case 'Banned Genres':
+                updatedJob = job.copyWith(bannedGenres: updatedList);
+                break;
+              case 'Exceptions to Banned Genres':
+                updatedJob =
+                    job.copyWith(exceptionsToBannedGenres: updatedList);
+                break;
+              case 'Last Track IDs':
+                updatedJob = job.copyWith(lastTrackIds: updatedList);
+                break;
+              default:
+                return;
+            }
+            updateJob(index, updatedJob);
+          },
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,168 +59,268 @@ class SettingsCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Tooltip(
-              message: 'This description will appear in your Spotify playlist',
-              child: TextFormField(
-                initialValue: job.description,
-                decoration: const InputDecoration(labelText: 'Description'),
-                onChanged: (value) =>
-                    updateJob(index, job.copyWith(description: value)),
+            ListTile(
+              title: const Text('Banned Artists'),
+              subtitle: Text(job.bannedArtistNames.join(', ')),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => _navigateToListScreen(
+                context,
+                'Banned Artists',
+                job.bannedArtistNames,
+                'These artists will never appear in your Spotify playlist',
               ),
             ),
-            
-            Tooltip(
-              message: 'These tracks will appear last in your Spotify playlist',
-              child: TextFormField(
-                initialValue: job.lastTrackIds.join(', '),
-                decoration: const InputDecoration(labelText: 'Last Track IDs'),
-                onChanged: (value) => updateJob(
-                    index,
-                    job.copyWith(
-                        lastTrackIds:
-                            value.split(',').map((e) => e.trim()).toList())),
+            ListTile(
+              title: const Text('Banned Songs'),
+              subtitle: Text(job.bannedSongTitles.join(', ')),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => _navigateToListScreen(
+                context,
+                'Banned Songs',
+                job.bannedSongTitles,
+                'These songs will never appear in your Spotify playlist',
               ),
             ),
-            Tooltip(
-              message: 'These artists will never appear in your Spotify playlist',
-              child: TextFormField(
-                initialValue: job.bannedArtistNames.join(', '),
-                decoration:
-                    const InputDecoration(labelText: 'Banned Artist Names'),
-                onChanged: (value) => updateJob(
-                    index,
-                    job.copyWith(
-                        bannedArtistNames:
-                            value.split(',').map((e) => e.trim()).toList())),
+            ListTile(
+              title: const Text('Banned Genres'),
+              subtitle: Text(job.bannedGenres.join(', ')),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => _navigateToListScreen(
+                context,
+                'Banned Genres',
+                job.bannedGenres,
+                'These genres will never appear in your Spotify playlist',
               ),
             ),
-            Tooltip(
-              message: 'These songs will never appear in your Spotify playlist',
-              child: TextFormField(
-                initialValue: job.bannedSongTitles.join(', '),
-                decoration:
-                    const InputDecoration(labelText: 'Banned Song Titles'),
-                onChanged: (value) => updateJob(
-                    index,
-                    job.copyWith(
-                        bannedSongTitles:
-                            value.split(',').map((e) => e.trim()).toList())),
+            ListTile(
+              title: const Text('Exceptions to Banned Genres'),
+              subtitle: Text(job.exceptionsToBannedGenres.join(', ')),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => _navigateToListScreen(
+                context,
+                'Exceptions to Banned Genres',
+                job.exceptionsToBannedGenres,
+                'These artists will be admitted to your Spotify playlist even if their genre is banned',
               ),
             ),
-            Tooltip(
-              message: 'These tracks will never appear in your Spotify playlist',
-              child: TextFormField(
-                initialValue: job.bannedTrackIds.join(', '),
-                decoration: const InputDecoration(labelText: 'Banned Track IDs'),
-                onChanged: (value) => updateJob(
-                    index,
-                    job.copyWith(
-                        bannedTrackIds:
-                            value.split(',').map((e) => e.trim()).toList())),
-              ),
+            SwitchListTile(
+              title: const Text('Remove Low Energy'),
+              subtitle: const Text(
+                  'Tracks with low energy will be removed from your Spotify playlist'),
+              value: job.removeLowEnergy,
+              onChanged: (value) =>
+                  updateJob(index, job.copyWith(removeLowEnergy: value)),
             ),
-            Tooltip(
-              message: 'These genres will never appear in your Spotify playlist',
-              child: TextFormField(
-                initialValue: job.bannedGenres.join(', '),
-                decoration: const InputDecoration(labelText: 'Banned Genres'),
-                onChanged: (value) => updateJob(
-                    index,
-                    job.copyWith(
-                        bannedGenres:
-                            value.split(',').map((e) => e.trim()).toList())),
-              ),
+            ListTile(
+              title: const Text('Description'),
+              subtitle: Text(job.description),
+              trailing: const Icon(Icons.edit),
+              onTap: () {
+                // Navigate to a screen for editing the description
+                // You can implement this similarly to the list management screen
+              },
             ),
-            Tooltip(
-              message: 'These artists will be admitted to your Spotify playlist even if their genre is banned',
-              child: TextFormField(
-                initialValue: job.exceptionsToBannedGenres.join(', '),
-                decoration: const InputDecoration(
-                    labelText: 'Exceptions to Banned Genres'),
-                onChanged: (value) => updateJob(
-                    index,
-                    job.copyWith(
-                        exceptionsToBannedGenres:
-                            value.split(',').map((e) => e.trim()).toList())),
-              ),
-            ),
-            Tooltip(
-              message: 'Tracks with low energy will be removed from your Spotify playlist (useful for workouts, parties, etc.)',
-              child: SwitchListTile(
-                title: const Text('Remove Low Energy'),
-                value: job.removeLowEnergy,
-                onChanged: (bool value) =>
-                    updateJob(index, job.copyWith(removeLowEnergy: value)),
+            ListTile(
+              title: const Text('Last Track IDs'),
+              subtitle: Text(job.lastTrackIds.join(', ')),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => _navigateToListScreen(
+                context,
+                'Last Track IDs',
+                job.lastTrackIds,
+                'These tracks will appear last in your Spotify playlist',
               ),
             ),
           ],
         ),
-
       ),
     );
   }
 }
+// class SettingsCard extends StatelessWidget {
+//   final int index;
+//   final Job job;
+//   final Function updateJob;
+//   const SettingsCard({
+//     super.key,
+//     required this.index,
+//     required this.job,
+//     required this.updateJob,
+//   });
 
+//   @override
+//   Widget build(BuildContext context) {
+//     return Card(
+//       child: Padding(
+//         padding: const EdgeInsets.all(8),
+//         child: Column(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             Tooltip(
+//               message:
+//                   'These artists will never appear in your Spotify playlist',
+//               child: TextFormField(
+//                 initialValue: job.bannedArtistNames.join(', '),
+//                 decoration: const InputDecoration(labelText: 'Banned Artists'),
+//                 onChanged: (value) => updateJob(
+//                     index,
+//                     job.copyWith(
+//                         bannedArtistNames:
+//                             value.split(',').map((e) => e.trim()).toList())),
+//               ),
+//             ),
+//             Tooltip(
+//               message: 'These songs will never appear in your Spotify playlist',
+//               child: TextFormField(
+//                 initialValue: job.bannedSongTitles.join(', '),
+//                 decoration: const InputDecoration(labelText: 'Banned '),
+//                 onChanged: (value) => updateJob(
+//                     index,
+//                     job.copyWith(
+//                         bannedSongTitles:
+//                             value.split(',').map((e) => e.trim()).toList())),
+//               ),
+//             ),
+//             Tooltip(
+//               message:
+//                   'These genres will never appear in your Spotify playlist',
+//               child: TextFormField(
+//                 initialValue: job.bannedGenres.join(', '),
+//                 decoration: const InputDecoration(labelText: 'Banned Genres'),
+//                 onChanged: (value) => updateJob(
+//                     index,
+//                     job.copyWith(
+//                         bannedGenres:
+//                             value.split(',').map((e) => e.trim()).toList())),
+//               ),
+//             ),
+//             Tooltip(
+//               message:
+//                   'These artists will be admitted to your Spotify playlist even if their genre is banned',
+//               child: TextFormField(
+//                 initialValue: job.exceptionsToBannedGenres.join(', '),
+//                 decoration: const InputDecoration(
+//                     labelText: 'Exceptions to Banned Genres'),
+//                 onChanged: (value) => updateJob(
+//                     index,
+//                     job.copyWith(
+//                         exceptionsToBannedGenres:
+//                             value.split(',').map((e) => e.trim()).toList())),
+//               ),
+//             ),
+//             Tooltip(
+//               message:
+//                   'Tracks with low energy will be removed from your Spotify playlist (useful for workouts, parties, etc.)',
+//               child: SwitchListTile(
+//                 title: const Text('Remove Low Energy'),
+//                 value: job.removeLowEnergy,
+//                 onChanged: (bool value) =>
+//                     updateJob(index, job.copyWith(removeLowEnergy: value)),
+//               ),
+//             ),
+//             Tooltip(
+//               message: 'This description will appear in your Spotify playlist',
+//               child: TextFormField(
+//                 initialValue: job.description,
+//                 decoration: const InputDecoration(labelText: 'Description'),
+//                 onChanged: (value) =>
+//                     updateJob(index, job.copyWith(description: value)),
+//               ),
+//             ),
+//             Tooltip(
+//               message: 'These tracks will appear last in your Spotify playlist',
+//               child: TextFormField(
+//                 initialValue: job.lastTrackIds.join(', '),
+//                 decoration: const InputDecoration(labelText: 'Last Track IDs'),
+//                 onChanged: (value) => updateJob(
+//                     index,
+//                     job.copyWith(
+//                         lastTrackIds:
+//                             value.split(',').map((e) => e.trim()).toList())),
+//               ),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+//   // Tooltip(
+//   //   message:
+//   //       'These tracks will never appear in your Spotify playlist',
+//   //   child: TextFormField(
+//   //     initialValue: job.bannedTrackIds.join(', '),
+//   //     decoration:
+//   //         const InputDecoration(labelText: 'Banned Track IDs'),
+//   //     onChanged: (value) => updateJob(
+//   //         index,
+//   //         job.copyWith(
+//   //             bannedTrackIds:
+//   //                 value.split(',').map((e) => e.trim()).toList())),
+//   //   ),
+//   // ),
+// }
 
-class TrackIdsInput extends StatefulWidget {
-  final Job job;
-  final int index;
-  final Function(int, Job) updateJob;
+// class TrackIdsInput extends StatefulWidget {
+//   final Job job;
+//   final int index;
+//   final Function(int, Job) updateJob;
 
-  TrackIdsInput({required this.job, required this.index, required this.updateJob});
+//   TrackIdsInput(
+//       {required this.job, required this.index, required this.updateJob});
 
-  @override
-  _TrackIdsInputState createState() => _TrackIdsInputState();
-}
+//   @override
+//   _TrackIdsInputState createState() => _TrackIdsInputState();
+// }
 
-class _TrackIdsInputState extends State<TrackIdsInput> {
-  late TextEditingController _controller;
-  List<String> _currentIds = [];
+// class _TrackIdsInputState extends State<TrackIdsInput> {
+//   late TextEditingController _controller;
+//   List<String> _currentIds = [];
 
-  @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController(text: widget.job.lastTrackIds.join(', '));
-    _currentIds = widget.job.lastTrackIds;
-  }
+//   @override
+//   void initState() {
+//     super.initState();
+//     _controller =
+//         TextEditingController(text: widget.job.lastTrackIds.join(', '));
+//     _currentIds = widget.job.lastTrackIds;
+//   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+//   @override
+//   void dispose() {
+//     _controller.dispose();
+//     super.dispose();
+//   }
 
-  void _updateIds(String value) {
-    setState(() {
-      _currentIds = value
-          .split(',')
-          .map((e) => e.trim())
-          .where((e) => e.isNotEmpty)
-          .toList();
-      
-      widget.updateJob(
-        widget.index,
-        widget.job.copyWith(lastTrackIds: _currentIds),
-      );
-    });
-  }
+//   void _updateIds(String value) {
+//     setState(() {
+//       _currentIds = value
+//           .split(',')
+//           .map((e) => e.trim())
+//           .where((e) => e.isNotEmpty)
+//           .toList();
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        TextFormField(
-          controller: _controller,
-          decoration: const InputDecoration(
-            labelText: 'Last Track IDs',
-            hintText: 'Enter track IDs separated by commas',
-          ),
-          onChanged: _updateIds,
-        ),
-        SizedBox(height: 8),
-        Text('Current IDs: ${_currentIds.join(", ")}'),
-      ],
-    );
-  }
-}
+//       widget.updateJob(
+//         widget.index,
+//         widget.job.copyWith(lastTrackIds: _currentIds),
+//       );
+//     });
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Column(
+//       crossAxisAlignment: CrossAxisAlignment.start,
+//       children: [
+//         TextFormField(
+//           controller: _controller,
+//           decoration: const InputDecoration(
+//             labelText: 'Last Track IDs',
+//             hintText: 'Enter track IDs separated by commas',
+//           ),
+//           onChanged: _updateIds,
+//         ),
+//         SizedBox(height: 8),
+//         Text('Current IDs: ${_currentIds.join(", ")}'),
+//       ],
+//     );
+//   }
+// }

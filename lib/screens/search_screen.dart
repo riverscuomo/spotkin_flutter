@@ -68,6 +68,14 @@ class _SearchScreenState extends State<SearchScreen> {
 
   Widget _buildFilterPill(String filter) {
     bool isSelected = filter == selectedFilter;
+
+    Map<String, Color> colors = {
+      'All': Colors.orange,
+      'Tracks': Colors.red,
+      'Artists': Colors.orange,
+      'Playlists': Colors.green
+    };
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: FilterChip(
@@ -80,7 +88,7 @@ class _SearchScreenState extends State<SearchScreen> {
           });
         },
         backgroundColor: Colors.grey[300],
-        selectedColor: Colors.green,
+        selectedColor: colors[filter],
         labelStyle: TextStyle(
           color: isSelected ? Colors.white : Colors.black,
           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
