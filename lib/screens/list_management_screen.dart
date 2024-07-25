@@ -2,23 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:spotify/spotify.dart' hide Image;
 import 'package:spotkin_flutter/app_core.dart';
 
+import '../models/display_item.dart';
 import '../models/spotify_item.dart';
-
-class DisplayItem {
-  final String id;
-  final String name;
-  final String type;
-  final String? imageUrl;
-  final String? subtitle;
-
-  DisplayItem({
-    required this.id,
-    required this.name,
-    required this.type,
-    this.imageUrl,
-    this.subtitle,
-  });
-}
 
 class ListManagementScreen extends StatefulWidget {
   final String title;

@@ -88,7 +88,7 @@ class SettingsCard extends StatelessWidget {
               trailing: const Icon(Icons.chevron_right),
               onTap: () => _navigateToListScreen(
                 context,
-                'Last Track IDs',
+                'Last Songs',
                 'lastTrackIds',
                 'These tracks will appear last in your Spotify playlist',
                 [SearchType.track],
