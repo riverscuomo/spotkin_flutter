@@ -143,14 +143,26 @@ class _HomeScreenState extends State<HomeScreen> {
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
-            icon: const Icon(Icons.search),
+            icon: const Icon(Icons.settings),
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const SearchScreen()),
+                MaterialPageRoute(
+                  builder: (context) =>
+                      SettingsScreen(jobs: jobs, updateJob: updateJob),
+                ),
               );
             },
-          ),
+          )
+          // IconButton(
+          //   icon: const Icon(Icons.search),
+          //   onPressed: () {
+          //     Navigator.push(
+          //       context,
+          //       MaterialPageRoute(builder: (context) => const SearchScreen()),
+          //     );
+          //   },
+          // ),
         ],
       ),
       body: SingleChildScrollView(
@@ -180,22 +192,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ...jobs.asMap().entries.map((entry) {
                     return _buildRecipeCard(entry.value, entry.key);
                   }),
-                  const SizedBox(height: 20),
-                  jobs.isNotEmpty
-                      ? ExpansionTile(
-                          title: const Text('Settings'),
-                          initiallyExpanded: false,
-                          children: [
-                            ...jobs.asMap().entries.map((entry) {
-                              return SettingsCard(
-                                index: entry.key,
-                                job: entry.value,
-                                updateJob: updateJob,
-                              );
-                            }),
-                          ],
-                        )
-                      : const SizedBox(),
                 ],
               ),
               const SizedBox(height: 20),
