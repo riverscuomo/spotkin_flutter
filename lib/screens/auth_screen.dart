@@ -5,8 +5,8 @@ import 'package:spotkin_flutter/app_core.dart';
 class AuthScreen extends StatefulWidget {
   final Map<String, dynamic> config;
   final String? initialAuthCode;
-
-  AuthScreen({required this.config, this.initialAuthCode});
+  final String? initialError;
+  AuthScreen({required this.config, this.initialAuthCode, this.initialError});
 
   @override
   _AuthScreenState createState() => _AuthScreenState();
@@ -28,7 +28,15 @@ class _AuthScreenState extends State<AuthScreen> {
       scope: widget.config['SPOTIFY_SCOPE']!,
     );
 
-    _initializeAuth();
+    if (widget.initialAuthCode != null) {
+      print('Handling initial auth code: ${widget.initialAuthCode}');
+      _handleAuthCode(widget.initialAuthCode!);
+    } else if (widget.initialError != null) {
+      print('Handling initial error: ${widget.initialError}');
+      _showErrorSnackBar('Authentication failed: ${widget.initialError}');
+    } else {
+      _initializeAuth();
+    }
   }
 
   Future<void> _initializeAuth() async {
@@ -71,28 +79,24 @@ class _AuthScreenState extends State<AuthScreen> {
   Future<void> _checkExistingAuth() async {
     try {
       print('Checking existing authentication...');
-      final accessToken = await spotifyService.getAccessToken();
-      if (accessToken != null) {
-        print('Existing access token found');
-        if (await spotifyService.checkAuthentication()) {
-          print('Existing token is valid');
-          _navigateToHomeScreen();
-        } else {
-          print('Existing token is invalid, initiating login');
-          _initiateSpotifyLogin();
-        }
+      if (await spotifyService.checkAuthentication()) {
+        print('Existing token is valid');
+        _navigateToHomeScreen();
       } else {
-        print('No existing access token found');
+        print('Existing token is invalid or not found, initiating login');
+        _initiateSpotifyLogin();
       }
     } catch (e) {
       print('Error checking existing auth: $e');
+      _initiateSpotifyLogin();
     }
   }
 
   void _navigateToHomeScreen() async {
     final accessToken = await spotifyService.getAccessToken();
     if (accessToken != null) {
-      print('Navigating to Home Screen');
+      print(
+          'Navigating to Home Screen with access token: ${accessToken.substring(0, 10)}...');
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (context) => HomeScreen(

@@ -30,12 +30,23 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    _verifyToken();
     _apiService = ApiService(
       accessToken: widget.accessToken,
       backendUrl: widget.backendUrl,
     );
     _storageService = StorageService();
     _loadJobs();
+  }
+
+  Future<void> _verifyToken() async {
+    try {
+      final user = await spotifyService.checkAuthentication();
+      print('Home screen: Token is valid');
+    } catch (e) {
+      print('Token verification failed: $e');
+      // Handle re-authentication here
+    }
   }
 
   void _loadJobs() {

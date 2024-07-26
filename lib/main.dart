@@ -41,15 +41,28 @@ class MyApp extends StatelessWidget {
           );
         }
         // Handle Spotify callback
-        if (settings.name!.startsWith('/?code=')) {
+        if (settings.name!.startsWith('/?')) {
           final uri = Uri.parse(settings.name!);
           final code = uri.queryParameters['code'];
-          return MaterialPageRoute(
-            builder: (context) => AuthScreen(
-              config: config,
-              initialAuthCode: code,
-            ),
-          );
+          final error = uri.queryParameters['error'];
+
+          if (code != null) {
+            print('Received Spotify callback with authorization code: $code');
+            return MaterialPageRoute(
+              builder: (context) => AuthScreen(
+                config: config,
+                initialAuthCode: code,
+              ),
+            );
+          } else if (error != null) {
+            print('Received Spotify callback with error: $error');
+            return MaterialPageRoute(
+              builder: (context) => AuthScreen(
+                config: config,
+                initialError: error,
+              ),
+            );
+          }
         }
         return null;
       },
