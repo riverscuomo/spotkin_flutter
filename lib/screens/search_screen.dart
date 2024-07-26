@@ -120,8 +120,8 @@
 //       imageUrl = item.images?.isNotEmpty == true ? item.images!.first.url : '';
 //       isArtist = true;
 //     } else if (item is PlaylistSimple) {
-//       title = item.name ?? 'Unknown Playlist';
-//       subtitle = 'Playlist • ${item.tracksLink?.total ?? 0} tracks';
+//       title = item.name ?? 'Unknown PlaylistSimple';
+//       subtitle = 'PlaylistSimple • ${item.tracksLink?.total ?? 0} tracks';
 //       imageUrl = item.images?.isNotEmpty == true ? item.images!.first.url : '';
 //     }
 

@@ -2,16 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:spotify/spotify.dart' hide Image;
 import 'package:spotkin_flutter/app_core.dart';
 
-import '../models/display_item.dart';
-import '../models/spotify_item.dart';
-
 class ListManagementScreen extends StatefulWidget {
   final String title;
   final Job job;
   final int jobIndex;
   final String fieldName;
   final String tooltip;
-  final Function(int, Job) updateJob; // Update the type here
+  final Function(int, Job) updateJob;
   final List<SearchType> searchTypes;
 
   const ListManagementScreen({
@@ -30,7 +27,7 @@ class ListManagementScreen extends StatefulWidget {
 }
 
 class _ListManagementScreenState extends State<ListManagementScreen> {
-  late List<DisplayItem> _items;
+  late List<dynamic> _items;
 
   @override
   void initState() {
@@ -38,81 +35,27 @@ class _ListManagementScreenState extends State<ListManagementScreen> {
     _items = _getItems();
   }
 
-  List<DisplayItem> _getItems() {
-    List<String> rawItems;
+  List<dynamic> _getItems() {
     switch (widget.fieldName) {
-      case 'bannedArtistNames':
-        rawItems = widget.job.bannedArtistNames;
-        break;
-      case 'bannedSongTitles':
-        rawItems = widget.job.bannedSongTitles;
-        break;
-      case 'bannedTrackIds':
-        rawItems = widget.job.bannedTrackIds;
-        break;
+      case 'bannedArtists':
+        return widget.job.bannedArtists;
+      case 'bannedTracks':
+        return widget.job.bannedTracks;
       case 'bannedGenres':
-        rawItems = widget.job.bannedGenres;
-        break;
+        return widget.job.bannedGenres;
       case 'exceptionsToBannedGenres':
-        rawItems = widget.job.exceptionsToBannedGenres;
-        break;
-      case 'lastTrackIds':
-        rawItems = widget.job.lastTrackIds;
-        break;
+        return widget.job.exceptionsToBannedGenres;
+      case 'lastTracks':
+        return widget.job.lastTracks;
       default:
-        rawItems = [];
+        return [];
     }
-
-    return rawItems
-        .map((item) => DisplayItem(
-              id: item,
-              name: item,
-              type: widget.fieldName,
-              imageUrl:
-                  null, // We don't have image URLs for existing items, so we'll leave this null for now
-            ))
-        .toList();
   }
 
   void _addItem(dynamic item) {
-    DisplayItem newItem;
-    if (item is Artist) {
-      newItem = DisplayItem(
-        id: item.id ?? '',
-        name: item.name ?? 'Unknown Artist',
-        type: 'Artist',
-        imageUrl:
-            item.images?.isNotEmpty == true ? item.images!.first.url : null,
-        subtitle: 'Artist',
-      );
-    } else if (item is Track) {
-      newItem = DisplayItem(
-        id: item.id ?? '',
-        name: item.name ?? 'Unknown Track',
-        type: 'Track',
-        imageUrl: item.album?.images?.isNotEmpty == true
-            ? item.album!.images!.first.url
-            : null,
-        subtitle:
-            '${item.artists?.isNotEmpty == true ? item.artists!.first.name : 'Unknown Artist'} • Track',
-      );
-    } else if (item is PlaylistSimple) {
-      newItem = DisplayItem(
-        id: item.id ?? '',
-        name: item.name ?? 'Unknown Playlist',
-        type: 'Playlist',
-        imageUrl:
-            item.images?.isNotEmpty == true ? item.images!.first.url : null,
-        subtitle: 'Playlist • ${item.tracksLink?.total ?? 0} tracks',
-      );
-    } else {
-      print('Unsupported item type: ${item.runtimeType}');
-      return;
-    }
-
     setState(() {
-      if (!_items.any((existingItem) => existingItem.id == newItem.id)) {
-        _items.add(newItem);
+      if (!_items.any((existingItem) => existingItem.id == item.id)) {
+        _items.add(item);
         _updateJob();
       }
     });
@@ -127,25 +70,22 @@ class _ListManagementScreenState extends State<ListManagementScreen> {
 
   void _updateJob() {
     Job updatedJob;
-    List<String> updatedList = _items.map((item) => item.name).toList();
     switch (widget.fieldName) {
-      case 'bannedArtistNames':
-        updatedJob = widget.job.copyWith(bannedArtistNames: updatedList);
+      case 'bannedArtists':
+        updatedJob = widget.job.copyWith(bannedArtists: _items as List<Artist>);
         break;
-      case 'bannedSongTitles':
-        updatedJob = widget.job.copyWith(bannedSongTitles: updatedList);
-        break;
-      case 'bannedTrackIds':
-        updatedJob = widget.job.copyWith(bannedTrackIds: updatedList);
+      case 'bannedTracks':
+        updatedJob = widget.job.copyWith(bannedTracks: _items as List<Track>);
         break;
       case 'bannedGenres':
-        updatedJob = widget.job.copyWith(bannedGenres: updatedList);
+        updatedJob = widget.job.copyWith(bannedGenres: _items as List<String>);
         break;
       case 'exceptionsToBannedGenres':
-        updatedJob = widget.job.copyWith(exceptionsToBannedGenres: updatedList);
+        updatedJob = widget.job
+            .copyWith(exceptionsToBannedGenres: _items as List<Artist>);
         break;
-      case 'lastTrackIds':
-        updatedJob = widget.job.copyWith(lastTrackIds: updatedList);
+      case 'lastTracks':
+        updatedJob = widget.job.copyWith(lastTracks: _items as List<Track>);
         break;
       default:
         return;
@@ -166,13 +106,45 @@ class _ListManagementScreenState extends State<ListManagementScreen> {
     );
   }
 
-  Widget _buildListItem(DisplayItem item) {
+  Widget _buildListItem(dynamic item) {
+    String name = '';
+    String? subtitle;
+    String? imageUrl;
+
+    if (item is Artist) {
+      name = item.name ?? 'Unknown Artist';
+      subtitle = 'Artist • Popularity: ${item.popularity ?? 'N/A'}';
+      imageUrl =
+          item.images?.isNotEmpty == true ? item.images!.first.url : null;
+    } else if (item is Track) {
+      name = item.name ?? 'Unknown Track';
+      subtitle =
+          '${item.artists?.isNotEmpty == true ? item.artists!.first.name : 'Unknown Artist'} • ${item.album?.name ?? 'Unknown Album'}';
+      imageUrl = item.album?.images?.isNotEmpty == true
+          ? item.album!.images!.first.url
+          : null;
+    } else if (item is Album) {
+      name = item.name ?? 'Unknown Album';
+      subtitle =
+          '${item.artists?.isNotEmpty == true ? item.artists!.first.name : 'Unknown Artist'} • ${item.releaseDate ?? 'Unknown Release Date'}';
+      imageUrl =
+          item.images?.isNotEmpty == true ? item.images!.first.url : null;
+    } else if (item is PlaylistSimple) {
+      name = item.name ?? 'Unknown Playlist';
+      subtitle = 'Playlist • ${item.tracksLink?.total ?? 0} tracks';
+      imageUrl =
+          item.images?.isNotEmpty == true ? item.images!.first.url : null;
+    } else if (item is String) {
+      name = item;
+      subtitle = 'Genre';
+    }
+
     Widget leadingWidget;
-    if (item.imageUrl != null) {
+    if (imageUrl != null) {
       leadingWidget = ClipRRect(
         borderRadius: BorderRadius.circular(4),
         child: Image.network(
-          item.imageUrl!,
+          imageUrl,
           width: 50,
           height: 50,
           fit: BoxFit.cover,
@@ -186,8 +158,8 @@ class _ListManagementScreenState extends State<ListManagementScreen> {
 
     return ListTile(
       leading: leadingWidget,
-      title: Text(item.name),
-      subtitle: Text(item.subtitle ?? ''),
+      title: Text(name),
+      subtitle: subtitle != null ? Text(subtitle) : null,
       trailing: IconButton(
         icon: const Icon(Icons.delete),
         onPressed: () => _removeItem(_items.indexOf(item)),

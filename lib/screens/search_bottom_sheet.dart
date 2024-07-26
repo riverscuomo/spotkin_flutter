@@ -4,13 +4,19 @@ import 'package:spotkin_flutter/app_core.dart';
 
 class SearchBottomSheet extends StatefulWidget {
   final Function(dynamic) onItemSelected;
-  final List<SearchType> searchTypes;
+  final List<SearchType>? searchTypes;
+  final bool userPlaylistsOnly;
 
   const SearchBottomSheet({
     Key? key,
     required this.onItemSelected,
-    required this.searchTypes,
-  }) : super(key: key);
+    this.searchTypes,
+    this.userPlaylistsOnly = false,
+  })  : assert(
+          !(userPlaylistsOnly && (searchTypes != null)),
+          'searchTypes should not be provided when userPlaylistsOnly is true',
+        ),
+        super(key: key);
 
   @override
   _SearchBottomSheetState createState() => _SearchBottomSheetState();
@@ -25,13 +31,38 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _searchController.addListener(() {
-        if (_searchController.text.isNotEmpty) {
-          _performSearch();
-        }
+    if (widget.userPlaylistsOnly) {
+      _fetchUserPlaylists();
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _searchController.addListener(() {
+          if (_searchController.text.isNotEmpty) {
+            _performSearch();
+          }
+        });
       });
+    }
+  }
+
+  void _fetchUserPlaylists() async {
+    setState(() {
+      _isLoading = true;
     });
+
+    try {
+      final playlists = await spotifyService.getUserPlaylists();
+      setState(() {
+        _searchResults = playlists;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error fetching user playlists: $e');
+      setState(() {
+        _searchResults = [];
+        _isLoading = false;
+      });
+      // You might want to show an error message to the user here
+    }
   }
 
   void _performSearch() async {
@@ -50,7 +81,8 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
     try {
       final results = await spotifyService.search(
         query,
-        types: widget.searchTypes,
+        types: widget.searchTypes ??
+            [SearchType.track, SearchType.artist, SearchType.playlist],
         limit: 20,
       );
       setState(() {
@@ -138,26 +170,29 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: MediaQuery.of(context).size.height * 0.8, // Consistent height
+      height: MediaQuery.of(context).size.height * 0.8,
       child: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search...',
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(),
+          if (!widget.userPlaylistsOnly)
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Search...',
+                  prefixIcon: Icon(Icons.search),
+                  border: OutlineInputBorder(),
+                ),
               ),
-              // onChanged removed as we're using a listener now
             ),
-          ),
           Expanded(
             child: _isLoading
                 ? Center(child: CircularProgressIndicator())
                 : _searchResults.isEmpty
-                    ? Center(child: Text('No results found'))
+                    ? Center(
+                        child: Text(widget.userPlaylistsOnly
+                            ? 'No playlists found'
+                            : 'No results found'))
                     : ListView.builder(
                         itemCount: _searchResults.length,
                         itemBuilder: (context, index) =>

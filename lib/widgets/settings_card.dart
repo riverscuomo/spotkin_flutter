@@ -45,7 +45,7 @@ class SettingsCard extends StatelessWidget {
               onTap: () => _navigateToListScreen(
                 context,
                 'Banned Artists',
-                'bannedArtistNames',
+                'bannedArtists',
                 'These artists will never appear in your Spotify playlist',
                 [SearchType.artist],
               ),
@@ -89,7 +89,7 @@ class SettingsCard extends StatelessWidget {
               onTap: () => _navigateToListScreen(
                 context,
                 'Last Songs',
-                'lastTrackIds',
+                'lastTracks',
                 'These tracks will appear last in your Spotify playlist',
                 [SearchType.track],
               ),

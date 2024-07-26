@@ -42,7 +42,7 @@
 //           onTap: () => _navigateToListScreen(
 //             context,
 //             'Banned Artists',
-//             'bannedArtistNames',
+//             'bannedArtists',
 //             'These artists will never appear in your Spotify playlist',
 //             [SearchType.artist],
 //           ),
@@ -86,7 +86,7 @@
 //           onTap: () => _navigateToListScreen(
 //             context,
 //             'Last Track IDs',
-//             'lastTrackIds',
+//             'lastTracks',
 //             'These tracks will appear last in your Spotify playlist',
 //             [SearchType.track],
 //           ),

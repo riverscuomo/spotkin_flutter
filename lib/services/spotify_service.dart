@@ -29,6 +29,18 @@ class SpotifyService {
     _spotify = SpotifyApi(credentials);
   }
 
+  Future<bool> checkAuthentication() async {
+    try {
+      await _ensureAuthenticated();
+      final me = await _spotify.me.get();
+      print('Authentication successful. User ID: ${me.id}');
+      return true;
+    } catch (e) {
+      print('Authentication check failed: $e');
+      return false;
+    }
+  }
+
   Future<void> exchangeCodeForToken(String code) async {
     final tokenEndpoint = Uri.parse('https://accounts.spotify.com/api/token');
     final response = await http.post(
@@ -40,6 +52,7 @@ class SpotifyService {
         'redirect_uri': redirectUri,
         'client_id': clientId,
         'client_secret': clientSecret,
+        'scope': scope,
       },
     );
 
@@ -64,6 +77,7 @@ class SpotifyService {
       'response_type': 'code',
       'redirect_uri': redirectUri,
       'scope': scope,
+      'show_dialog': 'true', // Force re-consent
     });
 
     print('Redirecting to: $spotifyAuthUrl');
@@ -76,15 +90,21 @@ class SpotifyService {
 
   Future<void> refreshAccessToken() async {
     final refreshToken = await _secureStorage.read(key: _refreshTokenKey);
+    if (refreshToken == null) {
+      throw Exception('No refresh token available');
+    }
+
     final tokenEndpoint = Uri.parse('https://accounts.spotify.com/api/token');
     final response = await http.post(
       tokenEndpoint,
-      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization':
+            'Basic ${base64Encode(utf8.encode('$clientId:$clientSecret'))}',
+      },
       body: {
         'grant_type': 'refresh_token',
         'refresh_token': refreshToken,
-        'client_id': clientId,
-        'client_secret': clientSecret,
       },
     );
 
@@ -92,9 +112,10 @@ class SpotifyService {
       final tokenData = json.decode(response.body);
       final accessToken = tokenData['access_token'];
       await _secureStorage.write(key: _accessTokenKey, value: accessToken);
-      print('Access Token refreshed: $accessToken');
+      print('Access Token refreshed: ${accessToken.substring(0, 10)}...');
       _spotify = SpotifyApi(SpotifyApiCredentials(clientId, clientSecret,
           accessToken: accessToken));
+      print('SpotifyApi re-initialized with new access token');
     } else {
       print('Failed to refresh token: ${response.body}');
       throw Exception('Failed to refresh token');
@@ -104,13 +125,80 @@ class SpotifyService {
   Future<void> _ensureAuthenticated() async {
     final accessToken = await getAccessToken();
     if (accessToken == null) {
+      print('No access token found. Initiating login...');
       throw Exception('Not authenticated');
     }
+    print('Access token found. Initializing SpotifyApi...');
     _spotify = SpotifyApi(SpotifyApiCredentials(clientId, clientSecret,
         accessToken: accessToken));
+    print(
+        'SpotifyApi initialized with access token: ${accessToken.substring(0, 10)}...');
   }
 
-  Future<Playlist> fetchPlaylist(String playlistId) async {
+  Future<T> _retryOperation<T>(Future<T> Function() operation,
+      {int maxRetries = 2}) async {
+    int attempts = 0;
+    while (true) {
+      try {
+        await _ensureAuthenticated();
+        return await operation();
+      } on SpotifyException catch (e) {
+        print('Spotify API error: ${e.message}, Status code: ${e.status}');
+        if (e.status == 401 && attempts < maxRetries) {
+          print(
+              'Token might be expired. Attempting to refresh... (Attempt ${attempts + 1})');
+          try {
+            await refreshAccessToken();
+            attempts++;
+          } catch (refreshError) {
+            print('Error refreshing token: $refreshError');
+            print('Attempting full re-authentication...');
+            initiateSpotifyLogin();
+            throw Exception('Re-authentication required');
+          }
+        } else {
+          rethrow;
+        }
+      } catch (e) {
+        print('Error in operation: $e');
+        rethrow;
+      }
+    }
+  }
+
+  Future<PlaylistSimple> createPlaylist(String name, String description,
+      {bool public = false}) async {
+    try {
+      // Get the current user's ID
+      final me = await _spotify.me.get();
+      final userId = me.id;
+
+      if (userId == null) {
+        throw Exception('Failed to get user ID');
+      }
+
+      // Create the playlist
+      final playlist = await _spotify.playlists.createPlaylist(userId, name,
+          public: public, description: description);
+
+      // Convert the full Playlist object to a PlaylistSimple object
+      return PlaylistSimple()
+        ..id = playlist.id
+        ..name = playlist.name
+        ..public = playlist.public
+        ..collaborative = playlist.collaborative
+        ..images = playlist.images
+        ..owner = playlist.owner
+        // ..tracks = playlist.tracks
+        ..type = playlist.type
+        ..uri = playlist.uri;
+    } catch (e) {
+      print('Error creating playlist: $e');
+      rethrow;
+    }
+  }
+
+  Future<PlaylistSimple> fetchPlaylist(String playlistId) async {
     await _ensureAuthenticated();
     try {
       return await _spotify.playlists.get(playlistId);
@@ -120,10 +208,26 @@ class SpotifyService {
     }
   }
 
-  Future<List<PlaylistSimple>> getUserPlaylists(String userId) async {
-    await _ensureAuthenticated();
-    final playlists = await _spotify.playlists.getUsersPlaylists(userId).all();
-    return playlists.toList();
+  Future<List<PlaylistSimple>> getUserPlaylists(
+      {int limit = 50, int offset = 0}) async {
+    return _retryOperation(() async {
+      print('Fetching user profile...');
+      final me = await _spotify.me.get();
+      print('User profile fetched. User ID: ${me.id}');
+
+      if (me.id == null) {
+        throw Exception('Failed to get user ID. Check authentication.');
+      }
+
+      print('Fetching user playlists...');
+      final playlistsPage = await _spotify.playlists
+          .getUsersPlaylists(me.id!)
+          .getPage(limit, offset);
+      print(
+          'Successfully fetched ${playlistsPage.items?.length ?? 0} playlists');
+
+      return playlistsPage.items?.toList() ?? [];
+    });
   }
 
   Future<void> updatePlaylist(String playlistId,
@@ -147,60 +251,6 @@ class SpotifyService {
     await _secureStorage.delete(key: _refreshTokenKey);
     _initializeSpotify();
   }
-
-  // Future<Map<String, List>> search(String query, {int limit = 20}) async {
-  //   try {
-  //     print('Performing search for query: $query with limit: $limit');
-  //     final searchResults = await _spotify.search.get(query).first(limit);
-
-  //     print('Number of pages: ${searchResults.length}');
-
-  //     final tracks = <Track>[];
-  //     final artists = <Artist>[];
-  //     final playlists = <PlaylistSimple>[];
-
-  //     for (var page in searchResults) {
-  //       print('Page type: ${page.runtimeType}');
-  //       if (page.items != null) {
-  //         print('Items type: ${page.items!.runtimeType}');
-  //         print('Number of items: ${page.items!.length}');
-  //         if (page.items!.isNotEmpty) {
-  //           print('First item type: ${page.items!.first.runtimeType}');
-  //         }
-  //       }
-
-  //       // Attempt to cast items based on their actual type
-  //       if (page.items != null) {
-  //         if (page.items!.isNotEmpty && page.items!.first is Track) {
-  //           tracks.addAll(page.items!.cast<Track>());
-  //         } else if (page.items!.isNotEmpty && page.items!.first is Artist) {
-  //           artists.addAll(page.items!.cast<Artist>());
-  //         } else if (page.items!.isNotEmpty &&
-  //             page.items!.first is PlaylistSimple) {
-  //           playlists.addAll(page.items!.cast<PlaylistSimple>());
-  //         }
-  //       }
-  //     }
-
-  //     print('Extracted results:');
-  //     print('Tracks: ${tracks.length}');
-  //     print('Artists: ${artists.length}');
-  //     print('Playlists: ${playlists.length}');
-
-  //     return {
-  //       'tracks': tracks,
-  //       'artists': artists,
-  //       'playlists': playlists,
-  //     };
-  //   } catch (e) {
-  //     print('Error searching Spotify: $e');
-  //     return {
-  //       'tracks': <Track>[],
-  //       'artists': <Artist>[],
-  //       'playlists': <PlaylistSimple>[],
-  //     };
-  //   }
-  // }
 
   Future<Iterable<dynamic>> search(
     String query, {

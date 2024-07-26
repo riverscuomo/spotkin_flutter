@@ -32,14 +32,14 @@ class StorageService {
         jsonEncode(jobs.map((job) => job.toJson()).toList());
     html.window.localStorage[_storageKey] = encodedJobs;
     print("Jobs saved to localStorage");
-    for (var job in jobs) {
-      if (job.lastTrackIds.isNotEmpty) {
-        // remove any empty strings from the list
-        job.lastTrackIds.removeWhere((element) => element.isEmpty);
-      }
-      print(
-          "Saved Job: ${job.targetPlaylist.name}, Playlist ID: ${job.targetPlaylist.id}, Recipe count: ${job.recipe.length}");
-    }
+    // for (var job in jobs) {
+    //   if (job.lastTracks.isNotEmpty) {
+    //     // remove any empty strings from the list
+    //     job.lastTracks.removeWhere((element) => element.isEmpty);
+    //   }
+    //   print(
+    //       "Saved Job: ${job.targetPlaylist.name}, Playlist ID: ${job.targetPlaylist.id}, Recipe count: ${job.recipe.length}");
+    // }
   }
 
   void addJob(Job job) {

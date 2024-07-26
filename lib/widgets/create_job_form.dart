@@ -14,7 +14,6 @@ class CreateJobForm extends StatefulWidget {
 
 class _CreateJobFormState extends State<CreateJobForm> {
   final _formKey = GlobalKey<FormState>();
-  // final _nameController = TextEditingController();
   final _playlistIdController = TextEditingController();
 
   @override
@@ -23,15 +22,10 @@ class _CreateJobFormState extends State<CreateJobForm> {
       key: _formKey,
       child: Column(
         children: [
-          // TextFormField(
-          //   controller: _nameController,
-          //   decoration: const InputDecoration(labelText: 'Job Name'),
-          //   validator: (value) =>
-          //       value?.isEmpty ?? true ? 'Please enter a job name' : null,
-          // ),
           TextFormField(
             controller: _playlistIdController,
-            decoration: const InputDecoration(labelText: 'Target playlist'),
+            decoration: const InputDecoration(
+                labelText: 'Paste a link to one of your playlists'),
             validator: (value) => value?.isEmpty ?? true
                 ? 'Please enter a Spotify playlist link'
                 : null,
@@ -39,7 +33,7 @@ class _CreateJobFormState extends State<CreateJobForm> {
           const SizedBox(height: 10),
           ElevatedButton(
             onPressed: _submitForm,
-            child: const Text('Create'),
+            child: const Text('Submit'),
           ),
         ],
       ),

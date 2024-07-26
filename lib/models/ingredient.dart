@@ -3,7 +3,7 @@ import 'package:spotify/spotify.dart';
 class Ingredient {
   // final String sourcePlaylistName;
   // final String sourcePlaylistId;
-  final Playlist playlist;
+  final PlaylistSimple playlist;
   final int quantity;
 
   Ingredient({
@@ -17,7 +17,7 @@ class Ingredient {
     return Ingredient(
       // playlistName: json['source_playlist_name'] ?? '',
       // playlistId: json['source_playlist_id'] ?? '',
-      playlist: Playlist.fromJson(json['playlist']),
+      playlist: PlaylistSimple.fromJson(json['playlist']),
       quantity: json['quantity'] ?? 0,
     );
   }
@@ -42,7 +42,7 @@ class Ingredient {
   Ingredient copyWith({
     // String? playlistName,
     // String? playlistId,
-    Playlist? playlist,
+    PlaylistSimple? playlist,
     int? quantity,
   }) {
     return Ingredient(

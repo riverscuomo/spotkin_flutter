@@ -196,11 +196,7 @@ class _IngredientFormState extends State<IngredientForm> {
             IngredientFormRow row = entry.value;
             return ListTile(
               title: Text(row.playlist?.name ?? 'Unknown Playlist'),
-              // PlaylistNameField(
-              //   playlistController: row.playlistController,
-              //   playlistName: row.playlist?.name,
-              //   quantityController: row.quantityController,
-              // ),
+              leading: Image.network(row.playlist?.images?.first.url ?? ''),
               trailing: buildQuantityDropdown(row),
             );
           }),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:spotify/spotify.dart';
 import 'package:spotkin_flutter/app_core.dart';
 
 import 'search_screen.dart';
@@ -85,6 +86,17 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  Widget _buildPlaylistSelectionOptions() {
+    return PlaylistSelectionOptions(
+      onPlaylistSelected: (PlaylistSimple selectedPlaylist) {
+        final newJob = Job(
+          targetPlaylist: selectedPlaylist,
+        );
+        _addNewJob(newJob);
+      },
+    );
+  }
+
   Widget _buildCreateJobForm() {
     return CreateJobForm(
       onSubmit: (Job newJob) {
@@ -165,7 +177,8 @@ class _HomeScreenState extends State<HomeScreen> {
               Column(
                 children: [
                   jobs.isEmpty
-                      ? _buildCreateJobForm()
+                      // ? _buildCreateJobForm()
+                      ? _buildPlaylistSelectionOptions()
                       : TextFormField(
                           initialValue: job.targetPlaylist.name,
                           // decoration: const InputDecoration(

@@ -4,7 +4,7 @@ import 'package:spotify/spotify.dart';
 class IngredientFormRow {
   final TextEditingController playlistController;
   final TextEditingController quantityController;
-  Playlist? playlist;
+  PlaylistSimple? playlist;
 
   IngredientFormRow({
     required this.playlistController,
