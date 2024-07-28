@@ -30,41 +30,48 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('Building MyApp...');
     return MaterialApp(
       title: 'Flutter Spotify Web Auth',
       theme: spotifyThemeData,
       debugShowCheckedModeBanner: false,
       onGenerateRoute: (settings) {
-        if (settings.name == '/') {
-          return MaterialPageRoute(
-            builder: (context) => AuthScreen(config: config),
-          );
-        }
-        // Handle Spotify callback
-        if (settings.name!.startsWith('/?')) {
-          final uri = Uri.parse(settings.name!);
-          final code = uri.queryParameters['code'];
-          final error = uri.queryParameters['error'];
+        return MaterialPageRoute(
+          builder: (context) => HomeScreen(config: config),
+        );
+        // if (settings.name == '/') {
+        //   return MaterialPageRoute(
+        //     builder: (context) => AuthScreen(config: config),
+        //   );
+        // }
+        // // Handle Spotify callback
+        // if (settings.name!.startsWith('/?'))  {
+        //   final uri = Uri.parse(settings.name!);
+        //   final code = uri.queryParameters['code'];
+        //   final error = uri.queryParameters['error'];
 
-          if (code != null) {
-            print('Received Spotify callback with authorization code: $code');
-            return MaterialPageRoute(
-              builder: (context) => AuthScreen(
-                config: config,
-                initialAuthCode: code,
-              ),
-            );
-          } else if (error != null) {
-            print('Received Spotify callback with error: $error');
-            return MaterialPageRoute(
-              builder: (context) => AuthScreen(
-                config: config,
-                initialError: error,
-              ),
-            );
-          }
-        }
-        return null;
+        //   if (code != null)  {
+        //     print('Received Spotify callback with authorization code: $code');
+        //     final spotifyService = getIt<SpotifyService>();
+        //     final accessToken =  spotifyService.getAccessToken();
+        //     return MaterialPageRoute(
+        //       builder: (context) => HomeScreen(
+        //         config: config,
+        //         accessToken: accessToken,
+        //         // initialAuthCode: code,
+        //       ),
+        //     );
+        //   } else if (error != null) {
+        //     print('Received Spotify callback with error: $error');
+        //     return MaterialPageRoute(
+        //       builder: (context) => AuthScreen(
+        //         config: config,
+        //         initialError: error,
+        //       ),
+        //     );
+        //   }
+        // }
+        // return null;
       },
     );
   }

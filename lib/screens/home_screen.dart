@@ -6,13 +6,11 @@ import 'search_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final Map<String, dynamic> config;
-  final String accessToken;
-  final String backendUrl;
+  // final String accessToken;
 
   HomeScreen({
     required this.config,
-    required this.accessToken,
-    required this.backendUrl,
+    // required this.accessToken,
   });
 
   @override
@@ -29,22 +27,40 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void initState() {
+    print('Home Screen: initState...');
     super.initState();
-    _verifyToken();
-    _apiService = ApiService(
-      accessToken: widget.accessToken,
-      backendUrl: widget.backendUrl,
-    );
+    // _verifyToken();
+    // final accessToken = spotifyService.getAccessToken();
+
     _storageService = StorageService();
+    _initializeSpotify();
+    _initialApiService();
     _loadJobs();
+  }
+  //  _apiService = ApiService(
+  //     accessToken: accessToken ?? '',
+  //     backendUrl: widget.config['backendUrl'],
+  //   );
+
+  void _initialApiService() async {
+    final accessToken = await spotifyService.getAccessToken();
+    _apiService = ApiService(
+      accessToken: accessToken ?? '',
+      backendUrl: widget.config['backendUrl'],
+    );
+  }
+
+  Future<void> _initializeSpotify() async {
+    await spotifyService.initializeSpotify();
+    // Now you can use _spotifyService.spotify
   }
 
   Future<void> _verifyToken() async {
     try {
       final user = await spotifyService.checkAuthentication();
-      print('Home screen: Token is valid');
+      print('Home Screen: Home screen: Token is valid');
     } catch (e) {
-      print('Token verification failed: $e');
+      print('Home Screen: Token verification failed: $e');
       // Handle re-authentication here
     }
   }
@@ -68,9 +84,9 @@ class _HomeScreenState extends State<HomeScreen> {
       if (results[0].containsKey('status') && results[0]['status'] == 'Error') {
         print(results[0]['result'].runtimeType);
         final result = results[0]['result'] as String;
-        print('Error processing jobs: $result');
+        print('Home Screen: Error processing jobs: $result');
         if (result.startsWith("Status 401")) {
-          print('Token expired, authenticate again...');
+          print('Home Screen: Token expired, authenticate again...');
           spotifyService.initiateSpotifyLogin();
           return;
         }
@@ -118,7 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildRecipeCard(Job job, int index) {
     if (job.recipe.isEmpty) {
-      print('Job ${job.targetPlaylist.name}  recipe is empty');
+      print('Home Screen: Job ${job.targetPlaylist.name}  recipe is empty');
       // return const SizedBox();
     } else {
       print(
@@ -151,7 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
   //     final playlist = await spotifyService.getPlaylistDetails(playlistId);
   //     return playlist.name ?? 'Unknown Playlist';
   //   } catch (e) {
-  //     print('Error fetching playlist name: $e');
+  //     print('Home Screen: Error fetching playlist name: $e');
   //     return 'Unknown Playlist';
   //   }
   // }
