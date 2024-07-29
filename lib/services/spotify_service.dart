@@ -61,11 +61,23 @@ class SpotifyService {
         final tokenData = json.decode(response.body);
         final accessToken = tokenData['access_token'];
         final refreshToken = tokenData['refresh_token'];
+        final expiresIn = tokenData['expires_in'];
+        final DateTime expiration =
+            DateTime.now().add(Duration(seconds: expiresIn));
         await _secureStorage.write(key: _accessTokenKey, value: accessToken);
         await _secureStorage.write(key: _refreshTokenKey, value: refreshToken);
         print('Access Token: ${accessToken.substring(0, 10)}...');
-        _spotify = SpotifyApi(SpotifyApiCredentials(clientId, clientSecret,
-            accessToken: accessToken));
+        _spotify = SpotifyApi(
+          SpotifyApiCredentials(
+            clientId,
+            clientSecret,
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+            expiration: expiration,
+          ),
+        );
+        print(
+            'SPOTIFY SERVICE: SpotifyApi re-initialized with new access token: $_spotify');
       } else {
         print(
             'Failed to exchange code for token. Status: ${response.statusCode}');

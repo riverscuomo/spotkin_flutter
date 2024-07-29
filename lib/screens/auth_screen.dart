@@ -44,22 +44,22 @@ class _AuthScreenState extends State<AuthScreen> {
     print('AUTHSCREEN: AUTHSCREEN: Initializing authentication...');
     setState(() => _isLoading = true);
 
-    try {
-      if (widget.initialAuthCode != null) {
-        await _handleAuthCode(widget.initialAuthCode!);
-      } else {
-        await _checkExistingAuth();
-      }
-    } catch (e) {
-      print('AUTHSCREEN: Error during authentication initialization: $e');
-      _showErrorSnackBar('Failed to initialize authentication');
-    }
+    // try {
+    //   if (widget.initialAuthCode != null) {
+    //     await _handleAuthCode(widget.initialAuthCode!);
+    //   } else {
+    //     await _checkExistingAuth();
+    //   }
+    // } catch (e) {
+    //   print('AUTHSCREEN: Error during authentication initialization: $e');
+    //   _showErrorSnackBar('Failed to initialize authentication');
+    // }
 
     setState(() => _isLoading = false);
   }
 
   Future<void> _handleAuthCode(String code) async {
-    print('AUTHSCREEN: AUTHSCREEN: Handling auth code: $code');
+    print('AUTHSCREEN: Handling auth code: $code');
     if (_authAttempts >= MAX_AUTH_ATTEMPTS) {
       _showErrorSnackBar(
           'Too many authentication attempts. Please try again later.');
