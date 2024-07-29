@@ -197,9 +197,7 @@ class _IngredientFormState extends State<IngredientForm> {
             print(row.playlist);
             return ListTile(
               title: Text(row.playlist?.name ?? 'Unknown Playlist'),
-              leading: row.playlist?.images?.first.url?.isNotEmpty == true
-                  ? Image.network(row.playlist?.images?.first.url ?? '')
-                  : Icon(Icons.music_note),
+              leading: Utils.getPlaylistImageOrIcon(row.playlist!),
               trailing: buildQuantityDropdown(row),
             );
           }),

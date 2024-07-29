@@ -274,9 +274,10 @@ class SpotifyService {
       {bool public = false}) async {
     print('spotify service: Creating playlist...');
     var userId;
+    User me;
     try {
       // Get the current user's ID
-      final me = await _spotify.me.get();
+      me = await _spotify.me.get();
       userId = me.id;
 
       if (userId == null) {
@@ -298,7 +299,7 @@ class SpotifyService {
         ..name = playlist.name
         ..public = playlist.public
         ..collaborative = playlist.collaborative
-        ..images = playlist.images
+        ..images = me.images ?? []
         ..owner = playlist.owner
         // ..tracks = playlist.tracks
         ..type = playlist.type

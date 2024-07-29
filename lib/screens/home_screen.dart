@@ -119,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildRecipeCard(Job job, int index) {
     if (job.recipe.isEmpty) {
       print('Job ${job.targetPlaylist.name}  recipe is empty');
-      // return const SizedBox();
+      return const SizedBox();
     } else {
       print(
           'Job ${job.targetPlaylist.name} recipe first ingredient before passing to widget: ${job.recipe[0].playlist.id} ${job.recipe[0].quantity}');
@@ -159,7 +159,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final job = jobs.isEmpty ? Job.empty() : jobs[0];
-    final spotifyService = getIt<SpotifyService>();
+    final targetPlaylist = job.targetPlaylist;
+    // final spotifyService = getIt<SpotifyService>();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Spotkin'),
@@ -190,18 +191,32 @@ class _HomeScreenState extends State<HomeScreen> {
                   jobs.isEmpty
                       // ? _buildCreateJobForm()
                       ? _buildPlaylistSelectionOptions()
-                      : TextFormField(
-                          initialValue: job.targetPlaylist.name,
-                          // decoration: const InputDecoration(
-                          //     labelText: 'Target playlist link'),
-                          onChanged: (value) async {
-                            final targetPlaylist =
-                                await spotifyService.getPlaylist(value);
-                            updateJob(
-                              0,
-                              job.copyWith(targetPlaylist: targetPlaylist),
-                            );
-                          },
+                      : ListTile(
+                          title:
+                              Text(targetPlaylist.name ?? 'Unknown Playlist'),
+                          leading: Utils.getPlaylistImageOrIcon(targetPlaylist),
+                          trailing: IconButton(
+                            icon: Icon(Icons.edit),
+                            onPressed: () {
+                              // setState(() {
+                              //   jobs.clear();
+                              //   _storageService.saveJobs(jobs);
+                              // });
+                              // TextFormField(
+                              //     initialValue: job.targetPlaylist.name,
+                              //     // decoration: const InputDecoration(
+                              //     //     labelText: 'Target playlist link'),
+                              //     onChanged: (value) async {
+                              //       final targetPlaylist =
+                              //           await spotifyService.getPlaylist(value);
+                              //       updateJob(
+                              //         0,
+                              //         job.copyWith(targetPlaylist: targetPlaylist),
+                              //       );
+                              //     },
+                              //   ),
+                            },
+                          ),
                         ),
                   const SizedBox(height: 20),
                   ...jobs.asMap().entries.map((entry) {
