@@ -42,6 +42,7 @@ class SpotifyService {
   }
 
   Future<void> exchangeCodeForToken(String code) async {
+    print('Exchanging code for token...');
     final tokenEndpoint = Uri.parse('https://accounts.spotify.com/api/token');
     try {
       final response = await http.post(
@@ -84,7 +85,7 @@ class SpotifyService {
       'response_type': 'code',
       'redirect_uri': redirectUri,
       'scope': scope,
-      'show_dialog': 'true', // Force re-consent
+      // 'show_dialog': 'SPOTIFY SERVICE: true', // Force re-consent
     });
 
     print('Initiating Spotify login with URL: $spotifyAuthUrl');
@@ -166,7 +167,7 @@ class SpotifyService {
       } catch (e) {
         if (e is SpotifyException && e.status == 401) {
           print(
-              'Token expired, attempting to refresh... (Attempt ${retryCount + 1})');
+              'SPOTIFY SERVICE: Token expired, attempting to refresh... (Attempt ${retryCount + 1})');
           try {
             await refreshAccessToken();
             // Re-initialize SpotifyApi with the new token
@@ -204,7 +205,7 @@ class SpotifyService {
         print('Spotify API error: ${e.message}, Status code: ${e.status}');
         if (e.status == 401 && attempts < maxRetries) {
           print(
-              'Token might be expired. Attempting to refresh... (Attempt ${attempts + 1})');
+              'SPOTIFY SERVICE: Token might be expired. Attempting to refresh... (Attempt ${attempts + 1})');
           try {
             await refreshAccessToken();
             attempts++;
@@ -330,7 +331,8 @@ class SpotifyService {
         }
       }
 
-      print('Total number of results: ${unifiedResults.length}');
+      print(
+          'SPOTIFY SERVICE: Total number of results: ${unifiedResults.length}');
 
       return unifiedResults;
     } catch (e) {

@@ -29,10 +29,11 @@ class _AuthScreenState extends State<AuthScreen> {
     );
 
     if (widget.initialAuthCode != null) {
-      print('Handling initial auth code: ${widget.initialAuthCode}');
+      print(
+          'AUTHSCREEN: Handling initial auth code: ${widget.initialAuthCode}');
       _handleAuthCode(widget.initialAuthCode!);
     } else if (widget.initialError != null) {
-      print('Handling initial error: ${widget.initialError}');
+      print('AUTHSCREEN: Handling initial error: ${widget.initialError}');
       _showErrorSnackBar('Authentication failed: ${widget.initialError}');
     } else {
       _initializeAuth();
@@ -40,6 +41,7 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
   Future<void> _initializeAuth() async {
+    print('AUTHSCREEN: AUTHSCREEN: Initializing authentication...');
     setState(() => _isLoading = true);
 
     try {
@@ -49,7 +51,7 @@ class _AuthScreenState extends State<AuthScreen> {
         await _checkExistingAuth();
       }
     } catch (e) {
-      print('Error during authentication initialization: $e');
+      print('AUTHSCREEN: Error during authentication initialization: $e');
       _showErrorSnackBar('Failed to initialize authentication');
     }
 
@@ -57,6 +59,7 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
   Future<void> _handleAuthCode(String code) async {
+    print('AUTHSCREEN: AUTHSCREEN: Handling auth code: $code');
     if (_authAttempts >= MAX_AUTH_ATTEMPTS) {
       _showErrorSnackBar(
           'Too many authentication attempts. Please try again later.');
@@ -66,28 +69,31 @@ class _AuthScreenState extends State<AuthScreen> {
     _authAttempts++;
 
     try {
-      print('Exchanging auth code for token (Attempt $_authAttempts)...');
+      print(
+          'AUTHSCREEN: Exchanging auth code for token (Attempt $_authAttempts)...');
       await spotifyService.exchangeCodeForToken(code);
-      print('Token exchange successful');
+      print('AUTHSCREEN: Token exchange successful');
       _navigateToHomeScreen();
     } catch (e) {
-      print('Error exchanging code for token: $e');
+      print('AUTHSCREEN: Error exchanging code for token: $e');
       _showErrorSnackBar('Failed to authenticate with Spotify');
     }
   }
 
   Future<void> _checkExistingAuth() async {
     try {
-      print('Checking existing authentication...');
+      print('AUTHSCREEN: Checking existing authentication...');
+      await Future.delayed(Duration(seconds: 3));
       if (await spotifyService.checkAuthentication()) {
-        print('Existing token is valid');
+        print('AUTHSCREEN: Existing token is valid');
         _navigateToHomeScreen();
       } else {
-        print('Existing token is invalid or not found, initiating login');
+        print(
+            'AUTHSCREEN: token may be missing!  or invalid, initiating login');
         _initiateSpotifyLogin();
       }
     } catch (e) {
-      print('Error checking existing auth: $e');
+      print('AUTHSCREEN: Error checking existing auth: $e');
       _initiateSpotifyLogin();
     }
   }
@@ -107,7 +113,7 @@ class _AuthScreenState extends State<AuthScreen> {
         ),
       );
     } else {
-      print('Failed to navigate: No access token available');
+      print('AUTHSCREEN: Failed to navigate: No access token available');
       _showErrorSnackBar('Authentication failed');
     }
   }
@@ -119,7 +125,8 @@ class _AuthScreenState extends State<AuthScreen> {
       return;
     }
 
-    print('Initiating Spotify login (Attempt ${_authAttempts + 1})...');
+    print(
+        'AUTHSCREEN: Initiating Spotify login (Attempt ${_authAttempts + 1})...');
     spotifyService.initiateSpotifyLogin();
   }
 
