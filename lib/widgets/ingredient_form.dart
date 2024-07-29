@@ -6,13 +6,13 @@ import 'ingredient_form_row.dart';
 class IngredientForm extends StatefulWidget {
   final List<Ingredient> initialIngredients;
   final Function(List<Ingredient>) onIngredientsChanged;
-  // final Future<String> Function(String playlistId) fetchPlaylistName;
+  // final Future<String> Function(String playlistId) getPlaylistName;
 
   const IngredientForm({
     Key? key,
     required this.initialIngredients,
     required this.onIngredientsChanged,
-    // required this.fetchPlaylistName,
+    // required this.getPlaylistName,
   }) : super(key: key);
 
   @override
@@ -116,7 +116,7 @@ class _IngredientFormState extends State<IngredientForm> {
           String playlistId =
               Utils.extractPlaylistId(lastRow.playlistController.text);
 
-          final playlist = await spotifyService.fetchPlaylist(playlistId);
+          final playlist = await spotifyService.getPlaylist(playlistId);
           // String playlistName = playlist.name ?? 'Unknown Playlist';
 
           Ingredient newIngredient = Ingredient(

@@ -99,7 +99,9 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
   void _navigateToHomeScreen() async {
-    final accessToken = await spotifyService.getAccessToken();
+    final accessToken = await spotifyService
+        .retrieveCredentials()
+        .then((creds) => creds!.accessToken);
     if (accessToken != null) {
       print(
           'Navigating to Home Screen with access token: ${accessToken.substring(0, 10)}...');

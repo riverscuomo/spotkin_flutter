@@ -44,7 +44,7 @@ class _CreateJobFormState extends State<CreateJobForm> {
     if (_formKey.currentState!.validate()) {
       final spotifyService = getIt<SpotifyService>();
       final playlistId = Utils.extractPlaylistId(_playlistIdController.text);
-      final targetPlaylist = await spotifyService.fetchPlaylist(playlistId);
+      final targetPlaylist = await spotifyService.getPlaylist(playlistId);
       final newJob = Job(
         targetPlaylist: targetPlaylist,
       );

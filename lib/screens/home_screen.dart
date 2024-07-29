@@ -132,7 +132,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             IngredientForm(
               initialIngredients: job.recipe,
-              // fetchPlaylistName: _fetchPlaylistName,
+              // getPlaylistName: _getPlaylistName,
               onIngredientsChanged: (updatedIngredients) {
                 setState(() {
                   job = job.copyWith(recipe: updatedIngredients);
@@ -146,7 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Future<String> _fetchPlaylistName(String playlistId) async {
+  // Future<String> _getPlaylistName(String playlistId) async {
   //   try {
   //     final playlist = await spotifyService.getPlaylistDetails(playlistId);
   //     return playlist.name ?? 'Unknown Playlist';
@@ -196,7 +196,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           //     labelText: 'Target playlist link'),
                           onChanged: (value) async {
                             final targetPlaylist =
-                                await spotifyService.fetchPlaylist(value);
+                                await spotifyService.getPlaylist(value);
                             updateJob(
                               0,
                               job.copyWith(targetPlaylist: targetPlaylist),
