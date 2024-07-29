@@ -38,7 +38,7 @@ class PlaylistSelectionOptions extends StatelessWidget {
     final spotifyService = getIt<SpotifyService>();
     try {
       final newPlaylist = await spotifyService.createPlaylist(
-        'New Playlist', // You might want to prompt the user for a name
+        'Spotkin',
         'Created by Spotkin',
         public: false,
       );

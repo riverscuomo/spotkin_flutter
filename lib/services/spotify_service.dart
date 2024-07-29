@@ -272,11 +272,12 @@ class SpotifyService {
 
   Future<PlaylistSimple> createPlaylist(String name, String description,
       {bool public = false}) async {
+    print('spotify service: Creating playlist...');
     var userId;
     try {
       // Get the current user's ID
       final me = await _spotify.me.get();
-      final userId = me.id;
+      userId = me.id;
 
       if (userId == null) {
         throw Exception('Failed to get user ID');
