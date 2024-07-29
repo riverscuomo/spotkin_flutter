@@ -67,15 +67,22 @@ class SpotifyService {
         await _secureStorage.write(key: _accessTokenKey, value: accessToken);
         await _secureStorage.write(key: _refreshTokenKey, value: refreshToken);
         print('Access Token: ${accessToken.substring(0, 10)}...');
-        _spotify = SpotifyApi(
-          SpotifyApiCredentials(
-            clientId,
-            clientSecret,
-            accessToken: accessToken,
-            refreshToken: refreshToken,
-            expiration: expiration,
-          ),
+
+        final credentials = SpotifyApiCredentials(
+          clientId,
+          clientSecret,
+          accessToken: accessToken,
+          refreshToken: refreshToken,
+          expiration: expiration,
+          scopes: scope.split(' '),
         );
+        print(credentials);
+        _spotify = SpotifyApi(
+          credentials,
+        );
+
+        final me = await _spotify.me.get();
+        print(me.id);
         print(
             'SPOTIFY SERVICE: SpotifyApi re-initialized with new access token: $_spotify');
       } else {
@@ -239,6 +246,7 @@ class SpotifyService {
 
   Future<PlaylistSimple> createPlaylist(String name, String description,
       {bool public = false}) async {
+    var userId;
     try {
       // Get the current user's ID
       final me = await _spotify.me.get();
@@ -247,7 +255,12 @@ class SpotifyService {
       if (userId == null) {
         throw Exception('Failed to get user ID');
       }
+    } catch (e) {
+      print('SPOTIFYSERVICE: spotify.me failed $e');
+      rethrow;
+    }
 
+    try {
       // Create the playlist
       final playlist = await _spotify.playlists.createPlaylist(userId, name,
           public: public, description: description);
