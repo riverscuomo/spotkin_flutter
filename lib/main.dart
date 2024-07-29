@@ -34,6 +34,17 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Spotify Web Auth',
       theme: spotifyThemeData,
       debugShowCheckedModeBanner: false,
+      builder: (context, child) {
+        return Container(
+          color: Colors.black, // Match your scaffold background color
+          child: Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 700),
+              child: child!,
+            ),
+          ),
+        );
+      },
       onGenerateRoute: (settings) {
         if (settings.name == '/') {
           return MaterialPageRoute(

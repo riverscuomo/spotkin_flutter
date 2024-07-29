@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:spotkin_flutter/app_core.dart';
+import 'dart:html' as html;
 
 class AuthScreen extends StatefulWidget {
   final Map<String, dynamic> config;
@@ -99,12 +100,25 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
   void _navigateToHomeScreen() async {
+    print('authscreen: Navigating to Home Screen...');
     final accessToken = await spotifyService
         .retrieveCredentials()
         .then((creds) => creds!.accessToken);
     if (accessToken != null) {
       print(
           'Navigating to Home Screen with access token: ${accessToken.substring(0, 10)}...');
+
+      // Clear the URL parameters and remove trailing '?'
+      final uri = Uri.parse(html.window.location.href);
+      if (uri.hasQuery) {
+        var newUri = uri.removeFragment().replace(query: '');
+        var cleanUrl = newUri.toString();
+        if (cleanUrl.endsWith('?')) {
+          cleanUrl = cleanUrl.substring(0, cleanUrl.length - 1);
+        }
+        html.window.history.pushState(null, '', cleanUrl);
+      }
+
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (context) => HomeScreen(

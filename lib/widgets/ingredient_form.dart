@@ -194,9 +194,12 @@ class _IngredientFormState extends State<IngredientForm> {
           ..._ingredientRows.asMap().entries.map((entry) {
             int idx = entry.key;
             IngredientFormRow row = entry.value;
+            print(row.playlist);
             return ListTile(
               title: Text(row.playlist?.name ?? 'Unknown Playlist'),
-              leading: Image.network(row.playlist?.images?.first.url ?? ''),
+              leading: row.playlist?.images?.first.url?.isNotEmpty == true
+                  ? Image.network(row.playlist?.images?.first.url ?? '')
+                  : Icon(Icons.music_note),
               trailing: buildQuantityDropdown(row),
             );
           }),
