@@ -57,9 +57,9 @@ class _IngredientFormState extends State<IngredientForm> {
               playlist: ingredient.playlist,
             ))
         .toList();
-    if (_ingredientRows.isEmpty) {
-      _addNewRow();
-    }
+    // if (_ingredientRows.isEmpty) {
+    //   _addNewRow();
+    // }
     _setupControllerListeners();
   }
 
@@ -191,19 +191,72 @@ class _IngredientFormState extends State<IngredientForm> {
         children: [
           Text('Source Playlists',
               style: Theme.of(context).textTheme.titleMedium),
-          ..._ingredientRows.asMap().entries.map((entry) {
-            int idx = entry.key;
-            IngredientFormRow row = entry.value;
-            print(row.playlist);
-            return ListTile(
-              title: Text(row.playlist?.name ?? 'Unknown Playlist'),
-              leading: Utils.getPlaylistImageOrIcon(row.playlist!),
-              trailing: buildQuantityDropdown(row),
-            );
-          }),
+          // Add to this Spotkin tile
+          ListTile(
+            leading: Icon(
+              Icons.add,
+            ),
+            title: const Text(
+              'Add to this Spotkin',
+            ),
+            onTap: () {
+              showModalBottomSheet(
+                context: context,
+                builder: (BuildContext context) {
+                  return Container(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        TextField(
+                          decoration: const InputDecoration(
+                            hintText: 'Search for a playlist...',
+                            prefixIcon: Icon(Icons.search),
+                            border: OutlineInputBorder(),
+                          ),
+                          onChanged: (value) {
+                            // Implement your search logic here
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          child: const Text('Add'),
+                          onPressed: () {
+                            // Implement logic to add the selected playlist
+                            Navigator.pop(context);
+                            _addNewRow(); // This adds a new empty row
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+          if (_ingredientRows.isEmpty)
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                "Let's start building your Spotkin",
+                style: Theme.of(context).textTheme.bodyMedium,
+                textAlign: TextAlign.center,
+              ),
+            )
+          else
+            ..._ingredientRows.asMap().entries.map((entry) {
+              int idx = entry.key;
+              IngredientFormRow row = entry.value;
+              print(row.playlist);
+              return ListTile(
+                title: Text(row.playlist?.name ?? 'Unknown Playlist'),
+                leading: Utils.getPlaylistImageOrIcon(row.playlist!),
+                trailing: buildQuantityDropdown(row),
+              );
+            }),
           const SizedBox(height: 10),
-          // In the build method
           if (_hasChanges &&
+              _ingredientRows.isNotEmpty &&
               _ingredientRows.last.playlistController.text.isNotEmpty &&
               _ingredientRows.last.quantityController.text.isNotEmpty)
             ElevatedButton(
@@ -211,41 +264,7 @@ class _IngredientFormState extends State<IngredientForm> {
               child: _isSubmitting
                   ? const CircularProgressIndicator()
                   : const Text('Submit'),
-            )
-          // else if (!_hasEmptyRow)
-          //   IconButton(
-          //     icon: const Icon(Icons.search),
-          //     onPressed: () {
-          //       showModalBottomSheet(
-          //         context: context,
-          //         builder: (BuildContext context) {
-          //           return Container(
-          //             padding: const EdgeInsets.all(16),
-          //             child: Column(
-          //               mainAxisSize: MainAxisSize.min,
-          //               children: <Widget>[
-          //                 TextField(
-          //                   decoration: const InputDecoration(
-          //                     hintText: 'Search...',
-          //                     prefixIcon: Icon(Icons.search),
-          //                     border: OutlineInputBorder(),
-          //                   ),
-          //                   onChanged: (value) {
-          //                     // Implement your search logic here
-          //                   },
-          //                 ),
-          //                 const SizedBox(height: 16),
-          //                 ElevatedButton(
-          //                   child: const Text('Close'),
-          //                   onPressed: () => Navigator.pop(context),
-          //                 ),
-          //               ],
-          //             ),
-          //           );
-          //         },
-          //       );
-          //     },
-          //   ),
+            ),
         ],
       ),
     );

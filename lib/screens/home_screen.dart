@@ -127,13 +127,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildRecipeCard(Job job, int index) {
-    if (job.recipe.isEmpty) {
-      print('Job ${job.targetPlaylist.name}  recipe is empty');
-      return const SizedBox();
-    } else {
-      print(
-          'Job ${job.targetPlaylist.name} recipe first ingredient before passing to widget: ${job.recipe[0].playlist.id} ${job.recipe[0].quantity}');
-    }
+    // if (job.recipe.isEmpty) {
+    //   print('Job ${job.targetPlaylist.name}  recipe is empty');
+    //   return const SizedBox();
+    // } else {
+    //   print(
+    //       'Job ${job.targetPlaylist.name} recipe first ingredient before passing to widget: ${job.recipe[0].playlist.id} ${job.recipe[0].quantity}');
+    // }
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(8),
@@ -155,16 +155,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
-  // Future<String> _getPlaylistName(String playlistId) async {
-  //   try {
-  //     final playlist = await spotifyService.getPlaylistDetails(playlistId);
-  //     return playlist.name ?? 'Unknown Playlist';
-  //   } catch (e) {
-  //     print('Error fetching playlist name: $e');
-  //     return 'Unknown Playlist';
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -200,19 +190,31 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   jobs.isEmpty || _isResettingTargetPlaylist
                       ? _buildPlaylistSelectionOptions()
-                      : ListTile(
-                          title:
-                              Text(targetPlaylist.name ?? 'Unknown Playlist'),
-                          leading: Utils.getPlaylistImageOrIcon(targetPlaylist),
-                          trailing: IconButton(
-                            icon: Icon(Icons.edit),
-                            onPressed: () {
-                              setState(() {
-                                _isResettingTargetPlaylist = true;
-                              });
-                            },
-                          ),
-                        ),
+                      : SpotifyStylePlaylistTile(
+                          playlist: targetPlaylist,
+                          onEditPressed: () {
+                            setState(() {
+                              _isResettingTargetPlaylist = true;
+                            });
+                          },
+                          onTileTapped: () {
+                            setState(() {
+                              _isResettingTargetPlaylist = true;
+                            });
+                          }),
+                  // ListTile(
+                  //     title:
+                  //         Text(targetPlaylist.name ?? 'Unknown Playlist'),
+                  //     leading: Utils.getPlaylistImageOrIcon(targetPlaylist),
+                  //     trailing: IconButton(
+                  //       icon: Icon(Icons.edit),
+                  //       onPressed: () {
+                  //         setState(() {
+                  //           _isResettingTargetPlaylist = true;
+                  //         });
+                  //       },
+                  //     ),
+                  //   ),
                   const SizedBox(height: 20),
                   ...jobs.asMap().entries.map((entry) {
                     return _buildRecipeCard(entry.value, entry.key);
@@ -261,6 +263,66 @@ class _HomeScreenState extends State<HomeScreen> {
             )
           : null,
       backgroundColor: Colors.black,
+    );
+  }
+}
+
+class SpotifyStylePlaylistTile extends StatelessWidget {
+  final PlaylistSimple playlist;
+  final VoidCallback onEditPressed;
+  final VoidCallback onTileTapped;
+
+  const SpotifyStylePlaylistTile({
+    Key? key,
+    required this.playlist,
+    required this.onEditPressed,
+    required this.onTileTapped,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () {
+        final url = playlist.externalUrls!.spotify;
+        if (url != null) {
+          Utils.launchUrl(url);
+        }
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+        child: Row(
+          children: [
+            // Playlist image
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: Colors.grey[800],
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Utils.getPlaylistImageOrIcon(playlist),
+            ),
+            SizedBox(width: 16),
+            // Playlist name
+            Expanded(
+              child: Text(
+                playlist.name ?? 'Unknown Playlist',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            // Edit button
+            IconButton(
+              icon: Icon(Icons.edit, color: Colors.white54),
+              onPressed: onEditPressed,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
