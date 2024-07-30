@@ -41,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _verifyToken() async {
     try {
-      final user = await spotifyService.checkAuthentication();
+      await spotifyService.checkAuthentication();
       print('Home screen: Token is valid');
     } catch (e) {
       print('Token verification failed: $e');

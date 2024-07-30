@@ -25,10 +25,21 @@ class SpotifyService {
   }
 
   Future<SpotifyApi> get spotify async {
-    if (_spotify == null) {
-      await _initializeSpotify();
+    return _spotify;
+  }
+
+  Future<bool> checkAuthentication() async {
+    print('spotify service: Checking authentication...');
+
+    try {
+      await _ensureAuthenticated();
+      final me = await _spotify.me.get();
+      print('Authentication successful. User ID: ${me.id}');
+      return true;
+    } catch (e) {
+      print('Authentication check failed: $e');
+      return false;
     }
-    return _spotify!;
   }
 
   Future<void> _initializeSpotify() async {
@@ -46,22 +57,20 @@ class SpotifyService {
     _spotify = SpotifyApi(credentials);
   }
 
-  // void _initializeSpotify() {
-  //   final credentials =
-  //       SpotifyApiCredentials(clientId, clientSecret, scopes: scope.split(' '));
-  //   _spotify = SpotifyApi(credentials);
-  // }
-
-  Future<bool> checkAuthentication() async {
-    print('spotify service: Checking authentication...');
-    return true;
+  // verify token
+  Future<bool> verifyToken(String token) async {
+    final tokenInfoEndpoint =
+        Uri.parse('https://api.spotify.com/v1/me?access_token=$token');
     try {
-      await _ensureAuthenticated();
-      final me = await _spotify.me.get();
-      print('Authentication successful. User ID: ${me.id}');
-      return true;
+      final response = await http.get(tokenInfoEndpoint);
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        print('Token verification failed. Status: ${response.statusCode}');
+        return false;
+      }
     } catch (e) {
-      print('Authentication check failed: $e');
+      print('Error verifying token: $e');
       return false;
     }
   }
@@ -142,6 +151,11 @@ class SpotifyService {
     html.window.location.href = spotifyAuthUrl.toString();
   }
 
+  // retrieve access token from secure storage
+  Future<String?> retrieveAccessToken() async {
+    return await _secureStorage.read(key: _accessTokenKey);
+  }
+
   // Future<String?> getAccessToken() async {
   Future<SpotifyApiCredentials?> retrieveCredentials() async {
     print('SPOTIFY SERVICE: Retrieving credentials...');
@@ -183,63 +197,66 @@ class SpotifyService {
     }
   }
 
-  Future<void> refreshAccessToken() async {
-    final refreshToken = await _secureStorage.read(key: _refreshTokenKey);
-    if (refreshToken == null) {
-      throw Exception('No refresh token available');
-    }
-
-    final tokenEndpoint = Uri.parse('https://accounts.spotify.com/api/token');
-    final response = await http.post(
-      tokenEndpoint,
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization':
-            'Basic ${base64Encode(utf8.encode('$clientId:$clientSecret'))}',
-      },
-      body: {
-        'grant_type': 'refresh_token',
-        'refresh_token': refreshToken,
-      },
-    );
-
-    if (response.statusCode == 200) {
-      final tokenData = json.decode(response.body);
-      final accessToken = tokenData['access_token'];
-      await _secureStorage.write(key: _accessTokenKey, value: accessToken);
-      print(
-          'Access Token refreshed and stored: ${accessToken.substring(0, 10)}...');
-
-      // If a new refresh token is provided, store it as well
-      if (tokenData['refresh_token'] != null) {
-        await _secureStorage.write(
-            key: _refreshTokenKey, value: tokenData['refresh_token']);
-        print('New refresh token stored');
+  Future<bool> refreshAccessToken() async {
+    try {
+      final refreshToken = await _secureStorage.read(key: _refreshTokenKey);
+      if (refreshToken == null) {
+        print('No refresh token available');
+        return false;
       }
 
-      final expiresIn = tokenData['expires_in'];
-      final DateTime expiration =
-          DateTime.now().add(Duration(seconds: expiresIn));
-
-      final credentials = SpotifyApiCredentials(
-        clientId,
-        clientSecret,
-        accessToken: accessToken,
-        refreshToken: refreshToken,
-        expiration: expiration,
-        scopes: scope.split(' '),
+      final tokenEndpoint = Uri.parse('https://accounts.spotify.com/api/token');
+      final response = await http.post(
+        tokenEndpoint,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization':
+              'Basic ${base64Encode(utf8.encode('$clientId:$clientSecret'))}',
+        },
+        body: {
+          'grant_type': 'refresh_token',
+          'refresh_token': refreshToken,
+        },
       );
-      print(credentials);
-      await saveCredentials(credentials);
-      // _spotify = SpotifyApi(
-      //   credentials,
-      // );
-      _updateSpotifyInstance(credentials);
-      print('SpotifyApi re-initialized with new access token');
-    } else {
-      print(
-          'Failed to refresh token. Status: ${response.statusCode}, Body: ${response.body}');
-      throw Exception('Failed to refresh token');
+
+      if (response.statusCode == 200) {
+        final tokenData = json.decode(response.body);
+        final accessToken = tokenData['access_token'];
+        await _secureStorage.write(key: _accessTokenKey, value: accessToken);
+        print(
+            'Access Token refreshed and stored: ${accessToken.substring(0, 10)}...');
+
+        if (tokenData['refresh_token'] != null) {
+          await _secureStorage.write(
+              key: _refreshTokenKey, value: tokenData['refresh_token']);
+          print('New refresh token stored');
+        }
+
+        final expiresIn = tokenData['expires_in'];
+        final DateTime expiration =
+            DateTime.now().add(Duration(seconds: expiresIn));
+
+        final credentials = SpotifyApiCredentials(
+          clientId,
+          clientSecret,
+          accessToken: accessToken,
+          refreshToken: refreshToken,
+          expiration: expiration,
+          scopes: scope.split(' '),
+        );
+        print(credentials);
+        await saveCredentials(credentials);
+        _updateSpotifyInstance(credentials);
+        print('SpotifyApi re-initialized with new access token');
+        return true;
+      } else {
+        print(
+            'Failed to refresh token. Status: ${response.statusCode}, Body: ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      print('Error refreshing access token: $e');
+      return false;
     }
   }
 
@@ -403,61 +420,22 @@ class SpotifyService {
       return [];
     }
   }
-
-  Iterable<T> _extractItems<T>(List<Page> pages) {
-    for (var page in pages) {
-      if (page is Page<T>) {
-        print('Extracting items of type $T, count: ${page.items?.length ?? 0}');
-        return page.items ?? [];
-      }
-    }
-    print('No items found of type $T');
-    return [];
-  }
 }
 
 
+  // Iterable<T> _extractItems<T>(List<Page> pages) {
+  //   for (var page in pages) {
+  //     if (page is Page<T>) {
+  //       print('Extracting items of type $T, count: ${page.items?.length ?? 0}');
+  //       return page.items ?? [];
+  //     }
+  //   }
+  //   print('No items found of type $T');
+  //   return [];
+  // }
 
-    // int retryCount = 0;
-    // while (retryCount < 3) {
-    //   try {
-    //     // Test the token with a simple API call
-    //     final me = await _spotify.me.get();
-    //     print('Successfully authenticated. User ID: ${me.id}');
-    //     return; // Authentication successful, exit the method
-    //   } catch (e) {
-    //     if (e is SpotifyException && e.status == 401) {
-    //       print(
-    //           'SPOTIFY SERVICE: Token expired, attempting to refresh... (Attempt ${retryCount + 1})');
-    //       try {
-    //         await refreshAccessToken();
-    //         // Re-initialize SpotifyApi with the new token
-    //         final newAccessToken = await getAccessToken();
-    //         if (newAccessToken == null) {
-    //           throw Exception('Failed to get new access token after refresh');
-    //         }
-    //         _spotify = SpotifyApi(
-    //           SpotifyApiCredentials(
-    //             clientId,
-    //             clientSecret,
-    //             accessToken: newAccessToken,
-    //             scopes: scope.split(' '),
-    //           ),
-    //         );
-    //         print(
-    //             'SpotifyApi re-initialized with new access token: ${newAccessToken.substring(0, 10)}...');
-    //         retryCount++;
-    //       } catch (refreshError) {
-    //         print('Error refreshing token: $refreshError');
-    //         retryCount++;
-    //       }
-    //     } else {
-    //       throw e; // Rethrow if it's not a 401 error
-    //     }
-    //   }
-    // }
 
-  // Future<T> _retryOperation<T>(Future<T> Function() operation,
+
   //     {int maxRetries = 2}) async {
   //   int attempts = 0;
   //   while (true) {

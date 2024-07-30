@@ -15,7 +15,7 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> {
   late final SpotifyService spotifyService;
-  bool _isLoading = false;
+  bool _isLoading = true;
   int _authAttempts = 0;
   static const int MAX_AUTH_ATTEMPTS = 3;
 
@@ -29,34 +29,41 @@ class _AuthScreenState extends State<AuthScreen> {
       scope: widget.config['SPOTIFY_SCOPE']!,
     );
 
-    if (widget.initialAuthCode != null) {
-      print(
-          'AUTHSCREEN: Handling initial auth code: ${widget.initialAuthCode}');
-      _handleAuthCode(widget.initialAuthCode!);
-    } else if (widget.initialError != null) {
-      print('AUTHSCREEN: Handling initial error: ${widget.initialError}');
-      _showErrorSnackBar('Authentication failed: ${widget.initialError}');
-    } else {
-      _initializeAuth();
-    }
+    _checkExistingAuth();
   }
 
-  Future<void> _initializeAuth() async {
-    print('AUTHSCREEN: AUTHSCREEN: Initializing authentication...');
+  Future<void> _checkExistingAuth() async {
     setState(() => _isLoading = true);
+    try {
+      print('AUTHSCREEN: Checking existing authentication...');
+      final accessToken = await spotifyService.retrieveAccessToken();
+      if (accessToken != null) {
+        print('AUTHSCREEN: Existing token found, verifying...');
+        if (await spotifyService.verifyToken(accessToken)) {
+          print('AUTHSCREEN: Existing token is valid');
+          _navigateToHomeScreen();
+          return;
+        } else {
+          print('AUTHSCREEN: Existing token is invalid, refreshing...');
+          if (await spotifyService.refreshAccessToken()) {
+            print('AUTHSCREEN: Token refreshed successfully');
 
-    // try {
-    //   if (widget.initialAuthCode != null) {
-    //     await _handleAuthCode(widget.initialAuthCode!);
-    //   } else {
-    //     await _checkExistingAuth();
-    //   }
-    // } catch (e) {
-    //   print('AUTHSCREEN: Error during authentication initialization: $e');
-    //   _showErrorSnackBar('Failed to initialize authentication');
-    // }
+            _navigateToHomeScreen();
+            return;
+          }
+        }
+      }
+    } catch (e) {
+      print('AUTHSCREEN: Error checking existing auth: $e');
+    }
 
     setState(() => _isLoading = false);
+
+    if (widget.initialAuthCode != null) {
+      _handleAuthCode(widget.initialAuthCode!);
+    } else if (widget.initialError != null) {
+      _showErrorSnackBar('Authentication failed: ${widget.initialError}');
+    }
   }
 
   Future<void> _handleAuthCode(String code) async {
@@ -81,30 +88,15 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
-  Future<void> _checkExistingAuth() async {
+  Future<void> _navigateToHomeScreen() async {
+    print('AuthScreen: Navigating to Home Screen...');
     try {
-      print('AUTHSCREEN: Checking existing authentication...');
-      await Future.delayed(Duration(seconds: 3));
-      if (await spotifyService.checkAuthentication()) {
-        print('AUTHSCREEN: Existing token is valid');
-        _navigateToHomeScreen();
-      } else {
-        print(
-            'AUTHSCREEN: token may be missing!  or invalid, initiating login');
-        _initiateSpotifyLogin();
+      final credentials = await spotifyService.retrieveCredentials();
+      if (credentials == null || credentials.accessToken == null) {
+        throw Exception('No valid credentials available');
       }
-    } catch (e) {
-      print('AUTHSCREEN: Error checking existing auth: $e');
-      _initiateSpotifyLogin();
-    }
-  }
 
-  void _navigateToHomeScreen() async {
-    print('authscreen: Navigating to Home Screen...');
-    final accessToken = await spotifyService
-        .retrieveCredentials()
-        .then((creds) => creds!.accessToken);
-    if (accessToken != null) {
+      final accessToken = credentials.accessToken!;
       print(
           'Navigating to Home Screen with access token: ${accessToken.substring(0, 10)}...');
 
@@ -128,11 +120,48 @@ class _AuthScreenState extends State<AuthScreen> {
           ),
         ),
       );
-    } else {
-      print('AUTHSCREEN: Failed to navigate: No access token available');
+    } catch (e) {
+      print('AuthScreen: Failed to navigate: $e');
       _showErrorSnackBar('Authentication failed');
+      // Optionally, you might want to trigger a new login here
+      // _initiateSpotifyLogin();
     }
   }
+
+  // void _navigateToHomeScreen() async {
+  //   print('authscreen: Navigating to Home Screen...');
+  //   final accessToken = await spotifyService
+  //       .retrieveCredentials()
+  //       .then((creds) => creds!.accessToken);
+  //   if (accessToken != null) {
+  //     print(
+  //         'Navigating to Home Screen with access token: ${accessToken.substring(0, 10)}...');
+
+  //     // Clear the URL parameters and remove trailing '?'
+  //     final uri = Uri.parse(html.window.location.href);
+  //     if (uri.hasQuery) {
+  //       var newUri = uri.removeFragment().replace(query: '');
+  //       var cleanUrl = newUri.toString();
+  //       if (cleanUrl.endsWith('?')) {
+  //         cleanUrl = cleanUrl.substring(0, cleanUrl.length - 1);
+  //       }
+  //       html.window.history.pushState(null, '', cleanUrl);
+  //     }
+
+  //     Navigator.of(context).pushReplacement(
+  //       MaterialPageRoute(
+  //         builder: (context) => HomeScreen(
+  //           config: widget.config,
+  //           accessToken: accessToken,
+  //           backendUrl: widget.config['BACKEND_URL']!,
+  //         ),
+  //       ),
+  //     );
+  //   } else {
+  //     print('AUTHSCREEN: Failed to navigate: No access token available');
+  //     _showErrorSnackBar('Authentication failed');
+  //   }
+  // }
 
   void _initiateSpotifyLogin() {
     if (_authAttempts >= MAX_AUTH_ATTEMPTS) {

@@ -12,6 +12,7 @@ void main() async {
 
   setUrlStrategy(PathUrlStrategy()); // Use path URL strategy
   Map<String, dynamic> config = await loadConfig();
+
   setupServiceLocator(config: config);
   // await getIt.allReady(); // Wait for all async registrations
   String jobs = await loadJobs();
