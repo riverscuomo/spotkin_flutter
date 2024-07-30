@@ -30,6 +30,14 @@ class Utils {
     }
   }
 
+  static void showSnackbar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+      ),
+    );
+  }
+
   static String? validateSpotifyPlaylistInput(String? value) {
     if (value == null || value.isEmpty) {
       return 'Please enter a Spotify playlist link or ID';

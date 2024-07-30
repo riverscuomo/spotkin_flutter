@@ -11,4 +11,6 @@ void setupServiceLocator({required Map<String, dynamic> config}) {
         redirectUri: config['SPOTIFY_REDIRECT_URI']!,
         scope: config['SPOTIFY_SCOPE']!,
       ));
+
+  getIt.registerLazySingleton<StorageService>(() => StorageService());
 }

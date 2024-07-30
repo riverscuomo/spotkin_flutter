@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:spotify/spotify.dart';
 import 'package:spotkin_flutter/app_core.dart';
 
-import 'search_screen.dart';
+import '../widgets/spotify_style_playlist_tile.dart';
 
 class HomeScreen extends StatefulWidget {
   final Map<String, dynamic> config;
@@ -192,11 +192,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       ? _buildPlaylistSelectionOptions()
                       : SpotifyStylePlaylistTile(
                           playlist: targetPlaylist,
-                          onEditPressed: () {
-                            setState(() {
-                              _isResettingTargetPlaylist = true;
-                            });
-                          },
+                          trailingButton: IconButton(
+                            icon: const Icon(Icons.edit),
+                            onPressed: () {
+                              setState(() {
+                                _isResettingTargetPlaylist = true;
+                              });
+                            },
+                          ),
                           onTileTapped: () {
                             setState(() {
                               _isResettingTargetPlaylist = true;
@@ -249,80 +252,20 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.all(16),
               child: ElevatedButton(
                 onPressed: isProcessing ? null : _processJobs,
-                child: Text(isProcessing
-                    ? 'Processing...'
-                    : 'Update Spotkin On Spotify'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
-                  minimumSize: Size(double.infinity, 50),
+                  minimumSize: const Size(double.infinity, 50),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(25),
                   ),
                 ),
+                child: Text(isProcessing
+                    ? 'Processing...'
+                    : 'Update Spotkin On Spotify'),
               ),
             )
           : null,
       backgroundColor: Colors.black,
-    );
-  }
-}
-
-class SpotifyStylePlaylistTile extends StatelessWidget {
-  final PlaylistSimple playlist;
-  final VoidCallback onEditPressed;
-  final VoidCallback onTileTapped;
-
-  const SpotifyStylePlaylistTile({
-    Key? key,
-    required this.playlist,
-    required this.onEditPressed,
-    required this.onTileTapped,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () {
-        final url = playlist.externalUrls!.spotify;
-        if (url != null) {
-          Utils.launchUrl(url);
-        }
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-        child: Row(
-          children: [
-            // Playlist image
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: Colors.grey[800],
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Utils.getPlaylistImageOrIcon(playlist),
-            ),
-            SizedBox(width: 16),
-            // Playlist name
-            Expanded(
-              child: Text(
-                playlist.name ?? 'Unknown Playlist',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            // Edit button
-            IconButton(
-              icon: Icon(Icons.edit, color: Colors.white54),
-              onPressed: onEditPressed,
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
