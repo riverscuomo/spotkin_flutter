@@ -26,6 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late ApiService _apiService;
   late StorageService _storageService;
   final SpotifyService spotifyService = getIt<SpotifyService>();
+  bool _isResettingTargetPlaylist = false;
 
   @override
   void initState() {
@@ -97,21 +98,30 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void _replaceJob(Job newJob) {
+    setState(() {
+      jobs.clear();
+      jobs.add(newJob);
+      _storageService.saveJobs(jobs);
+    });
+  }
+
   Widget _buildPlaylistSelectionOptions() {
     return PlaylistSelectionOptions(
       onPlaylistSelected: (PlaylistSimple selectedPlaylist) {
-        final newJob = Job(
-          targetPlaylist: selectedPlaylist,
-        );
-        _addNewJob(newJob);
-      },
-    );
-  }
-
-  Widget _buildCreateJobForm() {
-    return CreateJobForm(
-      onSubmit: (Job newJob) {
-        _addNewJob(newJob);
+        if (jobs.isEmpty) {
+          final newJob = Job(
+            targetPlaylist: selectedPlaylist,
+          );
+          // _addNewJob(newJob);
+          _addNewJob(newJob);
+        } else {
+          final updateJob = jobs[0].copyWith(targetPlaylist: selectedPlaylist);
+          _replaceJob(updateJob);
+        }
+        setState(() {
+          _isResettingTargetPlaylist = false;
+        });
       },
     );
   }
@@ -188,8 +198,7 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Column(
                 children: [
-                  jobs.isEmpty
-                      // ? _buildCreateJobForm()
+                  jobs.isEmpty || _isResettingTargetPlaylist
                       ? _buildPlaylistSelectionOptions()
                       : ListTile(
                           title:
@@ -198,23 +207,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           trailing: IconButton(
                             icon: Icon(Icons.edit),
                             onPressed: () {
-                              // setState(() {
-                              //   jobs.clear();
-                              //   _storageService.saveJobs(jobs);
-                              // });
-                              // TextFormField(
-                              //     initialValue: job.targetPlaylist.name,
-                              //     // decoration: const InputDecoration(
-                              //     //     labelText: 'Target playlist link'),
-                              //     onChanged: (value) async {
-                              //       final targetPlaylist =
-                              //           await spotifyService.getPlaylist(value);
-                              //       updateJob(
-                              //         0,
-                              //         job.copyWith(targetPlaylist: targetPlaylist),
-                              //       );
-                              //     },
-                              //   ),
+                              setState(() {
+                                _isResettingTargetPlaylist = true;
+                              });
                             },
                           ),
                         ),
