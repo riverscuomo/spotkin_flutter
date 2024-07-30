@@ -15,19 +15,41 @@ class PlaylistSelectionOptions extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        ElevatedButton(
-          onPressed: () => _createNewPlaylist(context),
-          child: Text('Create a New Playlist'),
-          style: ElevatedButton.styleFrom(
-            minimumSize: Size(double.infinity, 50),
+        Text(
+          'Step 1: Select which playlist you want to use for your Spotkin',
+          style: Theme.of(context).textTheme.headline6,
+          textAlign: TextAlign.center,
+        ),
+        SizedBox(height: 24),
+        Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: 250),
+            child: ElevatedButton(
+              onPressed: () => _createNewPlaylist(context),
+              child: Text('Create a New Playlist'),
+              style: ElevatedButton.styleFrom(
+                minimumSize: Size(200, 50),
+              ),
+            ),
           ),
         ),
         SizedBox(height: 16),
-        ElevatedButton(
-          onPressed: () => _showPlaylistSearchBottomSheet(context),
-          child: Text('Select Existing Playlist'),
-          style: ElevatedButton.styleFrom(
-            minimumSize: Size(double.infinity, 50),
+        Text(
+          'or',
+          style: Theme.of(context).textTheme.subtitle1,
+          textAlign: TextAlign.center,
+        ),
+        SizedBox(height: 16),
+        Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: 250),
+            child: ElevatedButton(
+              onPressed: () => _showPlaylistSearchBottomSheet(context),
+              child: Text('Select Existing Playlist'),
+              style: ElevatedButton.styleFrom(
+                minimumSize: Size(200, 50),
+              ),
+            ),
           ),
         ),
       ],
