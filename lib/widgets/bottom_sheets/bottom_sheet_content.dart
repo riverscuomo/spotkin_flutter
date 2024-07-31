@@ -1,30 +1,6 @@
 import 'package:flutter/material.dart';
 
-void showInfoDialog(BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: const Text('Spotkin'),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: infoScreenContent,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: const Text('Close'),
-          ),
-        ],
-      );
-    },
-  );
-}
-
-const infoScreenContent = [
+const infoSheetContent = [
   Text(
       'Spotkin updates one of your Spotify playlists every day with a random selection of tracks from any of your playlists.'),
   SizedBox(height: 10),

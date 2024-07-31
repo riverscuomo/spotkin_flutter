@@ -148,12 +148,12 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
             height: 50,
             fit: BoxFit.cover,
             errorBuilder: (context, error, stackTrace) =>
-                Icon(Icons.music_note, size: 50),
+                const Icon(Icons.music_note, size: 50),
           ),
         );
       }
     } else {
-      leadingWidget = Icon(Icons.music_note, size: 50);
+      leadingWidget = const Icon(Icons.music_note, size: 50);
     }
 
     return ListTile(
@@ -169,38 +169,69 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.8,
-      child: Column(
-        children: [
-          if (!widget.userPlaylistsOnly)
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  hintText: 'Search...',
-                  prefixIcon: Icon(Icons.search),
-                  border: OutlineInputBorder(),
-                ),
+    return CustomBottomSheet(
+      title: Text(widget.userPlaylistsOnly ? 'Your Playlists' : 'Search'),
+      content: [
+        if (!widget.userPlaylistsOnly)
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: const InputDecoration(
+                hintText: 'Search...',
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(),
               ),
             ),
-          Expanded(
-            child: _isLoading
-                ? Center(child: CircularProgressIndicator())
-                : _searchResults.isEmpty
-                    ? Center(
-                        child: Text(widget.userPlaylistsOnly
-                            ? 'No playlists found'
-                            : 'No results found'))
-                    : ListView.builder(
-                        itemCount: _searchResults.length,
-                        itemBuilder: (context, index) =>
-                            _buildListItem(_searchResults[index]),
-                      ),
           ),
-        ],
-      ),
+        _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : _searchResults.isEmpty
+                ? Center(
+                    child: Text(widget.userPlaylistsOnly
+                        ? 'No playlists found'
+                        : 'No results found'))
+                : Column(
+                    children: _searchResults
+                        .map((item) => _buildListItem(item))
+                        .toList(),
+                  ),
+      ],
     );
   }
+
+  //   return Container(
+  //     height: MediaQuery.of(context).size.height * 0.8,
+  //     child: Column(
+  //       children: [
+  //         if (!widget.userPlaylistsOnly)
+  //           Padding(
+  //             padding: const EdgeInsets.all(8.0),
+  //             child: TextField(
+  //               controller: _searchController,
+  //               decoration: InputDecoration(
+  //                 hintText: 'Search...',
+  //                 prefixIcon: Icon(Icons.search),
+  //                 border: OutlineInputBorder(),
+  //               ),
+  //             ),
+  //           ),
+  //         Expanded(
+  //           child: _isLoading
+  //               ? Center(child: CircularProgressIndicator())
+  //               : _searchResults.isEmpty
+  //                   ? Center(
+  //                       child: Text(widget.userPlaylistsOnly
+  //                           ? 'No playlists found'
+  //                           : 'No results found'))
+  //                   : ListView.builder(
+  //                       itemCount: _searchResults.length,
+  //                       itemBuilder: (context, index) =>
+  //                           _buildListItem(_searchResults[index]),
+  //                     ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 }

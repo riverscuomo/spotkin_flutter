@@ -13,45 +13,49 @@ class PlaylistSelectionOptions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisSize: MainAxisSize.min,
+      // mainAxisSize: MainAxisSize.min,
       children: [
+        const SizedBox(
+          height: 24,
+        ),
         Text(
           'Step 1: Select which playlist you want to use for your Spotkin',
-          style: Theme.of(context).textTheme.headline6,
+          style: Theme.of(context).textTheme.titleLarge,
           textAlign: TextAlign.center,
         ),
-        SizedBox(height: 24),
+        const SizedBox(height: 24),
         Center(
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: 250),
+            constraints: const BoxConstraints(maxWidth: 250),
             child: ElevatedButton(
               onPressed: () => _createNewPlaylist(context),
-              child: Text('Create a New Playlist'),
               style: ElevatedButton.styleFrom(
-                minimumSize: Size(200, 50),
+                minimumSize: const Size(200, 50),
               ),
+              child: const Text('Create a New Playlist'),
             ),
           ),
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
         Text(
           'or',
-          style: Theme.of(context).textTheme.subtitle1,
+          style: Theme.of(context).textTheme.titleMedium,
           textAlign: TextAlign.center,
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
         Center(
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: 250),
+            constraints: const BoxConstraints(maxWidth: 250),
             child: ElevatedButton(
               onPressed: () => _showPlaylistSearchBottomSheet(context),
-              child: Text('Select Existing Playlist'),
               style: ElevatedButton.styleFrom(
-                minimumSize: Size(200, 50),
+                minimumSize: const Size(200, 50),
               ),
+              child: const Text('Select Existing Playlist'),
             ),
           ),
         ),
+        const SizedBox(height: 24),
       ],
     );
   }

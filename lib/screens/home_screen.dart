@@ -26,7 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late ApiService _apiService;
   late StorageService _storageService;
   final SpotifyService spotifyService = getIt<SpotifyService>();
-  bool _isResettingTargetPlaylist = false;
+  // bool _isResettingTargetPlaylist = false;
 
   @override
   void initState() {
@@ -119,21 +119,14 @@ class _HomeScreenState extends State<HomeScreen> {
           final updateJob = jobs[0].copyWith(targetPlaylist: selectedPlaylist);
           _replaceJob(updateJob);
         }
-        setState(() {
-          _isResettingTargetPlaylist = false;
-        });
+        // setState(() {
+        //   _isResettingTargetPlaylist = false;
+        // });
       },
     );
   }
 
   Widget _buildRecipeCard(Job job, int index) {
-    // if (job.recipe.isEmpty) {
-    //   print('Job ${job.targetPlaylist.name}  recipe is empty');
-    //   return const SizedBox();
-    // } else {
-    //   print(
-    //       'Job ${job.targetPlaylist.name} recipe first ingredient before passing to widget: ${job.recipe[0].playlist.id} ${job.recipe[0].quantity}');
-    // }
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(8),
@@ -149,7 +142,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   updateJob(index, job);
                 });
               },
-            )
+            ),
           ],
         ),
       ),
@@ -160,7 +153,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final job = jobs.isEmpty ? Job.empty() : jobs[0];
     final targetPlaylist = job.targetPlaylist;
-    // final spotifyService = getIt<SpotifyService>();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Spotkin'),
@@ -178,12 +170,6 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.info),
-            onPressed: () {
-              showInfoDialog(context);
-            },
-          )
         ],
       ),
       body: SingleChildScrollView(
@@ -194,36 +180,43 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Column(
                 children: [
-                  jobs.isEmpty || _isResettingTargetPlaylist
-                      ? _buildPlaylistSelectionOptions()
-                      : SpotifyStylePlaylistTile(
-                          playlist: targetPlaylist,
-                          trailingButton: IconButton(
-                            icon: const Icon(Icons.edit),
-                            onPressed: () {
-                              setState(() {
-                                _isResettingTargetPlaylist = true;
-                              });
-                            },
-                          ),
-                          onTileTapped: () {
-                            setState(() {
-                              _isResettingTargetPlaylist = true;
-                            });
-                          }),
-                  // ListTile(
-                  //     title:
-                  //         Text(targetPlaylist.name ?? 'Unknown Playlist'),
-                  //     leading: Utils.getPlaylistImageOrIcon(targetPlaylist),
-                  //     trailing: IconButton(
-                  //       icon: Icon(Icons.edit),
-                  //       onPressed: () {
-                  //         setState(() {
-                  //           _isResettingTargetPlaylist = true;
-                  //         });
-                  //       },
-                  //     ),
-                  //   ),
+                  // jobs.isEmpty || _isResettingTargetPlaylist
+                  //     ? _buildPlaylistSelectionOptions()
+                  //     :
+                  ExpansionTile(
+                    title: Text(targetPlaylist.name ?? 'Unknown Playlist'),
+                    leading: PlaylistImageIcon(playlist: targetPlaylist),
+                    subtitle: targetPlaylist.owner != null
+                        ? Text(
+                            'Playlist • ${targetPlaylist.owner!.displayName}',
+                            style: Theme.of(context).textTheme.labelSmall,
+                          )
+                        : null,
+                    initiallyExpanded: jobs.isEmpty,
+
+                    children: [
+                      _buildPlaylistSelectionOptions(),
+                    ],
+
+                    // playlist: targetPlaylist,
+                    // trailingButton: IconButton(
+                    //   icon: const Icon(Icons.edit),
+                    //   onPressed: () {
+                    //     setState(
+                    //       () {
+                    //         _isResettingTargetPlaylist = true;
+                    //       },
+                    //     );
+                    //   },
+                    // ),
+                    // onTileTapped: () {
+                    //   setState(
+                    //     () {
+                    //       _isResettingTargetPlaylist = true;
+                    //     },
+                    //   );
+                    // },
+                  ),
                   const SizedBox(height: 20),
                   ...jobs.asMap().entries.map((entry) {
                     return _buildRecipeCard(entry.value, entry.key);

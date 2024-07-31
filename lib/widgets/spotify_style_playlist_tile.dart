@@ -27,33 +27,59 @@ class SpotifyStylePlaylistTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
         child: Row(
           children: [
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: Colors.grey[800],
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Utils.getPlaylistImageOrIcon(playlist),
-            ),
+            PlaylistImageIcon(playlist: playlist),
             const SizedBox(width: 16),
             // Playlist name
             Expanded(
-              child: Text(
-                playlist.name ?? 'Unknown Playlist',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-                overflow: TextOverflow.ellipsis,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    playlist.name ?? 'Unknown Playlist',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  playlist.owner != null
+                      ? Text(
+                          'Playlist • ${playlist.owner!.displayName}',
+                          style: Theme.of(context).textTheme.labelSmall,
+                        )
+                      : Container(),
+                ],
               ),
             ),
+
             // Edit button
             trailingButton ?? const SizedBox(),
           ],
         ),
       ),
+    );
+  }
+}
+
+class PlaylistImageIcon extends StatelessWidget {
+  const PlaylistImageIcon({
+    super.key,
+    required this.playlist,
+  });
+
+  final PlaylistSimple playlist;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 56,
+      height: 56,
+      decoration: BoxDecoration(
+        color: Colors.grey[800],
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Utils.getPlaylistImageOrIcon(playlist),
     );
   }
 }
