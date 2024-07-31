@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:spotify/spotify.dart';
 import 'package:spotkin_flutter/app_core.dart';
 
-class PlaylistSelectionOptions extends StatelessWidget {
+class TargetPlaylistSelectionOptions extends StatelessWidget {
   final Function(PlaylistSimple) onPlaylistSelected;
 
-  const PlaylistSelectionOptions({
+  const TargetPlaylistSelectionOptions({
     Key? key,
     required this.onPlaylistSelected,
   }) : super(key: key);
@@ -19,7 +19,7 @@ class PlaylistSelectionOptions extends StatelessWidget {
           height: 24,
         ),
         Text(
-          'Step 1: Select which playlist you want to use for your Spotkin',
+          'Step 1: Select which playlist you want to use for Spotkin',
           style: Theme.of(context).textTheme.titleLarge,
           textAlign: TextAlign.center,
         ),

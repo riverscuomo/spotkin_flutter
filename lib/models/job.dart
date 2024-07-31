@@ -71,7 +71,7 @@ class Job {
       'playlist_id': targetPlaylist.id,
       'description': description,
       'remove_low_energy': removeLowEnergy,
-      'last_tracks': lastTracks,
+      'last_track_ids': lastTracks.map((t) => t.id).toList(),
       'banned_artists': bannedArtists,
       // 'banned_song_titles': bannedSongTitles,
       'banned_tracks': bannedTracks,

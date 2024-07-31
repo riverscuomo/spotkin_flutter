@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:spotify/spotify.dart';
 import 'package:spotkin_flutter/app_core.dart';
 
 class PlaylistNameField extends StatelessWidget {
@@ -26,4 +27,21 @@ class PlaylistNameField extends StatelessWidget {
             validator: Utils.validateSpotifyPlaylistInput,
           );
   }
+}
+
+Widget playlistSubtitle(PlaylistSimple playlist, BuildContext context) {
+  return playlist.owner != null
+      ? Text(
+          'Playlist • ${playlist.owner!.displayName}',
+          style: Theme.of(context).textTheme.labelMedium,
+        )
+      : const SizedBox();
+}
+
+Text PlaylistTitle(BuildContext context, PlaylistSimple playlist) {
+  return Text(
+    playlist.name ?? 'Unknown Playlist',
+    style: Theme.of(context).textTheme.titleMedium,
+    overflow: TextOverflow.ellipsis,
+  );
 }

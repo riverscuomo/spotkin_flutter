@@ -20,7 +20,7 @@ class SpotifyStylePlaylistTile extends StatelessWidget {
       onTap: () {
         final url = playlist.externalUrls!.spotify;
         if (url != null) {
-          Utils.launchUrl(url);
+          Utils.myLaunch(url);
         }
       },
       child: Padding(

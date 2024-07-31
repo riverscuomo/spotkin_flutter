@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:spotify/spotify.dart' hide Image;
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher.dart' as url_launcher;
 
 class Utils {
   static String extractPlaylistId(String playlistUrl) {
@@ -22,9 +22,11 @@ class Utils {
         : const Icon(Icons.music_note);
   }
 
-  static void launchUrl(String url) async {
-    if (await canLaunchUrl(Uri.parse(url))) {
-      launchUrl(url);
+  static Future<void> myLaunch(String url) async {
+    print('Launching URL: $url');
+    final uri = Uri.parse(url);
+    if (await url_launcher.canLaunchUrl(uri)) {
+      await url_launcher.launchUrl(uri);
     } else {
       throw 'Could not launch $url';
     }

@@ -106,8 +106,8 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  Widget _buildPlaylistSelectionOptions() {
-    return PlaylistSelectionOptions(
+  Widget _buildTargetPlaylistSelectionOptions() {
+    return TargetPlaylistSelectionOptions(
       onPlaylistSelected: (PlaylistSimple selectedPlaylist) {
         if (jobs.isEmpty) {
           final newJob = Job(
@@ -181,7 +181,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Column(
                 children: [
                   // jobs.isEmpty || _isResettingTargetPlaylist
-                  //     ? _buildPlaylistSelectionOptions()
+                  //     ? _buildTargetPlaylistSelectionOptions()
                   //     :
                   ExpansionTile(
                     title: PlaylistTitle(context, targetPlaylist),
@@ -190,7 +190,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     initiallyExpanded: jobs.isEmpty,
 
                     children: [
-                      _buildPlaylistSelectionOptions(),
+                      _buildTargetPlaylistSelectionOptions(),
                     ],
 
                     // playlist: targetPlaylist,
@@ -234,6 +234,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ? Colors.green
                                 : Colors.red,
                           ),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.play_arrow),
+                            style: greenButtonStyle,
+                            onPressed: () {
+                              Utils.myLaunch(
+                                  targetPlaylist.externalUrls?.spotify ?? '');
+                            },
+                          ),
                         );
                       }),
                     ]),
@@ -242,20 +250,33 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       bottomNavigationBar: jobs.isNotEmpty && jobs[0].recipe.isNotEmpty
-          ? Padding(
+          ? Container(
               padding: const EdgeInsets.all(16),
-              child: ElevatedButton(
-                onPressed: isProcessing ? null : _processJobs,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
-                  ),
+              child: SafeArea(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        maxWidth: 300, // Adjust this value as needed
+                        minHeight: 50,
+                      ),
+                      child: ElevatedButton(
+                        onPressed: isProcessing ? null : _processJobs,
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(200, 50), // Minimum size
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                        ),
+                        child: Text(
+                          isProcessing
+                              ? 'Processing...'
+                              : 'Update Spotkin On Spotify',
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                child: Text(isProcessing
-                    ? 'Processing...'
-                    : 'Update Spotkin On Spotify'),
               ),
             )
           : null,
@@ -264,19 +285,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-Widget playlistSubtitle(PlaylistSimple playlist, BuildContext context) {
-  return playlist.owner != null
-      ? Text(
-          'Playlist • ${playlist.owner!.displayName}',
-          style: Theme.of(context).textTheme.labelMedium,
-        )
-      : const SizedBox();
-}
-
-Text PlaylistTitle(BuildContext context, PlaylistSimple playlist) {
-  return Text(
-    playlist.name ?? 'Unknown Playlist',
-    style: Theme.of(context).textTheme.titleMedium,
-    overflow: TextOverflow.ellipsis,
-  );
-}
+var greenButtonStyle = ButtonStyle(
+  backgroundColor: MaterialStateProperty.all(Colors.green),
+  foregroundColor: MaterialStateProperty.all(Colors.black),
+);

@@ -93,9 +93,28 @@ final spotifyThemeData = ThemeData(
     titleTextStyle: TextStyle(
         color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
   ),
+  buttonTheme: ButtonThemeData(
+    buttonColor: Colors.green,
+    textTheme: ButtonTextTheme.primary,
+    // padding: const EdgeInsets.all(16.0),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(25),
+    ),
+  ),
+  // iconButtonTheme: IconButtonThemeData(
+  //   style: ButtonStyle(
+  //     backgroundColor: MaterialStateProperty.all(Colors.green),
+  //     foregroundColor: MaterialStateProperty.all(Colors.black),
+  //     overlayColor: MaterialStateProperty.all(Colors.green[700]),
+  //     shape: MaterialStateProperty.all(CircleBorder()),
+  //     padding: MaterialStateProperty.all(EdgeInsets.all(12)),
+  //     minimumSize: MaterialStateProperty.all(Size(48, 48)),
+  //   ),
+  // ),
   textTheme: TextTheme(
-    titleLarge: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-    bodyMedium: TextStyle(color: Colors.white70),
+    titleLarge:
+        const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+    bodyMedium: const TextStyle(color: Colors.white70),
     // titleMedium: TextStyle(color: Colors.white54),
     labelMedium: TextStyle(color: Colors.grey[400]),
   ),
