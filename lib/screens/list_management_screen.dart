@@ -70,7 +70,8 @@ class _ListManagementScreenState extends State<ListManagementScreen> {
 
   void _updateJob() {
     Job updatedJob;
-    switch (widget.fieldName) {
+    final fieldName = widget.fieldName;
+    switch (fieldName) {
       case 'bannedArtists':
         updatedJob = widget.job.copyWith(bannedArtists: _items as List<Artist>);
         break;
@@ -159,7 +160,12 @@ class _ListManagementScreenState extends State<ListManagementScreen> {
     return ListTile(
       leading: leadingWidget,
       title: Text(name),
-      subtitle: subtitle != null ? Text(subtitle) : null,
+      subtitle: subtitle != null
+          ? Text(
+              subtitle,
+              style: Theme.of(context).textTheme.labelSmall,
+            )
+          : null,
       trailing: IconButton(
         icon: const Icon(Icons.delete),
         onPressed: () => _removeItem(_items.indexOf(item)),

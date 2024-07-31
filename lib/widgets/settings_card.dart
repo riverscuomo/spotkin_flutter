@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:spotify/spotify.dart';
 import 'package:spotkin_flutter/app_core.dart';
 
+import 'quantity_circle.dart';
+
 class SettingsCard extends StatelessWidget {
   final int index;
   final Job job;
-  final Function(int, Job) updateJob; // Specify the function type here
+  final Function(int, Job) updateJob;
 
   const SettingsCard({
     Key? key,
@@ -13,6 +15,7 @@ class SettingsCard extends StatelessWidget {
     required this.job,
     required this.updateJob,
   }) : super(key: key);
+
   void _navigateToListScreen(BuildContext context, String title,
       String fieldName, String tooltip, List<SearchType> searchTypes) {
     Navigator.push(
@@ -57,7 +60,7 @@ class SettingsCard extends StatelessWidget {
               onTap: () => _navigateToListScreen(
                 context,
                 'Banned Songs',
-                'bannedSongTitles',
+                'bannedTracks',
                 'These songs will never appear in your Spotify playlist',
                 [SearchType.track],
               ),
@@ -136,36 +139,6 @@ class SettingsRowTitle extends StatelessWidget {
         const SizedBox(width: 8),
         QuantityCircle(quantity: quantity),
       ],
-    );
-  }
-}
-
-class QuantityCircle extends StatelessWidget {
-  const QuantityCircle({
-    super.key,
-    required this.quantity,
-  });
-
-  final int quantity;
-
-  @override
-  Widget build(BuildContext context) {
-    if (quantity == 0) {
-      return const SizedBox.shrink();
-    }
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: Colors.grey[400],
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Text(
-        '$quantity',
-        style: const TextStyle(
-          color: Colors.black,
-          fontSize: 12,
-        ),
-      ),
     );
   }
 }

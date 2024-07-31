@@ -4,14 +4,11 @@ import 'package:spotkin_flutter/models/ingredient.dart';
 import 'package:spotify/spotify.dart';
 
 class Job {
-  // final String name;
-  // final String playlistId;
   final PlaylistSimple targetPlaylist;
   final String description;
   final bool removeLowEnergy;
   final List<Track> lastTracks;
   final List<Artist> bannedArtists;
-  // final List<Track> bannedSongTitles;
   final List<Track> bannedTracks;
   final List<String> bannedGenres;
   final List<Artist> exceptionsToBannedGenres;
@@ -23,7 +20,6 @@ class Job {
     this.removeLowEnergy = false,
     this.lastTracks = const [],
     this.bannedArtists = const [],
-    // this.bannedSongTitles = const [],
     this.bannedTracks = const [],
     this.bannedGenres = const [],
     this.exceptionsToBannedGenres = const [],
@@ -39,12 +35,14 @@ class Job {
       lastTracks: List<Track>.from(json['last_tracks'] ?? []),
       bannedArtists: List<Artist>.from(
           json['banned_artists']?.map((x) => Artist.fromJson(x)) ?? []),
-
-      // bannedSongTitles: List<String>.from(json['banned_song_titles'] ?? []),
-      bannedTracks: List<Track>.from(json['banned_tracks'] ?? []),
+      bannedTracks: List<Track>.from(
+          json['banned_tracks']?.map((x) => Track.fromJson(x)) ?? []),
       bannedGenres: List<String>.from(json['banned_genres'] ?? []),
       exceptionsToBannedGenres:
-          List<Artist>.from(json['exceptions_to_banned_genres'] ?? []),
+          List<Artist>.from(json['exceptions_to_banned_genres']?.map((x) {
+                return Artist.fromJson(x);
+              }) ??
+              []),
       recipe: (json['recipe'] as List<dynamic>?)
               ?.map((i) => Ingredient.fromJson(i as Map<String, dynamic>))
               .toList() ??
@@ -59,7 +57,6 @@ class Job {
       'remove_low_energy': removeLowEnergy,
       'last_tracks': lastTracks,
       'banned_artists': bannedArtists,
-      // 'banned_song_titles': bannedSongTitles,
       'banned_tracks': bannedTracks,
       'banned_genres': bannedGenres,
       'exceptions_to_banned_genres': exceptionsToBannedGenres,
@@ -75,7 +72,6 @@ class Job {
       'remove_low_energy': removeLowEnergy,
       'last_track_ids': lastTracks.map((t) => t.id).toList(),
       'banned_artists': bannedArtists,
-      // 'banned_song_titles': bannedSongTitles,
       'banned_tracks': bannedTracks.map((t) => t.id).toList(),
       'banned_genres': bannedGenres,
       'exceptions_to_banned_genres': exceptionsToBannedGenres,

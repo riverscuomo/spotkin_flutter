@@ -159,7 +159,10 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
     return ListTile(
       leading: leadingWidget,
       title: Text(title),
-      subtitle: Text(subtitle),
+      subtitle: Text(
+        subtitle,
+        style: Theme.of(context).textTheme.labelSmall,
+      ),
       onTap: () {
         widget.onItemSelected(item);
         Navigator.pop(context);
