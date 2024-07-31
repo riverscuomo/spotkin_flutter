@@ -1,4 +1,4 @@
-export 'ingredient_form.dart';
+export 'recipe_widget.dart';
 export 'bottom_sheets/bottom_sheets.dart';
 export 'playlist_widgets.dart';
 export 'target_playlist_selection_options.dart';

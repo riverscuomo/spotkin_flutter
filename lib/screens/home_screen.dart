@@ -133,9 +133,10 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            IngredientForm(
+            RecipeWidget(
               initialIngredients: job.recipe,
-              // getPlaylistName: _getPlaylistName,
+              jobs: jobs,
+              updateJob: updateJob,
               onIngredientsChanged: (updatedIngredients) {
                 setState(() {
                   job = job.copyWith(recipe: updatedIngredients);
@@ -157,20 +158,7 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Text('Spotkin'),
         automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      SettingsScreen(jobs: jobs, updateJob: updateJob),
-                ),
-              );
-            },
-          ),
-        ],
+        actions: const [InfoButton()],
       ),
       body: SingleChildScrollView(
         child: Padding(

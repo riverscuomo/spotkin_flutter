@@ -13,14 +13,7 @@ class SettingsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.info),
-            onPressed: () {
-              showInfoBottomSheet(context);
-            },
-          )
-        ],
+        // actions: [],
       ),
       body: ListView.builder(
         itemCount: jobs.length,
@@ -32,6 +25,22 @@ class SettingsScreen extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+}
+
+class InfoButton extends StatelessWidget {
+  const InfoButton({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.info),
+      onPressed: () {
+        showInfoBottomSheet(context);
+      },
     );
   }
 }

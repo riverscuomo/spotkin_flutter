@@ -33,6 +33,7 @@ class SettingsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bannedArtists = job.bannedArtists;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(8),
@@ -40,7 +41,7 @@ class SettingsCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ListTile(
-              title: const Text('Banned Artists'),
+              title: SettingsRowTitle('Banned Artists', bannedArtists.length),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => _navigateToListScreen(
                 context,
@@ -51,7 +52,7 @@ class SettingsCard extends StatelessWidget {
               ),
             ),
             ListTile(
-              title: const Text('Banned Songs'),
+              title: SettingsRowTitle('Banned Songs', job.bannedTracks.length),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => _navigateToListScreen(
                 context,
@@ -62,7 +63,7 @@ class SettingsCard extends StatelessWidget {
               ),
             ),
             ListTile(
-              title: const Text('Banned Genres'),
+              title: SettingsRowTitle('Banned Genres', job.bannedGenres.length),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => _navigateToListScreen(
                 context,
@@ -73,7 +74,8 @@ class SettingsCard extends StatelessWidget {
               ),
             ),
             ListTile(
-              title: const Text('Exceptions to Banned Genres'),
+              title: SettingsRowTitle('Exceptions to Banned Genres',
+                  job.exceptionsToBannedGenres.length),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => _navigateToListScreen(
                 context,
@@ -84,7 +86,7 @@ class SettingsCard extends StatelessWidget {
               ),
             ),
             ListTile(
-              title: const Text('Last Track IDs'),
+              title: SettingsRowTitle('Last Songs', job.lastTracks.length),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => _navigateToListScreen(
                 context,
@@ -111,6 +113,57 @@ class SettingsCard extends StatelessWidget {
               },
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class SettingsRowTitle extends StatelessWidget {
+  const SettingsRowTitle(
+    this.title,
+    this.quantity,
+  );
+
+  final String title;
+  final int quantity;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Text(title),
+        const SizedBox(width: 8),
+        QuantityCircle(quantity: quantity),
+      ],
+    );
+  }
+}
+
+class QuantityCircle extends StatelessWidget {
+  const QuantityCircle({
+    super.key,
+    required this.quantity,
+  });
+
+  final int quantity;
+
+  @override
+  Widget build(BuildContext context) {
+    if (quantity == 0) {
+      return const SizedBox.shrink();
+    }
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: Colors.grey[400],
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Text(
+        '$quantity',
+        style: const TextStyle(
+          color: Colors.black,
+          fontSize: 12,
         ),
       ),
     );

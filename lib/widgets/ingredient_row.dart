@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:spotify/spotify.dart';
 
-class IngredientFormRow {
+class IngredientRow {
   // final TextEditingController playlistController;
   final TextEditingController quantityController;
   PlaylistSimple? playlist;
 
-  IngredientFormRow({
+  IngredientRow({
     // required this.playlistController,
     required this.quantityController,
     this.playlist,

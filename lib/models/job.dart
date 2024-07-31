@@ -37,7 +37,9 @@ class Job {
       description: json['description'] ?? '',
       removeLowEnergy: json['remove_low_energy'] == true,
       lastTracks: List<Track>.from(json['last_tracks'] ?? []),
-      bannedArtists: List<Artist>.from(json['banned_artists'] ?? []),
+      bannedArtists: List<Artist>.from(
+          json['banned_artists']?.map((x) => Artist.fromJson(x)) ?? []),
+
       // bannedSongTitles: List<String>.from(json['banned_song_titles'] ?? []),
       bannedTracks: List<Track>.from(json['banned_tracks'] ?? []),
       bannedGenres: List<String>.from(json['banned_genres'] ?? []),
@@ -74,7 +76,7 @@ class Job {
       'last_track_ids': lastTracks.map((t) => t.id).toList(),
       'banned_artists': bannedArtists,
       // 'banned_song_titles': bannedSongTitles,
-      'banned_tracks': bannedTracks,
+      'banned_tracks': bannedTracks.map((t) => t.id).toList(),
       'banned_genres': bannedGenres,
       'exceptions_to_banned_genres': exceptionsToBannedGenres,
       'recipe': recipe.map((r) => r.toJsonForPost()).toList(),
