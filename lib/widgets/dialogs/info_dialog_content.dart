@@ -26,16 +26,13 @@ void showInfoDialog(BuildContext context) {
 
 const infoScreenContent = [
   Text(
-      'Spotkin updates one or more of your Spotify playlists every day with a random selection of tracks from any public playlists.'),
+      'Spotkin updates one of your Spotify playlists every day with a random selection of tracks from any of your playlists.'),
   SizedBox(height: 10),
   Text(
-      'For example, "Rivers Radio" is a playlist updated by Spotkin daily, providing a fresh selection of music without manual intervention.'),
+      'Spotkin was developed to eliminate the need for fiddling with the Spotify app, offering a great selection of music in one playlist every day.'),
   SizedBox(height: 10),
   Text(
-      'Spotkin was developed to eliminate the need for constant manual playlist management, offering a great selection of music in one playlist every day.'),
-  SizedBox(height: 10),
-  Text(
-      'It runs automatically at 2am using Windows Task Scheduler, ensuring your playlists are always up-to-date.'),
+      'It will run automatically .... or by clicking the "Update Spotkin On Spotify" button.'),
   SizedBox(height: 10),
   Text(
       'Spotkin works best when drawing from a variety of playlists, including:'),
@@ -57,5 +54,5 @@ const infoScreenContent = [
       'Spotkin processes your recipes and updates your playlists with new music when you click the "Update Spotkin On Spotify" button.'),
   SizedBox(height: 10),
   Text(
-      'This tool helps keep your Spotify playlists fresh and exciting by automatically updating them with new music tailored to your preferences.'),
+      'This tool helps keep your listening fresh and exciting by automatically updating them with new music tailored to your preferences.'),
 ];
