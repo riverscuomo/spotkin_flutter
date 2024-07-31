@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
           color: Colors.black, // Match your scaffold background color
           child: Center(
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 600),
+              constraints: const BoxConstraints(maxWidth: 600),
               child: child!,
             ),
           ),
@@ -96,8 +96,8 @@ final spotifyThemeData = ThemeData(
   textTheme: TextTheme(
     titleLarge: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
     bodyMedium: TextStyle(color: Colors.white70),
-    titleMedium: TextStyle(color: Colors.white54),
-    labelSmall: TextStyle(color: Colors.grey),
+    // titleMedium: TextStyle(color: Colors.white54),
+    labelMedium: TextStyle(color: Colors.grey[400]),
   ),
   inputDecorationTheme: InputDecorationTheme(
     fillColor: const Color(0xFF212121),

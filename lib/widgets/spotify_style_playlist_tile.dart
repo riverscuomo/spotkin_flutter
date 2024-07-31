@@ -34,21 +34,8 @@ class SpotifyStylePlaylistTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    playlist.name ?? 'Unknown Playlist',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  playlist.owner != null
-                      ? Text(
-                          'Playlist • ${playlist.owner!.displayName}',
-                          style: Theme.of(context).textTheme.labelSmall,
-                        )
-                      : Container(),
+                  PlaylistTitle(context, playlist),
+                  playlistSubtitle(playlist, context)
                 ],
               ),
             ),

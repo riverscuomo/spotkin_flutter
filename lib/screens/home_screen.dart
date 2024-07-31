@@ -184,14 +184,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   //     ? _buildPlaylistSelectionOptions()
                   //     :
                   ExpansionTile(
-                    title: Text(targetPlaylist.name ?? 'Unknown Playlist'),
+                    title: PlaylistTitle(context, targetPlaylist),
                     leading: PlaylistImageIcon(playlist: targetPlaylist),
-                    subtitle: targetPlaylist.owner != null
-                        ? Text(
-                            'Playlist • ${targetPlaylist.owner!.displayName}',
-                            style: Theme.of(context).textTheme.labelSmall,
-                          )
-                        : null,
+                    subtitle: playlistSubtitle(targetPlaylist, context),
                     initiallyExpanded: jobs.isEmpty,
 
                     children: [
@@ -267,4 +262,21 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: Colors.black,
     );
   }
+}
+
+Widget playlistSubtitle(PlaylistSimple playlist, BuildContext context) {
+  return playlist.owner != null
+      ? Text(
+          'Playlist • ${playlist.owner!.displayName}',
+          style: Theme.of(context).textTheme.labelMedium,
+        )
+      : const SizedBox();
+}
+
+Text PlaylistTitle(BuildContext context, PlaylistSimple playlist) {
+  return Text(
+    playlist.name ?? 'Unknown Playlist',
+    style: Theme.of(context).textTheme.titleMedium,
+    overflow: TextOverflow.ellipsis,
+  );
 }
