@@ -101,16 +101,6 @@ final spotifyThemeData = ThemeData(
       borderRadius: BorderRadius.circular(25),
     ),
   ),
-  // iconButtonTheme: IconButtonThemeData(
-  //   style: ButtonStyle(
-  //     backgroundColor: MaterialStateProperty.all(Colors.green),
-  //     foregroundColor: MaterialStateProperty.all(Colors.black),
-  //     overlayColor: MaterialStateProperty.all(Colors.green[700]),
-  //     shape: MaterialStateProperty.all(CircleBorder()),
-  //     padding: MaterialStateProperty.all(EdgeInsets.all(12)),
-  //     minimumSize: MaterialStateProperty.all(Size(48, 48)),
-  //   ),
-  // ),
   textTheme: TextTheme(
     titleLarge:
         const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
