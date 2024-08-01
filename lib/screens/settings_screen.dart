@@ -3,10 +3,12 @@ import 'package:spotkin_flutter/app_core.dart';
 
 class SettingsScreen extends StatelessWidget {
   final List<Job> jobs;
+  final Function(int, Job) updateJob;
 
   const SettingsScreen({
     Key? key,
     required this.jobs,
+    required this.updateJob,
   }) : super(key: key);
 
   @override
@@ -21,6 +23,7 @@ class SettingsScreen extends StatelessWidget {
           return SettingsCard(
             index: index,
             job: jobs[index],
+            updateJob: updateJob,
           );
         },
       ),

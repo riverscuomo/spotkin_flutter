@@ -40,6 +40,13 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadJobs();
   }
 
+  void _addNewJob(Job newJob) {
+    setState(() {
+      jobs.add(newJob);
+      _storageService.saveJobs(jobs);
+    });
+  }
+
   Future<void> _verifyToken() async {
     try {
       await spotifyService.checkAuthentication();
@@ -87,13 +94,6 @@ class _HomeScreenState extends State<HomeScreen> {
     print("Updating job at index $index: ${updatedJob.targetPlaylist.name}");
     setState(() {
       jobs[index] = updatedJob;
-      _storageService.saveJobs(jobs);
-    });
-  }
-
-  void _addNewJob(Job newJob) {
-    setState(() {
-      jobs.add(newJob);
       _storageService.saveJobs(jobs);
     });
   }
@@ -168,37 +168,14 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Column(
                 children: [
-                  // jobs.isEmpty || _isResettingTargetPlaylist
-                  //     ? _buildTargetPlaylistSelectionOptions()
-                  //     :
                   ExpansionTile(
                     title: PlaylistTitle(context, targetPlaylist),
                     leading: PlaylistImageIcon(playlist: targetPlaylist),
                     subtitle: playlistSubtitle(targetPlaylist, context),
                     initiallyExpanded: jobs.isEmpty,
-
                     children: [
                       _buildTargetPlaylistSelectionOptions(),
                     ],
-
-                    // playlist: targetPlaylist,
-                    // trailingButton: IconButton(
-                    //   icon: const Icon(Icons.edit),
-                    //   onPressed: () {
-                    //     setState(
-                    //       () {
-                    //         _isResettingTargetPlaylist = true;
-                    //       },
-                    //     );
-                    //   },
-                    // ),
-                    // onTileTapped: () {
-                    //   setState(
-                    //     () {
-                    //       _isResettingTargetPlaylist = true;
-                    //     },
-                    //   );
-                    // },
                   ),
                   const SizedBox(height: 20),
                   ...jobs.asMap().entries.map((entry) {

@@ -131,7 +131,7 @@ class _RecipeWidgetState extends State<RecipeWidget> {
                 MaterialPageRoute(
                   builder: (context) => SettingsScreen(
                     jobs: widget.jobs,
-                    // updateJob: widget.updateJob,
+                    updateJob: widget.updateJob,
                   ),
                 ),
               );

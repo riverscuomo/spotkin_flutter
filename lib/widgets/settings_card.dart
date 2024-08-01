@@ -6,13 +6,13 @@ import 'settings_row_title.dart';
 class SettingsCard extends StatefulWidget {
   final int index;
   final Job job;
-  // final Function(int, Job) updateJob;
+  final Function(int, Job) updateJob;
 
   const SettingsCard({
     Key? key,
     required this.index,
     required this.job,
-    // required this.updateJob,
+    required this.updateJob,
   }) : super(key: key);
 
   @override
@@ -26,16 +26,14 @@ class _SettingsCardState extends State<SettingsCard> {
   @override
   void initState() {
     super.initState();
-    _storageService = getIt<StorageService>();
     _job = widget.job;
   }
 
-  void updateJob(int index, Job updatedJob) {
-    print("Updating job at index $index: ${updatedJob.targetPlaylist.name}");
+  void updateJob(Job updatedJob) {
     setState(() {
       _job = updatedJob;
-      _storageService.saveJobs([updatedJob]);
     });
+    widget.updateJob(widget.index, updatedJob);
   }
 
   void _navigateToListScreen(BuildContext context, String title,
@@ -49,8 +47,21 @@ class _SettingsCardState extends State<SettingsCard> {
           jobIndex: widget.index,
           fieldName: fieldName,
           tooltip: tooltip,
-          updateJob: updateJob,
+          updateJob: widget.updateJob, // Pass the function from the widget
           searchTypes: searchTypes,
+        ),
+      ),
+    );
+  }
+
+  void _navigateToEditDescriptionScreen(BuildContext context, Job job) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditDescriptionScreen(
+          job: job,
+          jobIndex: widget.index,
+          updateJob: widget.updateJob,
         ),
       ),
     );
@@ -118,28 +129,96 @@ class _SettingsCardState extends State<SettingsCard> {
                 context,
                 'Last Songs',
                 'lastTracks',
-                'These tracks will appear last in your Spotify playlist',
+                'These tracks will always appear last in your Spotify playlist',
                 [SearchType.track],
               ),
             ),
             SwitchListTile(
               title: const Text('Remove Low Energy'),
-              subtitle: const Text(
-                  'Tracks with low energy will be removed from your Spotify playlist'),
+              subtitle: Text(
+                'Tracks with low energy will be removed from your Spotify playlist',
+                style: Theme.of(context).textTheme.labelSmall,
+              ),
               value: job.removeLowEnergy,
               inactiveTrackColor: Colors.grey,
-              onChanged: (value) =>
-                  updateJob(widget.index, job.copyWith(removeLowEnergy: value)),
+              onChanged: (value) => updateJob(
+                _job.copyWith(removeLowEnergy: value),
+              ),
             ),
             ListTile(
               title: const Text('Description'),
               trailing: const Icon(Icons.edit),
               onTap: () {
-                // Navigate to a screen for editing the description
-                // You can implement this similarly to the list management screen
+                _navigateToEditDescriptionScreen(context, job);
               },
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class EditDescriptionScreen extends StatefulWidget {
+  final Job job;
+  final int jobIndex;
+  final Function(int, Job) updateJob;
+
+  const EditDescriptionScreen({
+    Key? key,
+    required this.job,
+    required this.jobIndex,
+    required this.updateJob,
+  }) : super(key: key);
+
+  @override
+  State<EditDescriptionScreen> createState() => _EditDescriptionScreenState();
+}
+
+class _EditDescriptionScreenState extends State<EditDescriptionScreen> {
+  late TextEditingController _descriptionController;
+
+  @override
+  void initState() {
+    super.initState();
+    _descriptionController =
+        TextEditingController(text: widget.job.description);
+  }
+
+  @override
+  void dispose() {
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
+  void _saveDescription() {
+    final updatedJob =
+        widget.job.copyWith(description: _descriptionController.text);
+    widget.updateJob(widget.jobIndex, updatedJob);
+    Navigator.pop(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Edit Description'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.check),
+            onPressed: _saveDescription,
+          ),
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: TextField(
+          controller: _descriptionController,
+          decoration: const InputDecoration(
+            labelText: 'Description',
+            border: OutlineInputBorder(),
+          ),
+          maxLines: 5,
         ),
       ),
     );

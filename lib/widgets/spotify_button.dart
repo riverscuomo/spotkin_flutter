@@ -20,17 +20,17 @@ class SpotifyButton extends StatelessWidget {
           children: [
             ConstrainedBox(
               constraints: const BoxConstraints(
-                maxWidth: 300, // Adjust this value as needed
-                minHeight: 50,
+                maxWidth: 300,
+                minHeight: 40,
               ),
               child: ElevatedButton(
                 onPressed: isProcessing ? null : processJobs,
                 style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(200, 50), // Minimum size
+                  minimumSize: const Size(100, 50),
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                 ),
                 child: Text(
-                  isProcessing ? 'Processing...' : 'Update Spotkin On Spotify',
+                  isProcessing ? 'Processing...' : 'Update',
                   textAlign: TextAlign.center,
                 ),
               ),
