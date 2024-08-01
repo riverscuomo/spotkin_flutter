@@ -15,7 +15,6 @@ class SettingsCard extends StatelessWidget {
     required this.job,
     required this.updateJob,
   }) : super(key: key);
-
   void _navigateToListScreen(BuildContext context, String title,
       String fieldName, String tooltip, List<SearchType> searchTypes) {
     Navigator.push(
