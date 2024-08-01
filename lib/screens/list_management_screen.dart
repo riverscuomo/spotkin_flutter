@@ -1,5 +1,4 @@
 import 'dart:collection';
-
 import 'package:flutter/material.dart';
 import 'package:spotify/spotify.dart' hide Image;
 import 'package:spotkin_flutter/app_core.dart';
@@ -29,7 +28,8 @@ class ListManagementScreen extends StatefulWidget {
 }
 
 class _ListManagementScreenState extends State<ListManagementScreen> {
-  late List<dynamic> _items;
+  late List<dynamic> _items = [];
+  bool _switchValue = false;
 
   @override
   void initState() {
@@ -168,9 +168,25 @@ class _ListManagementScreenState extends State<ListManagementScreen> {
               style: Theme.of(context).textTheme.labelSmall,
             )
           : null,
-      trailing: IconButton(
-        icon: const Icon(Icons.delete),
-        onPressed: () => _removeItem(_items.indexOf(item)),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Switch(
+            value:
+                _switchValue, // Assuming each item has a boolean field to represent switch state
+            onChanged: (value) {
+              setState(() {
+                _switchValue =
+                    value; // your logic to set the item's switch state
+                _updateJob(); // ensure job is updated and widget rebuilds
+              });
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: () => _removeItem(_items.indexOf(item)),
+          ),
+        ],
       ),
     );
   }
