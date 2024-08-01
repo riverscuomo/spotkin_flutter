@@ -1,21 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:spotify/spotify.dart';
 import 'package:spotkin_flutter/app_core.dart';
-
-import 'quantity_circle.dart';
 import 'settings_row_title.dart';
 
-class SettingsCard extends StatelessWidget {
+class SettingsCard extends StatefulWidget {
   final int index;
   final Job job;
-  final Function(int, Job) updateJob;
+  // final Function(int, Job) updateJob;
 
   const SettingsCard({
     Key? key,
     required this.index,
     required this.job,
-    required this.updateJob,
+    // required this.updateJob,
   }) : super(key: key);
+
+  @override
+  State<SettingsCard> createState() => _SettingsCardState();
+}
+
+class _SettingsCardState extends State<SettingsCard> {
+  late StorageService _storageService;
+  late Job _job;
+
+  @override
+  void initState() {
+    super.initState();
+    _storageService = getIt<StorageService>();
+    _job = widget.job;
+  }
+
+  void updateJob(int index, Job updatedJob) {
+    print("Updating job at index $index: ${updatedJob.targetPlaylist.name}");
+    setState(() {
+      _job = updatedJob;
+      _storageService.saveJobs([updatedJob]);
+    });
+  }
+
   void _navigateToListScreen(BuildContext context, String title,
       String fieldName, String tooltip, List<SearchType> searchTypes) {
     Navigator.push(
@@ -23,8 +45,8 @@ class SettingsCard extends StatelessWidget {
       MaterialPageRoute(
         builder: (context) => ListManagementScreen(
           title: title,
-          job: job,
-          jobIndex: index,
+          job: _job,
+          jobIndex: widget.index,
           fieldName: fieldName,
           tooltip: tooltip,
           updateJob: updateJob,
@@ -36,7 +58,7 @@ class SettingsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bannedArtists = job.bannedArtists;
+    final job = _job;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(8),
@@ -44,7 +66,8 @@ class SettingsCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ListTile(
-              title: SettingsRowTitle('Banned Artists', bannedArtists.length),
+              title:
+                  SettingsRowTitle('Banned Artists', job.bannedArtists.length),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => _navigateToListScreen(
                 context,
@@ -106,7 +129,7 @@ class SettingsCard extends StatelessWidget {
               value: job.removeLowEnergy,
               inactiveTrackColor: Colors.grey,
               onChanged: (value) =>
-                  updateJob(index, job.copyWith(removeLowEnergy: value)),
+                  updateJob(widget.index, job.copyWith(removeLowEnergy: value)),
             ),
             ListTile(
               title: const Text('Description'),

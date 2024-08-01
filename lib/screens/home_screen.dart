@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:spotify/spotify.dart';
 import 'package:spotkin_flutter/app_core.dart';
 import '../widgets/info_button.dart';
+import '../widgets/spotify_button.dart';
 
 class HomeScreen extends StatefulWidget {
   final Map<String, dynamic> config;
@@ -237,35 +238,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       bottomNavigationBar: jobs.isNotEmpty && jobs[0].recipe.isNotEmpty
-          ? Container(
-              padding: const EdgeInsets.all(16),
-              child: SafeArea(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(
-                        maxWidth: 300, // Adjust this value as needed
-                        minHeight: 50,
-                      ),
-                      child: ElevatedButton(
-                        onPressed: isProcessing ? null : _processJobs,
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size(200, 50), // Minimum size
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                        ),
-                        child: Text(
-                          isProcessing
-                              ? 'Processing...'
-                              : 'Update Spotkin On Spotify',
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            )
+          ? SpotifyButton(isProcessing: isProcessing, processJobs: _processJobs)
           : null,
       backgroundColor: Colors.black,
     );
