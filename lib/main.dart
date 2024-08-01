@@ -163,6 +163,7 @@ final spotifyThemeData = ThemeData(
   switchTheme: SwitchThemeData(
     thumbColor: MaterialStateProperty.all(Colors.white),
     trackColor: MaterialStateProperty.all(Colors.green),
+
     // overlayColor: MaterialStateProperty.all(Colors.green),
   ),
 );

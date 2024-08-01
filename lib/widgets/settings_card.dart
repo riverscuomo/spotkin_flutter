@@ -3,6 +3,7 @@ import 'package:spotify/spotify.dart';
 import 'package:spotkin_flutter/app_core.dart';
 
 import 'quantity_circle.dart';
+import 'settings_row_title.dart';
 
 class SettingsCard extends StatelessWidget {
   final int index;
@@ -103,6 +104,7 @@ class SettingsCard extends StatelessWidget {
               subtitle: const Text(
                   'Tracks with low energy will be removed from your Spotify playlist'),
               value: job.removeLowEnergy,
+              inactiveTrackColor: Colors.grey,
               onChanged: (value) =>
                   updateJob(index, job.copyWith(removeLowEnergy: value)),
             ),
@@ -117,27 +119,6 @@ class SettingsCard extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class SettingsRowTitle extends StatelessWidget {
-  const SettingsRowTitle(
-    this.title,
-    this.quantity,
-  );
-
-  final String title;
-  final int quantity;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Text(title),
-        const SizedBox(width: 8),
-        QuantityCircle(quantity: quantity),
-      ],
     );
   }
 }
