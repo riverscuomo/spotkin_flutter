@@ -27,7 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late ApiService _apiService;
   late StorageService _storageService;
   final SpotifyService spotifyService = getIt<SpotifyService>();
-  bool _isExpanded = false;
+  bool _isExpanded = true;
   Key _expansionTileKey = UniqueKey();
   final widgetPadding = 3.0;
 

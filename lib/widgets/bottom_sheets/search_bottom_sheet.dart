@@ -121,7 +121,8 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
       isArtist = true;
     } else if (item is PlaylistSimple) {
       title = item.name ?? 'Unknown Playlist';
-      subtitle = 'Playlist • ${item.tracksLink?.total ?? 0} tracks';
+      subtitle =
+          '${item.owner?.displayName} • ${item.tracksLink?.total ?? 0} tracks';
       imageUrl = item.images?.isNotEmpty == true ? item.images!.first.url : '';
     }
 

@@ -33,7 +33,9 @@ class PlaylistNameField extends StatelessWidget {
 Widget playlistSubtitle(PlaylistSimple playlist, BuildContext context) {
   return playlist.owner != null
       ? Text(
-          'Playlist • ${playlist.owner!.displayName}',
+          // 'Playlist • ${playlist.owner!.displayName}',
+
+          '${playlist.owner?.displayName} • ${playlist.tracksLink?.total ?? 0} tracks',
           style: Theme.of(context).textTheme.labelMedium,
           overflow: TextOverflow.ellipsis,
           maxLines: 1,

@@ -41,6 +41,32 @@ class _RecipeWidgetState extends State<RecipeWidget> {
     super.dispose();
   }
 
+  void _addNewRow(PlaylistSimple playlist, Job job) {
+    // Check if the playlist already exists in the recipe
+    if (job.recipe.any((ingredient) => ingredient.playlist.id == playlist.id)) {
+      // Show a snackbar or alert to inform the user
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('This playlist is already in the recipe')),
+      );
+      return;
+    }
+
+    Ingredient newIngredient = Ingredient(
+      playlist: playlist,
+      quantity: 5,
+    );
+
+    storageService.updateJob(job.copyWith(
+      recipe: [...job.recipe, newIngredient],
+    ));
+    setState(() {
+      _ingredientRows.add(IngredientRow(
+        playlist: playlist,
+        quantityController: TextEditingController(),
+      ));
+    });
+  }
+
   void _initIngredientRows() {
     _ingredientRows = widget.initialIngredients
         .map((ingredient) => IngredientRow(
@@ -59,27 +85,56 @@ class _RecipeWidgetState extends State<RecipeWidget> {
     }
   }
 
-  void _addNewRow(PlaylistSimple playlist, Job job) {
-    Ingredient newIngredient = Ingredient(
-      playlist: playlist,
-      quantity: 5,
-    );
+  Future<bool> _handleDismiss(DismissDirection direction, int index) async {
+    if (direction == DismissDirection.endToStart) {
+      // Right swipe: confirm and remove the ingredient
+      bool confirmDelete = await showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text("Confirm Delete"),
+                content: const Text(
+                    "Are you sure you want to remove this playlist?"),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: const Text("Cancel"),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(true),
+                    child: const Text("Delete"),
+                  ),
+                ],
+              );
+            },
+          ) ??
+          false;
 
-    storageService.updateJob(job.copyWith(
-      recipe: [...job.recipe, newIngredient],
-    ));
-    setState(() {
-      _ingredientRows.add(IngredientRow(
-        playlist: playlist,
-        quantityController: TextEditingController(),
-      ));
-    });
+      if (confirmDelete) {
+        _removeIngredient(index);
+        return true;
+      }
+    } else if (direction == DismissDirection.startToEnd) {
+      // Left swipe: set quantity to zero (archive)
+      _updateJobInStorage(index, 0);
+      setState(() {
+        _ingredientRows[index].quantityController.text = '0';
+      });
+      // Show a snackbar to inform the user
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Playlist archived (quantity set to 0)')),
+      );
+    }
+    return false; // Don't dismiss the item
   }
 
   void _removeIngredient(int index) {
     setState(() {
       _ingredientRows.removeAt(index);
-      // _onFormChanged();
+      final job = storageService.getJobs().first;
+      final updatedRecipe = List<Ingredient>.from(job.recipe)..removeAt(index);
+      final updatedJob = job.copyWith(recipe: updatedRecipe);
+      storageService.updateJob(updatedJob);
     });
   }
 
@@ -173,9 +228,38 @@ class _RecipeWidgetState extends State<RecipeWidget> {
             if (playlist == null) {
               return const SizedBox.shrink();
             }
-            return SpotifyStylePlaylistTile(
-              playlist: row.playlist!,
-              trailingButton: buildQuantityDropdown(row, index),
+            return Dismissible(
+              key: ValueKey('${playlist.id}_$index'),
+              background: Container(
+                color: Colors.orange,
+                alignment: Alignment.centerLeft,
+                padding: const EdgeInsets.only(left: 20.0),
+                child: Row(
+                  children: const [
+                    Icon(Icons.archive, color: Colors.white),
+                    SizedBox(width: 8),
+                    Text('Archive', style: TextStyle(color: Colors.white)),
+                  ],
+                ),
+              ),
+              secondaryBackground: Container(
+                color: Colors.red,
+                alignment: Alignment.centerRight,
+                padding: const EdgeInsets.only(right: 20.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: const [
+                    Text('Delete', style: TextStyle(color: Colors.white)),
+                    SizedBox(width: 8),
+                    Icon(Icons.delete, color: Colors.white),
+                  ],
+                ),
+              ),
+              confirmDismiss: (direction) => _handleDismiss(direction, index),
+              child: SpotifyStylePlaylistTile(
+                playlist: playlist,
+                trailingButton: buildQuantityDropdown(row, index),
+              ),
             );
           }),
       ],
