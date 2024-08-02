@@ -43,6 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
     _storageService = StorageService();
     _loadJobs();
+    _isExpanded = jobs.isEmpty;
   }
 
   void _addNewJob(Job newJob) {
