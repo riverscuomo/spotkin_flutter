@@ -26,6 +26,9 @@ class _HomeScreenState extends State<HomeScreen> {
   late ApiService _apiService;
   late StorageService _storageService;
   final SpotifyService spotifyService = getIt<SpotifyService>();
+  bool _isExpanded = false;
+  Key _expansionTileKey = UniqueKey();
+
   // bool _isResettingTargetPlaylist = false;
 
   @override
@@ -41,10 +44,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _addNewJob(Job newJob) {
-    setState(() {
-      jobs.add(newJob);
-      _storageService.saveJobs(jobs);
-    });
+    setState(
+      () {
+        jobs.add(newJob);
+      },
+    );
+    _storageService.saveJobs(jobs);
   }
 
   Future<void> _verifyToken() async {
@@ -94,34 +99,36 @@ class _HomeScreenState extends State<HomeScreen> {
     print("Updating job at index $index: ${updatedJob.targetPlaylist.name}");
     setState(() {
       jobs[index] = updatedJob;
-      _storageService.saveJobs(jobs);
     });
+    _storageService.saveJobs(jobs);
   }
 
   void _replaceJob(Job newJob) {
     setState(() {
       jobs.clear();
       jobs.add(newJob);
-      _storageService.saveJobs(jobs);
     });
+    _storageService.saveJobs(jobs);
   }
 
-  Widget _buildTargetPlaylistSelectionOptions() {
+  Widget buildTargetPlaylistSelectionOptions() {
     return TargetPlaylistSelectionOptions(
       onPlaylistSelected: (PlaylistSimple selectedPlaylist) {
         if (jobs.isEmpty) {
           final newJob = Job(
             targetPlaylist: selectedPlaylist,
           );
-          // _addNewJob(newJob);
           _addNewJob(newJob);
         } else {
           final updateJob = jobs[0].copyWith(targetPlaylist: selectedPlaylist);
           _replaceJob(updateJob);
         }
-        // setState(() {
-        //   _isResettingTargetPlaylist = false;
-        // });
+
+        // Collapse the ExpansionTile
+        setState(() {
+          _isExpanded = false;
+          _expansionTileKey = UniqueKey(); // This forces a rebuild
+        });
       },
     );
   }
@@ -169,12 +176,18 @@ class _HomeScreenState extends State<HomeScreen> {
               Column(
                 children: [
                   ExpansionTile(
+                    key: _expansionTileKey,
                     title: PlaylistTitle(context, targetPlaylist),
                     leading: PlaylistImageIcon(playlist: targetPlaylist),
                     subtitle: playlistSubtitle(targetPlaylist, context),
-                    initiallyExpanded: jobs.isEmpty,
+                    initiallyExpanded: _isExpanded,
+                    onExpansionChanged: (expanded) {
+                      setState(() {
+                        _isExpanded = expanded;
+                      });
+                    },
                     children: [
-                      _buildTargetPlaylistSelectionOptions(),
+                      buildTargetPlaylistSelectionOptions(),
                     ],
                   ),
                   const SizedBox(height: 20),
