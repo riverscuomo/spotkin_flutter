@@ -24,7 +24,7 @@ class SpotifyStylePlaylistTile extends StatelessWidget {
         }
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
         child: Row(
           children: [
             PlaylistImageIcon(playlist: playlist),
@@ -45,28 +45,6 @@ class SpotifyStylePlaylistTile extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class PlaylistImageIcon extends StatelessWidget {
-  const PlaylistImageIcon({
-    super.key,
-    required this.playlist,
-  });
-
-  final PlaylistSimple playlist;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 56,
-      height: 56,
-      decoration: BoxDecoration(
-        color: Colors.grey[800],
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Utils.getPlaylistImageOrIcon(playlist),
     );
   }
 }

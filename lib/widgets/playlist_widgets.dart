@@ -17,7 +17,8 @@ class PlaylistNameField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return playlistName != null
-        ? Text(playlistName!, style: TextStyle(fontWeight: FontWeight.bold))
+        ? Text(playlistName!,
+            style: const TextStyle(fontWeight: FontWeight.bold))
         : TextFormField(
             controller: playlistController,
             decoration: const InputDecoration(
@@ -34,6 +35,8 @@ Widget playlistSubtitle(PlaylistSimple playlist, BuildContext context) {
       ? Text(
           'Playlist • ${playlist.owner!.displayName}',
           style: Theme.of(context).textTheme.labelMedium,
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
         )
       : const SizedBox();
 }
@@ -43,5 +46,6 @@ Text PlaylistTitle(BuildContext context, PlaylistSimple playlist) {
     playlist.name ?? 'Unknown Playlist',
     style: Theme.of(context).textTheme.titleMedium,
     overflow: TextOverflow.ellipsis,
+    maxLines: 1,
   );
 }

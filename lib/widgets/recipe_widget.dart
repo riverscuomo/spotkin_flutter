@@ -83,9 +83,9 @@ class _RecipeWidgetState extends State<RecipeWidget> {
     });
   }
 
-  Widget buildQuantityDropdown(IngredientRow row) {
+  Widget buildQuantityDropdown(IngredientRow row, int index) {
     return SizedBox(
-      width: 80, // Adjust the width as needed
+      width: 80,
       child: DropdownButtonFormField<int>(
         value: int.tryParse(row.quantityController.text) ?? 5,
         items: List.generate(21, (index) {
@@ -95,7 +95,12 @@ class _RecipeWidgetState extends State<RecipeWidget> {
           );
         }),
         onChanged: (value) {
-          row.quantityController.text = value.toString();
+          if (value != null) {
+            setState(() {
+              row.quantityController.text = value.toString();
+              _updateJobInStorage(index, value);
+            });
+          }
         },
         validator: (value) {
           if (value == null) {
@@ -111,47 +116,45 @@ class _RecipeWidgetState extends State<RecipeWidget> {
     );
   }
 
+  void _updateJobInStorage(int index, int newQuantity) {
+    final job = storageService.getJobs().first;
+    final updatedRecipe = List<Ingredient>.from(job.recipe);
+    updatedRecipe[index] = updatedRecipe[index].copyWith(quantity: newQuantity);
+
+    final updatedJob = job.copyWith(recipe: updatedRecipe);
+    storageService.updateJob(updatedJob);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ListTile(
-          leading: const Icon(
-            Icons.add,
-          ),
-          title: const Text(
-            'Add',
-          ),
-          trailing: IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => SettingsScreen(
-                    jobs: widget.jobs,
-                    updateJob: widget.updateJob,
-                  ),
-                ),
-              );
-            },
-          ),
-          onTap: () async {
-            showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                builder: (BuildContext context) {
-                  return SearchBottomSheet(
-                    onItemSelected: (dynamic item) {
-                      if (item is PlaylistSimple) {
-                        _addNewRow(item, storageService.getJobs().first);
-                      }
-                    },
-                    searchTypes: const [SearchType.playlist],
-                  );
-                });
-          },
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            IconButton(
+              icon: const Icon(
+                Icons.add,
+              ),
+              onPressed: () async {
+                showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    builder: (BuildContext context) {
+                      return SearchBottomSheet(
+                        onItemSelected: (dynamic item) {
+                          if (item is PlaylistSimple) {
+                            _addNewRow(item, storageService.getJobs().first);
+                          }
+                        },
+                        searchTypes: const [SearchType.playlist],
+                        title: 'Add a playlist',
+                      );
+                    });
+              },
+            ),
+          ],
         ),
         if (_ingredientRows.isEmpty)
           Padding(
@@ -164,49 +167,17 @@ class _RecipeWidgetState extends State<RecipeWidget> {
           )
         else
           ..._ingredientRows.asMap().entries.map((entry) {
+            int index = entry.key;
             IngredientRow row = entry.value;
             final playlist = row.playlist;
             if (playlist == null) {
               return const SizedBox.shrink();
             }
             return SpotifyStylePlaylistTile(
-                playlist: row.playlist!,
-                trailingButton: buildQuantityDropdown(row),
-                onTileTapped: () async {
-                  // update the job.recipe
-                  //  String playlistName = playlist.name ?? 'Unknown Playlist';
-
-                  // // Update the row with the fetched playlist name
-                  // setState(() {
-                  //   // lastRow.playlistName = playlistName;
-                  //   // lastRow.playlist = playlist;
-                  //   // Add the new ingredient to the list
-                  //   widget.onIngredientsChanged(
-                  //       [...widget.initialIngredients, newIngredient]);
-                  // });
-                }
-
-                // setState(() {
-                //   _hasChanges = false;
-                //   _isSubmitting = false;
-                //   // Add a new empty row for the next ingredient
-                //   _addNewRow();
-                // });
-
-                // },
-                );
+              playlist: row.playlist!,
+              trailingButton: buildQuantityDropdown(row, index),
+            );
           }),
-        // const SizedBox(height: 10),
-        // if (_hasChanges &&
-        //     _ingredientRows.isNotEmpty &&
-        //     // _ingredientRows.last.playlistController.text.isNotEmpty &&
-        //     _ingredientRows.last.quantityController.text.isNotEmpty)
-        //   // ElevatedButton(
-        //   //   onPressed: _isSubmitting ? null : _submitForm,
-        //   //   child: _isSubmitting
-        //   //       ? const CircularProgressIndicator()
-        //   //       : const Text('Submit'),
-        //   // ),
       ],
     );
   }

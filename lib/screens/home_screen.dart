@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:spotify/spotify.dart';
 import 'package:spotkin_flutter/app_core.dart';
 import '../widgets/info_button.dart';
+import '../widgets/playlist_image_icon.dart';
 import '../widgets/spotify_button.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -28,6 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final SpotifyService spotifyService = getIt<SpotifyService>();
   bool _isExpanded = false;
   Key _expansionTileKey = UniqueKey();
+  final widgetPadding = 3.0;
 
   // bool _isResettingTargetPlaylist = false;
 
@@ -82,7 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
         print(results[0]['result'].runtimeType);
         final result = results[0]['result'] as String;
         print('Error processing jobs: $result');
-        if (result.startsWith("Status 401")) {
+        if (result.startsWith("Status widgetPadding01")) {
           print('Token expired, authenticate again...');
           spotifyService.initiateSpotifyLogin();
           return;
@@ -134,7 +136,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildRecipeCard(Job job, int index) {
-    return Card(
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(8),
         child: Column(
@@ -165,32 +171,64 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Text('Spotkin'),
         automaticallyImplyLeading: false,
-        actions: const [InfoButton()],
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SettingsScreen(
+                    jobs: jobs,
+                    updateJob: updateJob,
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.symmetric(vertical: widgetPadding),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Column(
                 children: [
-                  ExpansionTile(
-                    key: _expansionTileKey,
-                    title: PlaylistTitle(context, targetPlaylist),
-                    leading: PlaylistImageIcon(playlist: targetPlaylist),
-                    subtitle: playlistSubtitle(targetPlaylist, context),
-                    initiallyExpanded: _isExpanded,
-                    onExpansionChanged: (expanded) {
-                      setState(() {
-                        _isExpanded = expanded;
-                      });
-                    },
-                    children: [
-                      buildTargetPlaylistSelectionOptions(),
-                    ],
+                  Material(
+                    // color: Theme.of(context).cardColor,
+                    elevation: 1,
+                    borderRadius: BorderRadius.circular(12.0),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12.0),
+                      child: ExpansionTile(
+                        key: _expansionTileKey,
+                        title: Column(children: [
+                          PlaylistImageIcon(
+                            playlist: targetPlaylist,
+                            size: 120,
+                          ),
+                          const SizedBox(height: 10),
+                          PlaylistTitle(context, targetPlaylist),
+                          const SizedBox(height: 5),
+                          playlistSubtitle(targetPlaylist, context)
+                        ]),
+                        // leading: ,
+                        // subtitle: ,
+                        initiallyExpanded: _isExpanded,
+                        onExpansionChanged: (expanded) {
+                          setState(() {
+                            _isExpanded = expanded;
+                          });
+                        },
+                        children: [
+                          buildTargetPlaylistSelectionOptions(),
+                        ],
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: widgetPadding),
                   ...jobs.asMap().entries.map((entry) {
                     return _buildRecipeCard(entry.value, entry.key);
                   }),

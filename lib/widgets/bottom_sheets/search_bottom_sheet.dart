@@ -6,12 +6,14 @@ class SearchBottomSheet extends StatefulWidget {
   final Function(dynamic) onItemSelected;
   final List<SearchType>? searchTypes;
   final bool userPlaylistsOnly;
+  final String? title;
 
   const SearchBottomSheet({
     Key? key,
     required this.onItemSelected,
     this.searchTypes,
     this.userPlaylistsOnly = false,
+    this.title,
   })  : assert(
           !(userPlaylistsOnly && (searchTypes != null)),
           'searchTypes should not be provided when userPlaylistsOnly is true',
@@ -170,10 +172,17 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
     );
   }
 
+  String title = 'Search';
+
   @override
   Widget build(BuildContext context) {
+    if (widget.title != null) {
+      title = widget.title!;
+    } else if (widget.userPlaylistsOnly) {
+      title = 'Your Playlists';
+    }
     return CustomBottomSheet(
-      title: Text(widget.userPlaylistsOnly ? 'Your Playlists' : 'Search'),
+      title: Text(title),
       content: [
         if (!widget.userPlaylistsOnly)
           Padding(

@@ -82,12 +82,13 @@ class MyApp extends StatelessWidget {
   }
 }
 
+const spotifyWidgetColor = Color(0xFF121212);
 final spotifyThemeData = ThemeData(
   primarySwatch: Colors.green,
   brightness: Brightness.dark,
-  scaffoldBackgroundColor: const Color(0xFF121212),
+  scaffoldBackgroundColor: spotifyWidgetColor,
   appBarTheme: const AppBarTheme(
-    backgroundColor: Color(0xFF121212),
+    backgroundColor: spotifyWidgetColor,
     elevation: 0,
     iconTheme: IconThemeData(color: Colors.white),
     titleTextStyle: TextStyle(
@@ -101,6 +102,18 @@ final spotifyThemeData = ThemeData(
       borderRadius: BorderRadius.circular(25),
     ),
   ),
+  expansionTileTheme: ExpansionTileThemeData(
+    backgroundColor: spotifyWidgetColor,
+    collapsedBackgroundColor: spotifyWidgetColor,
+    textColor: Colors.white,
+    collapsedTextColor: Colors.white,
+    iconColor: Colors.white,
+    collapsedIconColor: Colors.white,
+    // shape: RoundedRectangleBorder(
+    //   borderRadius: BorderRadius.circular(4),
+    //   // side: BorderSide(color: Colors.white24),
+    // ),
+  ),
   textTheme: TextTheme(
     titleLarge:
         const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
@@ -109,7 +122,7 @@ final spotifyThemeData = ThemeData(
     labelMedium: TextStyle(color: Colors.grey[400]),
   ),
   inputDecorationTheme: InputDecorationTheme(
-    fillColor: const Color(0xFF212121),
+    fillColor: spotifyWidgetColor,
     filled: true,
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(4),
@@ -138,17 +151,9 @@ final spotifyThemeData = ThemeData(
     ),
   ),
   listTileTheme: const ListTileThemeData(
-    tileColor: Color(0xFF212121),
+    tileColor: Color(0xFF121212),
     textColor: Colors.white,
     iconColor: Colors.white54,
-  ),
-  expansionTileTheme: const ExpansionTileThemeData(
-    backgroundColor: Color(0xFF212121),
-    collapsedBackgroundColor: Color(0xFF212121),
-    textColor: Colors.white,
-    collapsedTextColor: Colors.white,
-    iconColor: Colors.white,
-    collapsedIconColor: Colors.white,
   ),
   switchTheme: SwitchThemeData(
     thumbColor: MaterialStateProperty.all(Colors.white),
