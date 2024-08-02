@@ -140,7 +140,7 @@ class _RecipeWidgetState extends State<RecipeWidget> {
 
   Widget buildQuantityDropdown(IngredientRow row, int index) {
     return SizedBox(
-      width: 80,
+      width: 70,
       child: DropdownButtonFormField<int>(
         value: int.tryParse(row.quantityController.text) ?? 5,
         items: List.generate(21, (index) {
@@ -163,10 +163,10 @@ class _RecipeWidgetState extends State<RecipeWidget> {
           }
           return null;
         },
-        decoration: const InputDecoration(
-          isDense: true,
-          contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        ),
+        // decoration: const InputDecoration(
+        //   isDense: true,
+        //   contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        // ),
       ),
     );
   }

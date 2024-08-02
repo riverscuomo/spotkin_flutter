@@ -27,7 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late ApiService _apiService;
   late StorageService _storageService;
   final SpotifyService spotifyService = getIt<SpotifyService>();
-  bool _isExpanded = true;
+  bool _isExpanded = false;
   Key _expansionTileKey = UniqueKey();
   final widgetPadding = 3.0;
 
@@ -241,7 +241,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       ...jobResults.map((result) {
                         return ListTile(
                           title: Text(result['name']),
-                          subtitle: Text(result['result']),
+                          subtitle: Text(result['result'],
+                              style: Theme.of(context).textTheme.labelSmall),
                           leading: Icon(
                             result['status'] == 'Success'
                                 ? Icons.check_circle
