@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:spotify/spotify.dart' hide Image;
 import 'package:spotkin_flutter/app_core.dart';
@@ -29,6 +31,7 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
   final SpotifyService spotifyService = getIt<SpotifyService>();
   List<dynamic> _searchResults = [];
   bool _isLoading = false;
+  Timer? _debounceTimer;
 
   @override
   void initState() {
@@ -39,11 +42,20 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _searchController.addListener(() {
           if (_searchController.text.isNotEmpty) {
-            _performSearch();
+            _debounceSearch();
           }
         });
       });
     }
+  }
+
+  void _debounceSearch() {
+    if (_debounceTimer != null) {
+      _debounceTimer!.cancel();
+    }
+    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+      _performSearch();
+    });
   }
 
   void _fetchUserPlaylists() async {
@@ -211,6 +223,13 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
                   ),
       ],
     );
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _debounceTimer?.cancel();
+    super.dispose();
   }
 
   //   return Container(
