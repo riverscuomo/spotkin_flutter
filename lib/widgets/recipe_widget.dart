@@ -65,6 +65,8 @@ class _RecipeWidgetState extends State<RecipeWidget> {
         quantityController: TextEditingController(),
       ));
     });
+
+    widget.onIngredientsChanged([...job.recipe, newIngredient]);
   }
 
   void _initIngredientRows() {
@@ -136,6 +138,8 @@ class _RecipeWidgetState extends State<RecipeWidget> {
       final updatedJob = job.copyWith(recipe: updatedRecipe);
       storageService.updateJob(updatedJob);
     });
+
+    widget.onIngredientsChanged(storageService.getJobs().first.recipe);
   }
 
   Widget buildQuantityDropdown(IngredientRow row, int index) {
@@ -155,6 +159,7 @@ class _RecipeWidgetState extends State<RecipeWidget> {
               row.quantityController.text = value.toString();
               _updateJobInStorage(index, value);
             });
+            widget.onIngredientsChanged(storageService.getJobs().first.recipe);
           }
         },
         validator: (value) {
