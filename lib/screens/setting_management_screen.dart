@@ -103,10 +103,16 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
       context: context,
       isScrollControlled: true,
       builder: (BuildContext context) {
-        return SearchBottomSheet(
-          onItemSelected: _addItem,
-          searchTypes: widget.searchTypes,
-        );
+        return widget.fieldName == 'bannedGenres'
+            ? BannedGenresBottomSheet(
+                job: widget.job,
+                updateJob: widget.updateJob,
+                jobIndex: widget.jobIndex,
+              )
+            : SearchBottomSheet(
+                onItemSelected: _addItem,
+                searchTypes: widget.searchTypes,
+              );
       },
     );
   }
@@ -170,25 +176,9 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
               style: Theme.of(context).textTheme.labelSmall,
             )
           : null,
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Switch(
-            value:
-                _switchValue, // Assuming each item has a boolean field to represent switch state
-            onChanged: (value) {
-              setState(() {
-                _switchValue =
-                    value; // your logic to set the item's switch state
-                _updateJob(); // ensure job is updated and widget rebuilds
-              });
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: () => _removeItem(_items.indexOf(item)),
-          ),
-        ],
+      trailing: IconButton(
+        icon: const Icon(Icons.delete),
+        onPressed: () => _removeItem(_items.indexOf(item)),
       ),
     );
   }
@@ -214,19 +204,13 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
       ),
       body: Column(
         children: [
-          widget.fieldName == 'bannedGenres'
-              ? BannedGenresBottomSheet(
-                  job: widget.job,
-                  updateJob: widget.updateJob,
-                  jobIndex: widget.jobIndex,
-                )
-              : Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ElevatedButton(
-                    onPressed: showSearchBottomSheet,
-                    child: const Text('Add New Item'),
-                  ),
-                ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ElevatedButton(
+              onPressed: showSearchBottomSheet,
+              child: const Text('Add New Item'),
+            ),
+          ),
           Expanded(
             child: ListView.builder(
               itemCount: _items.length,

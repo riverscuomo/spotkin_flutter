@@ -81,7 +81,6 @@ class _BannedGenresBottomSheetState extends State<BannedGenresBottomSheet> {
   Widget _buildArtistWidget(Artist artist) {
     final genres = artist.genres ?? [];
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -120,25 +119,16 @@ class _BannedGenresBottomSheetState extends State<BannedGenresBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.9, // 90% of screen height
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Banned Genres'),
-          automaticallyImplyLeading: false,
-        ),
-        body: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : _artistsInTargetPlaylist.isEmpty
-                ? const Center(
-                    child: Text(
-                        'Run Spotkin to generate a list of bannable genres.'))
-                : ListView.builder(
-                    itemCount: _artistsInTargetPlaylist.length,
-                    itemBuilder: (context, index) =>
-                        _buildArtistWidget(_artistsInTargetPlaylist[index]),
-                  ),
-      ),
+    return Column(
+      children: [
+        if (_isLoading)
+          const Center(child: CircularProgressIndicator())
+        else if (_artistsInTargetPlaylist.isEmpty)
+          const Center(
+              child: Text('Run Spotkin to generate a list of bannable genres.'))
+        else
+          ..._artistsInTargetPlaylist.map(_buildArtistWidget),
+      ],
     );
   }
 }
