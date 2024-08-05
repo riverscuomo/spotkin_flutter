@@ -32,6 +32,7 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
   List<dynamic> _searchResults = [];
   bool _isLoading = false;
   Timer? _debounceTimer;
+  late List<Artist> artistsInTargetPlaylist = [];
 
   @override
   void initState() {

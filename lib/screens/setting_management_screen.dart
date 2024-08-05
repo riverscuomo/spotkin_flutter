@@ -1,9 +1,10 @@
-import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:spotify/spotify.dart' hide Image;
 import 'package:spotkin_flutter/app_core.dart';
 
-class ListManagementScreen extends StatefulWidget {
+import '../widgets/bottom_sheets/banned_genres_bottom_sheet.dart';
+
+class SettingManagementScreen extends StatefulWidget {
   final String title;
   final Job job;
   final int jobIndex;
@@ -12,7 +13,7 @@ class ListManagementScreen extends StatefulWidget {
   final Function(int, Job) updateJob;
   final List<SearchType> searchTypes;
 
-  const ListManagementScreen({
+  const SettingManagementScreen({
     Key? key,
     required this.title,
     required this.job,
@@ -24,10 +25,11 @@ class ListManagementScreen extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _ListManagementScreenState createState() => _ListManagementScreenState();
+  _SettingManagementScreenState createState() =>
+      _SettingManagementScreenState();
 }
 
-class _ListManagementScreenState extends State<ListManagementScreen> {
+class _SettingManagementScreenState extends State<SettingManagementScreen> {
   late List<dynamic> _items = [];
   bool _switchValue = false;
 
@@ -96,7 +98,7 @@ class _ListManagementScreenState extends State<ListManagementScreen> {
     widget.updateJob(widget.jobIndex, updatedJob);
   }
 
-  void _showSearchBottomSheet() {
+  void showSearchBottomSheet() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -152,11 +154,11 @@ class _ListManagementScreenState extends State<ListManagementScreen> {
           height: 50,
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) =>
-              Icon(Icons.music_note, size: 50),
+              const Icon(Icons.music_note, size: 50),
         ),
       );
     } else {
-      leadingWidget = Icon(Icons.music_note, size: 50);
+      leadingWidget = const Icon(Icons.music_note, size: 50);
     }
 
     return ListTile(
@@ -212,13 +214,19 @@ class _ListManagementScreenState extends State<ListManagementScreen> {
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ElevatedButton(
-              onPressed: _showSearchBottomSheet,
-              child: const Text('Add New Item'),
-            ),
-          ),
+          widget.fieldName == 'bannedGenres'
+              ? BannedGenresBottomSheet(
+                  job: widget.job,
+                  updateJob: widget.updateJob,
+                  jobIndex: widget.jobIndex,
+                )
+              : Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ElevatedButton(
+                    onPressed: showSearchBottomSheet,
+                    child: const Text('Add New Item'),
+                  ),
+                ),
           Expanded(
             child: ListView.builder(
               itemCount: _items.length,

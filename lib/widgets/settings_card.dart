@@ -42,7 +42,7 @@ class _SettingsCardState extends State<SettingsCard> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ListManagementScreen(
+        builder: (context) => SettingManagementScreen(
           title: title,
           job: _job,
           jobIndex: widget.index,
