@@ -23,6 +23,7 @@ class _BannedGenresBottomSheetState extends State<BannedGenresBottomSheet> {
   List<String> _bannedGenres = [];
   List<Artist> _artistsInTargetPlaylist = [];
   bool _isLoading = true;
+  String? _feedbackMessage;
 
   @override
   void initState() {
@@ -69,6 +70,7 @@ class _BannedGenresBottomSheetState extends State<BannedGenresBottomSheet> {
       setState(() {
         _bannedGenres.add(genre);
         _updateJob();
+        _feedbackMessage = '$genre added to banned genres';
       });
     }
   }
@@ -80,42 +82,43 @@ class _BannedGenresBottomSheetState extends State<BannedGenresBottomSheet> {
 
   Widget _buildArtistWidget(Artist artist) {
     final genres = artist.genres ?? [];
-    return Card(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ListTile(
-            leading: artist.images?.isNotEmpty == true
-                ? CircleAvatar(
-                    backgroundImage: NetworkImage(artist.images!.first.url!))
-                : const CircleAvatar(child: Icon(Icons.person)),
-            title: Row(
-              children: [
-                Text(artist.name ?? 'Unknown Artist'),
-                genres.isNotEmpty
-                    ? Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: genres
-                              .take(3)
-                              .map((genre) => ElevatedButton.icon(
-                                    icon: const Icon(Icons.close, size: 18),
-                                    label: Text(genre),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.red,
-                                      foregroundColor: Colors.white,
-                                    ),
-                                    onPressed: () => _addGenreToBanned(genre),
-                                  ))
-                              .toList(),
-                        ),
-                      )
-                    : const SizedBox.shrink(),
-              ],
+    return ListTile(
+      leading: artist.images?.isNotEmpty == true
+          ? CircleAvatar(
+              backgroundImage: NetworkImage(artist.images!.first.url!),
+            )
+          : const CircleAvatar(
+              child: Icon(Icons.person),
             ),
-          ),
+      title: Row(
+        children: [
+          Text(artist.name ?? 'Unknown Artist'),
+          genres.isNotEmpty
+              ? Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: genres
+                        // .take(3)
+                        .map((genre) {
+                      return ElevatedButton(
+                        style: _bannedGenres.contains(genre)
+                            ? ElevatedButton.styleFrom(
+                                backgroundColor: Colors.grey[900],
+                                foregroundColor: Colors.white,
+                              )
+                            : ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red,
+                                foregroundColor: Colors.white,
+                              ),
+                        onPressed: () => _addGenreToBanned(genre),
+                        child: Text(genre),
+                      );
+                    }).toList(),
+                  ),
+                )
+              : const SizedBox.shrink(),
         ],
       ),
     );
@@ -124,7 +127,7 @@ class _BannedGenresBottomSheetState extends State<BannedGenresBottomSheet> {
   @override
   Widget build(BuildContext context) {
     return CustomBottomSheet(
-      title: const Text('Banned Genres'),
+      title: const Text('Genres in your Spotkin'),
       content: [
         if (_isLoading)
           const Center(child: CircularProgressIndicator())
