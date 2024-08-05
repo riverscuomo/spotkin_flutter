@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'bottom_sheet_content.dart';
+import 'spotkin_info_content.dart';
 
 class CustomBottomSheet extends StatelessWidget {
   final Widget title;
@@ -94,7 +94,7 @@ class CustomBottomSheet extends StatelessWidget {
 void showInfoBottomSheet(BuildContext context) {
   CustomBottomSheet.show(
     context: context,
-    title: Text('About Spotkin'),
+    title: const Text('About Spotkin'),
     content: infoSheetContent,
   );
 }

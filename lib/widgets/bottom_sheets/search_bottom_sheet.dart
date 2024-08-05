@@ -32,6 +32,7 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
   List<dynamic> _searchResults = [];
   bool _isLoading = false;
   Timer? _debounceTimer;
+  late List<Artist> artistsInTargetPlaylist = [];
 
   @override
   void initState() {
@@ -47,6 +48,13 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
         });
       });
     }
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _debounceTimer?.cancel();
+    super.dispose();
   }
 
   void _debounceSearch() {
@@ -224,46 +232,4 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
       ],
     );
   }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    _debounceTimer?.cancel();
-    super.dispose();
-  }
-
-  //   return Container(
-  //     height: MediaQuery.of(context).size.height * 0.8,
-  //     child: Column(
-  //       children: [
-  //         if (!widget.userPlaylistsOnly)
-  //           Padding(
-  //             padding: const EdgeInsets.all(8.0),
-  //             child: TextField(
-  //               controller: _searchController,
-  //               decoration: InputDecoration(
-  //                 hintText: 'Search...',
-  //                 prefixIcon: Icon(Icons.search),
-  //                 border: OutlineInputBorder(),
-  //               ),
-  //             ),
-  //           ),
-  //         Expanded(
-  //           child: _isLoading
-  //               ? Center(child: CircularProgressIndicator())
-  //               : _searchResults.isEmpty
-  //                   ? Center(
-  //                       child: Text(widget.userPlaylistsOnly
-  //                           ? 'No playlists found'
-  //                           : 'No results found'))
-  //                   : ListView.builder(
-  //                       itemCount: _searchResults.length,
-  //                       itemBuilder: (context, index) =>
-  //                           _buildListItem(_searchResults[index]),
-  //                     ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 }

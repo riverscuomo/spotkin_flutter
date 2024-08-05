@@ -268,23 +268,10 @@ class SpotifyService {
       print('No credentials found. Initiating login...');
       throw Exception('Not authenticated');
     }
-
     print('SPOTIFY SERVICE: Access token found. Initializing SpotifyApi...');
     _updateSpotifyInstance(credentials);
-    // _spotify = SpotifyApi(
-    //   SpotifyApiCredentials(
-    //     clientId,
-    //     clientSecret,
-    //     accessToken: credentials.accessToken,
-    //     scopes: scope.split(' '),
-    //     expiration: credentials.expiration,
-    //   ),
-    // );
     print('SpotifyApi initialized with access token: $credentials');
     await saveCredentials(credentials);
-
-    // If we've exhausted all retry attempts, throw an exception
-    throw Exception('Failed to authenticate after multiple attempts');
   }
 
   Future<PlaylistSimple> createPlaylist(String name, String description,
@@ -380,6 +367,12 @@ class SpotifyService {
     return await _spotify.artists.get(artistId);
   }
 
+  Future<List<Artist>> getArtists(List<String> artistIds) async {
+    await _ensureAuthenticated();
+    final artistsIterable = await _spotify.artists.list(artistIds);
+    return artistsIterable.toList();
+  }
+
   Future<Iterable<Track>> getPlaylistTracks(String playlistId) async {
     await _ensureAuthenticated();
     return await _spotify.playlists.getTracksByPlaylistId(playlistId).all();
@@ -423,20 +416,6 @@ class SpotifyService {
 }
 
 
-  // Iterable<T> _extractItems<T>(List<Page> pages) {
-  //   for (var page in pages) {
-  //     if (page is Page<T>) {
-  //       print('Extracting items of type $T, count: ${page.items?.length ?? 0}');
-  //       return page.items ?? [];
-  //     }
-  //   }
-  //   print('No items found of type $T');
-  //   return [];
-  // }
-
-
-
-  //     {int maxRetries = 2}) async {
   //   int attempts = 0;
   //   while (true) {
   //     try {
