@@ -89,29 +89,33 @@ class _BannedGenresBottomSheetState extends State<BannedGenresBottomSheet> {
                 ? CircleAvatar(
                     backgroundImage: NetworkImage(artist.images!.first.url!))
                 : const CircleAvatar(child: Icon(Icons.person)),
-            title: Text(artist.name ?? 'Unknown Artist'),
-            subtitle: Text('Popularity: ${artist.popularity ?? 'N/A'}'),
-          ),
-          if (genres.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: genres
-                    .take(3)
-                    .map((genre) => ElevatedButton.icon(
-                          icon: const Icon(Icons.close, size: 18),
-                          label: Text(genre),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
-                            foregroundColor: Colors.white,
-                          ),
-                          onPressed: () => _addGenreToBanned(genre),
-                        ))
-                    .toList(),
-              ),
+            title: Row(
+              children: [
+                Text(artist.name ?? 'Unknown Artist'),
+                genres.isNotEmpty
+                    ? Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: genres
+                              .take(3)
+                              .map((genre) => ElevatedButton.icon(
+                                    icon: const Icon(Icons.close, size: 18),
+                                    label: Text(genre),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.red,
+                                      foregroundColor: Colors.white,
+                                    ),
+                                    onPressed: () => _addGenreToBanned(genre),
+                                  ))
+                              .toList(),
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+              ],
             ),
+          ),
         ],
       ),
     );
@@ -119,8 +123,9 @@ class _BannedGenresBottomSheetState extends State<BannedGenresBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
+    return CustomBottomSheet(
+      title: const Text('Banned Genres'),
+      content: [
         if (_isLoading)
           const Center(child: CircularProgressIndicator())
         else if (_artistsInTargetPlaylist.isEmpty)

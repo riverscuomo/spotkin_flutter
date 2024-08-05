@@ -94,7 +94,7 @@ class CustomBottomSheet extends StatelessWidget {
 void showInfoBottomSheet(BuildContext context) {
   CustomBottomSheet.show(
     context: context,
-    title: Text('About Spotkin'),
+    title: const Text('About Spotkin'),
     content: infoSheetContent,
   );
 }
