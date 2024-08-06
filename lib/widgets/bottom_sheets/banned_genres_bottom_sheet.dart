@@ -5,7 +5,7 @@ import 'package:spotkin_flutter/app_core.dart';
 class BannedGenresBottomSheet extends StatefulWidget {
   final Job job;
   final int jobIndex;
-  final Function(int, Job) updateJob;
+  final Function(Job) updateJob;
 
   const BannedGenresBottomSheet({
     Key? key,
@@ -20,7 +20,7 @@ class BannedGenresBottomSheet extends StatefulWidget {
 }
 
 class _BannedGenresBottomSheetState extends State<BannedGenresBottomSheet> {
-  List<String> _bannedGenres = [];
+  late List<String> _bannedGenres;
   List<Artist> _artistsInTargetPlaylist = [];
   bool _isLoading = true;
   String? _feedbackMessage;
@@ -28,8 +28,23 @@ class _BannedGenresBottomSheetState extends State<BannedGenresBottomSheet> {
   @override
   void initState() {
     super.initState();
-    _bannedGenres = widget.job.bannedGenres;
+    _bannedGenres = List.from(widget.job.bannedGenres);
     _getPlaylistArtists();
+  }
+
+  void _addGenreToBanned(String genre) {
+    if (!_bannedGenres.contains(genre)) {
+      setState(() {
+        _bannedGenres.add(genre);
+        _updateJob();
+        _feedbackMessage = '$genre added to banned genres';
+      });
+    }
+  }
+
+  void _updateJob() {
+    final updatedJob = widget.job.copyWith(bannedGenres: _bannedGenres);
+    widget.updateJob(updatedJob);
   }
 
   void _getPlaylistArtists() async {
@@ -63,21 +78,6 @@ class _BannedGenresBottomSheetState extends State<BannedGenresBottomSheet> {
         _isLoading = false;
       });
     }
-  }
-
-  void _addGenreToBanned(String genre) {
-    if (!_bannedGenres.contains(genre)) {
-      setState(() {
-        _bannedGenres.add(genre);
-        _updateJob();
-        _feedbackMessage = '$genre added to banned genres';
-      });
-    }
-  }
-
-  void _updateJob() {
-    final updatedJob = widget.job.copyWith(bannedGenres: _bannedGenres);
-    widget.updateJob(widget.jobIndex, updatedJob);
   }
 
   Widget _buildArtistWidget(Artist artist) {

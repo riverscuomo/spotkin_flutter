@@ -30,71 +30,49 @@ class SettingManagementScreen extends StatefulWidget {
 }
 
 class _SettingManagementScreenState extends State<SettingManagementScreen> {
+  late Job _job;
   late List<dynamic> _items = [];
-  bool _switchValue = false;
 
   @override
   void initState() {
     super.initState();
+    _job = widget.job;
     _items = _getItems();
+  }
+
+  @override
+  void didUpdateWidget(SettingManagementScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.job != oldWidget.job) {
+      setState(() {
+        _job = widget.job;
+        _items = _getItems();
+      });
+    }
   }
 
   List<dynamic> _getItems() {
     switch (widget.fieldName) {
       case 'bannedArtists':
-        return widget.job.bannedArtists;
+        return _job.bannedArtists;
       case 'bannedTracks':
-        return widget.job.bannedTracks;
+        return _job.bannedTracks;
       case 'bannedGenres':
-        return widget.job.bannedGenres;
+        return _job.bannedGenres;
       case 'exceptionsToBannedGenres':
-        return widget.job.exceptionsToBannedGenres;
+        return _job.exceptionsToBannedGenres;
       case 'lastTracks':
-        return widget.job.lastTracks;
+        return _job.lastTracks;
       default:
         return [];
     }
   }
 
-  void _addItem(dynamic item) {
+  void _updateJobAndState(Job updatedJob) {
     setState(() {
-      if (!_items.any((existingItem) => existingItem.id == item.id)) {
-        _items.add(item);
-        _updateJob();
-      }
+      _job = updatedJob;
+      _items = _getItems();
     });
-  }
-
-  void _removeItem(int index) {
-    setState(() {
-      _items.removeAt(index);
-      _updateJob();
-    });
-  }
-
-  void _updateJob() {
-    Job updatedJob;
-    final fieldName = widget.fieldName;
-    switch (fieldName) {
-      case 'bannedArtists':
-        updatedJob = widget.job.copyWith(bannedArtists: _items as List<Artist>);
-        break;
-      case 'bannedTracks':
-        updatedJob = widget.job.copyWith(bannedTracks: _items as List<Track>);
-        break;
-      case 'bannedGenres':
-        updatedJob = widget.job.copyWith(bannedGenres: _items as List<String>);
-        break;
-      case 'exceptionsToBannedGenres':
-        updatedJob = widget.job
-            .copyWith(exceptionsToBannedGenres: _items as List<Artist>);
-        break;
-      case 'lastTracks':
-        updatedJob = widget.job.copyWith(lastTracks: _items as List<Track>);
-        break;
-      default:
-        return;
-    }
     widget.updateJob(widget.jobIndex, updatedJob);
   }
 
@@ -105,8 +83,8 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
       builder: (BuildContext context) {
         return widget.fieldName == 'bannedGenres'
             ? BannedGenresBottomSheet(
-                job: widget.job,
-                updateJob: widget.updateJob,
+                job: _job,
+                updateJob: _updateJobAndState,
                 jobIndex: widget.jobIndex,
               )
             : SearchBottomSheet(
@@ -115,6 +93,22 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
               );
       },
     );
+  }
+
+  void _addItem(dynamic item) {
+    setState(() {
+      if (!_items.any((existingItem) => existingItem.id == item.id)) {
+        _items.add(item);
+        _updateJobAndState(_job);
+      }
+    });
+  }
+
+  void _removeItem(int index) {
+    setState(() {
+      _items.removeAt(index);
+      _updateJobAndState(_job);
+    });
   }
 
   Widget _buildListItem(dynamic item) {
