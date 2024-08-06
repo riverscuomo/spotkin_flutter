@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:spotify/spotify.dart';
 import 'package:spotkin_flutter/app_core.dart';
-import '../widgets/info_button.dart';
-import '../widgets/playlist_image_icon.dart';
 import '../widgets/spotify_button.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -198,7 +196,6 @@ class _HomeScreenState extends State<HomeScreen> {
               Column(
                 children: [
                   Material(
-                    // color: Theme.of(context).cardColor,
                     elevation: 1,
                     borderRadius: BorderRadius.circular(12.0),
                     child: ClipRRect(

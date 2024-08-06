@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:spotify/spotify.dart';
+import 'package:spotify/spotify.dart' hide Image;
 import 'package:spotkin_flutter/app_core.dart';
 
 class SpotifyStylePlaylistTile extends StatelessWidget {
@@ -24,7 +24,7 @@ class SpotifyStylePlaylistTile extends StatelessWidget {
         }
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
         child: Row(
           children: [
             PlaylistImageIcon(playlist: playlist),
@@ -48,3 +48,71 @@ class SpotifyStylePlaylistTile extends StatelessWidget {
     );
   }
 }
+
+class PlaylistImageIcon extends StatelessWidget {
+  final PlaylistSimple playlist;
+  final double size;
+
+  const PlaylistImageIcon({
+    Key? key,
+    required this.playlist,
+    this.size = 56,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final imageUrl =
+        playlist.images?.isNotEmpty == true ? playlist.images!.first.url : null;
+
+    return SizedBox(
+      width: size,
+      height: size,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: imageUrl != null
+            ? Image.network(
+                imageUrl,
+                width: size,
+                height: size,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) =>
+                    _buildPlaceholder(),
+              )
+            : _buildPlaceholder(),
+      ),
+    );
+  }
+
+  Widget _buildPlaceholder() {
+    return Container(
+      width: size,
+      height: size,
+      color: Colors.grey[300],
+      child: Icon(
+        Icons.music_note,
+        size: size * 0.5,
+        color: Colors.grey[600],
+      ),
+    );
+  }
+}
+
+// class PlaylistImageIcon extends StatelessWidget {
+//   const PlaylistImageIcon({super.key, required this.playlist, this.size = 56});
+
+//   final PlaylistSimple playlist;
+//   final double? size;
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       width: size,
+//       height: size,
+//       decoration: BoxDecoration(
+//         color: Colors.grey[800],
+//         borderRadius: BorderRadius.circular(4),
+//       ),
+//       child: Utils.getPlaylistImageOrIcon(playlist),
+//     );
+//   }
+// }
