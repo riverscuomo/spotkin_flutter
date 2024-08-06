@@ -27,7 +27,7 @@ const infoSheetContent = [
       'You can also specify artists, tracks, genres, and energy levels to include or exclude from your target playlist.'),
   SizedBox(height: 10),
   Text(
-      'Spotkin processes your recipes and updates your playlists with new music when you click the "Update Spotkin On Spotify" button.'),
+      'Spotkin processes your recipes and updates your playlists with new music when you click the "Update" button.'),
   SizedBox(height: 10),
   Text(
       'This tool helps keep your listening fresh and exciting by automatically updating them with new music tailored to your preferences.'),
