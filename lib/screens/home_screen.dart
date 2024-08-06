@@ -175,6 +175,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final job = jobs.isEmpty ? Job.empty() : jobs[0];
     final targetPlaylist = job.targetPlaylist;
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
         title: const Text('Spotkin'),
         titleTextStyle: Theme.of(context).textTheme.titleLarge,
@@ -213,60 +214,66 @@ class _HomeScreenState extends State<HomeScreen> {
                         size: 160,
                       ),
                       const SizedBox(height: 16),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  PlaylistTitle(context, targetPlaylist,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleLarge),
-                                  const SizedBox(height: 5),
-                                  Row(
-                                    children: [
-                                      playlistSubtitle(targetPlaylist, context),
-                                      const SizedBox(width: 10),
-                                      if (jobResults.isNotEmpty)
-                                        Text(
-                                          jobResults[0]['result'],
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .labelMedium!
-                                              .copyWith(
-                                                  fontStyle: FontStyle.italic),
+                      jobs.isEmpty
+                          ? const SizedBox()
+                          : Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        PlaylistTitle(context, targetPlaylist,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .titleLarge),
+                                        const SizedBox(height: 5),
+                                        Row(
+                                          children: [
+                                            playlistSubtitle(
+                                                targetPlaylist, context),
+                                            const SizedBox(width: 10),
+                                            if (jobResults.isNotEmpty)
+                                              Text(
+                                                jobResults[0]['result'],
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .labelMedium!
+                                                    .copyWith(
+                                                        fontStyle:
+                                                            FontStyle.italic),
+                                              ),
+                                            const SizedBox(width: 10),
+                                            if (jobResults.isNotEmpty)
+                                              Icon(
+                                                size: 14,
+                                                jobResults[0]['status'] ==
+                                                        'Success'
+                                                    ? Icons.check_circle
+                                                    : Icons.error,
+                                                color: jobResults[0]
+                                                            ['status'] ==
+                                                        'Success'
+                                                    ? Colors.green
+                                                    : Colors.red,
+                                              ),
+                                          ],
                                         ),
-                                      const SizedBox(width: 10),
-                                      if (jobResults.isNotEmpty)
-                                        Icon(
-                                          size: 14,
-                                          jobResults[0]['status'] == 'Success'
-                                              ? Icons.check_circle
-                                              : Icons.error,
-                                          color: jobResults[0]['status'] ==
-                                                  'Success'
-                                              ? Colors.green
-                                              : Colors.red,
-                                        ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              SpotifyButton(
-                                  isProcessing: isProcessing,
-                                  processJobs: _processJobs),
-                            ],
-                          )
-                        ],
-                      )
+                                      ],
+                                    ),
+                                    SpotifyButton(
+                                        isProcessing: isProcessing,
+                                        processJobs: _processJobs),
+                                  ],
+                                )
+                              ],
+                            )
                     ]),
-                    // leading: ,
-                    // subtitle: ,
                     initiallyExpanded: _isExpanded,
                     onExpansionChanged: (expanded) {
                       setState(() {
@@ -288,10 +295,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-      // bottomNavigationBar: jobs.isNotEmpty && jobs[0].recipe.isNotEmpty
-      //     ? SpotifyButton(isProcessing: isProcessing, processJobs: _processJobs)
-      //     : null,
-      backgroundColor: Colors.black,
     );
   }
 }
