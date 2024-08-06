@@ -162,6 +162,14 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _refreshJobs() {
+    _loadJobs();
+    setState(() {
+      _isExpanded = jobs.isEmpty;
+      _expansionTileKey = UniqueKey();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final job = jobs.isEmpty ? Job.empty() : jobs[0];
@@ -181,6 +189,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   builder: (context) => SettingsScreen(
                     jobs: jobs,
                     updateJob: updateJob,
+                    onJobsImported: _refreshJobs,
                   ),
                 ),
               );

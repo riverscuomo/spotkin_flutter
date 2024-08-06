@@ -6,11 +6,13 @@ class SettingsScreen extends StatelessWidget {
   final Function(int, Job) updateJob;
   final StorageService storageService = StorageService();
   late final BackupService backupService;
+  final VoidCallback onJobsImported;
 
   SettingsScreen({
     Key? key,
     required this.jobs,
     required this.updateJob,
+    required this.onJobsImported,
   }) : super(key: key) {
     backupService = BackupService(storageService);
   }
@@ -27,7 +29,7 @@ class SettingsScreen extends StatelessWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Backup imported and jobs updated.')),
     );
-    // You might want to refresh the jobs list here or in the parent widget
+    onJobsImported();
   }
 
   @override
