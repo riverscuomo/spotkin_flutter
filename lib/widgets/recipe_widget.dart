@@ -41,34 +41,6 @@ class _RecipeWidgetState extends State<RecipeWidget> {
     super.dispose();
   }
 
-  void _addNewRow(PlaylistSimple playlist, Job job) {
-    // Check if the playlist already exists in the recipe
-    if (job.recipe.any((ingredient) => ingredient.playlist.id == playlist.id)) {
-      // Show a snackbar or alert to inform the user
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('This playlist is already in the recipe')),
-      );
-      return;
-    }
-
-    Ingredient newIngredient = Ingredient(
-      playlist: playlist,
-      quantity: 5,
-    );
-
-    storageService.updateJob(job.copyWith(
-      recipe: [...job.recipe, newIngredient],
-    ));
-    setState(() {
-      _ingredientRows.add(IngredientRow(
-        playlist: playlist,
-        quantityController: TextEditingController(),
-      ));
-    });
-
-    widget.onIngredientsChanged([...job.recipe, newIngredient]);
-  }
-
   void _initIngredientRows() {
     _ingredientRows = widget.initialIngredients
         .map((ingredient) => IngredientRow(
@@ -77,6 +49,17 @@ class _RecipeWidgetState extends State<RecipeWidget> {
               playlist: ingredient.playlist,
             ))
         .toList();
+    _sortIngredientRows();
+  }
+
+  void _sortIngredientRows() {
+    setState(() {
+      _ingredientRows.sort((a, b) {
+        int quantityA = int.tryParse(a.quantityController.text) ?? 0;
+        int quantityB = int.tryParse(b.quantityController.text) ?? 0;
+        return quantityB.compareTo(quantityA);
+      });
+    });
   }
 
   @override
@@ -87,9 +70,86 @@ class _RecipeWidgetState extends State<RecipeWidget> {
     }
   }
 
-  Future<bool> _handleDismiss(DismissDirection direction, int index) async {
+  void _addNewRow(PlaylistSimple playlist, Job job) {
+    if (job.recipe.any((ingredient) => ingredient.playlist.id == playlist.id)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('This playlist is already in the recipe')),
+      );
+      return;
+    }
+
+    Ingredient newIngredient = Ingredient(
+      playlist: playlist,
+      quantity: 5,
+    );
+
+    setState(() {
+      _ingredientRows.add(IngredientRow(
+        playlist: playlist,
+        quantityController: TextEditingController(text: '5'),
+      ));
+      _sortIngredientRows();
+    });
+
+    final updatedJob = job.copyWith(recipe: [...job.recipe, newIngredient]);
+    storageService.updateJob(updatedJob);
+    widget.onIngredientsChanged(updatedJob.recipe);
+  }
+
+  void _updateJobInStorage(String playlistId, int newQuantity) {
+    final job = storageService.getJobs().first;
+    final updatedRecipe = job.recipe.map((ingredient) {
+      if (ingredient.playlist.id == playlistId) {
+        return ingredient.copyWith(quantity: newQuantity);
+      }
+      return ingredient;
+    }).toList();
+
+    final updatedJob = job.copyWith(recipe: updatedRecipe);
+    storageService.updateJob(updatedJob);
+
+    setState(() {
+      for (var row in _ingredientRows) {
+        if (row.playlist?.id == playlistId) {
+          row.quantityController.text = newQuantity.toString();
+          break;
+        }
+      }
+      _sortIngredientRows();
+    });
+
+    widget.onIngredientsChanged(updatedJob.recipe);
+  }
+
+  Widget buildQuantityDropdown(IngredientRow row) {
+    return SizedBox(
+      width: 70,
+      child: DropdownButtonFormField<int>(
+        value: int.tryParse(row.quantityController.text) ?? 5,
+        items: List.generate(21, (index) {
+          return DropdownMenuItem<int>(
+            value: index,
+            child: Text(index.toString()),
+          );
+        }),
+        onChanged: (value) {
+          if (value != null && row.playlist != null) {
+            _updateJobInStorage(row.playlist!.id!, value);
+          }
+        },
+        validator: (value) {
+          if (value == null) {
+            return 'Please select a quantity';
+          }
+          return null;
+        },
+      ),
+    );
+  }
+
+  Future<bool> _handleDismiss(
+      DismissDirection direction, String playlistId) async {
     if (direction == DismissDirection.endToStart) {
-      // Right swipe: confirm and remove the ingredient
       bool confirmDelete = await showDialog(
             context: context,
             builder: (BuildContext context) {
@@ -113,76 +173,32 @@ class _RecipeWidgetState extends State<RecipeWidget> {
           false;
 
       if (confirmDelete) {
-        _removeIngredient(index);
+        _removeIngredient(playlistId);
         return true;
       }
     } else if (direction == DismissDirection.startToEnd) {
-      // Left swipe: set quantity to zero (archive)
-      _updateJobInStorage(index, 0);
-      setState(() {
-        _ingredientRows[index].quantityController.text = '0';
-      });
-      // Show a snackbar to inform the user
+      _updateJobInStorage(playlistId, 0);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Playlist archived (quantity set to 0)')),
+        const SnackBar(content: Text('Playlist archived (quantity set to 0)')),
       );
     }
-    return false; // Don't dismiss the item
+    return false;
   }
 
-  void _removeIngredient(int index) {
-    setState(() {
-      _ingredientRows.removeAt(index);
-      final job = storageService.getJobs().first;
-      final updatedRecipe = List<Ingredient>.from(job.recipe)..removeAt(index);
-      final updatedJob = job.copyWith(recipe: updatedRecipe);
-      storageService.updateJob(updatedJob);
-    });
-
-    widget.onIngredientsChanged(storageService.getJobs().first.recipe);
-  }
-
-  Widget buildQuantityDropdown(IngredientRow row, int index) {
-    return SizedBox(
-      width: 70,
-      child: DropdownButtonFormField<int>(
-        value: int.tryParse(row.quantityController.text) ?? 5,
-        items: List.generate(21, (index) {
-          return DropdownMenuItem<int>(
-            value: index,
-            child: Text(index.toString()),
-          );
-        }),
-        onChanged: (value) {
-          if (value != null) {
-            setState(() {
-              row.quantityController.text = value.toString();
-              _updateJobInStorage(index, value);
-            });
-            widget.onIngredientsChanged(storageService.getJobs().first.recipe);
-          }
-        },
-        validator: (value) {
-          if (value == null) {
-            return 'Please select a quantity';
-          }
-          return null;
-        },
-        // decoration: const InputDecoration(
-        //   isDense: true,
-        //   contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        // ),
-      ),
-    );
-  }
-
-  void _updateJobInStorage(int index, int newQuantity) {
+  void _removeIngredient(String playlistId) {
     final job = storageService.getJobs().first;
-    final updatedRecipe = List<Ingredient>.from(job.recipe);
-    updatedRecipe[index] = updatedRecipe[index].copyWith(quantity: newQuantity);
-
+    final updatedRecipe = job.recipe
+        .where((ingredient) => ingredient.playlist.id != playlistId)
+        .toList();
     final updatedJob = job.copyWith(recipe: updatedRecipe);
     storageService.updateJob(updatedJob);
+
+    setState(() {
+      _ingredientRows.removeWhere((row) => row.playlist?.id == playlistId);
+      _sortIngredientRows();
+    });
+
+    widget.onIngredientsChanged(updatedJob.recipe);
   }
 
   @override
@@ -194,24 +210,23 @@ class _RecipeWidgetState extends State<RecipeWidget> {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             IconButton(
-              icon: const Icon(
-                Icons.add,
-              ),
+              icon: const Icon(Icons.add),
               onPressed: () async {
                 showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    builder: (BuildContext context) {
-                      return SearchBottomSheet(
-                        onItemSelected: (dynamic item) {
-                          if (item is PlaylistSimple) {
-                            _addNewRow(item, storageService.getJobs().first);
-                          }
-                        },
-                        searchTypes: const [SearchType.playlist],
-                        title: 'Add a playlist',
-                      );
-                    });
+                  context: context,
+                  isScrollControlled: true,
+                  builder: (BuildContext context) {
+                    return SearchBottomSheet(
+                      onItemSelected: (dynamic item) {
+                        if (item is PlaylistSimple) {
+                          _addNewRow(item, storageService.getJobs().first);
+                        }
+                      },
+                      searchTypes: const [SearchType.playlist],
+                      title: 'Add a playlist',
+                    );
+                  },
+                );
               },
             ),
           ],
@@ -226,21 +241,19 @@ class _RecipeWidgetState extends State<RecipeWidget> {
             ),
           )
         else
-          ..._ingredientRows.asMap().entries.map((entry) {
-            int index = entry.key;
-            IngredientRow row = entry.value;
+          ..._ingredientRows.map((row) {
             final playlist = row.playlist;
             if (playlist == null) {
               return const SizedBox.shrink();
             }
             return Dismissible(
-              key: ValueKey('${playlist.id}_$index'),
+              key: ValueKey(playlist.id),
               background: Container(
                 color: Colors.orange,
                 alignment: Alignment.centerLeft,
                 padding: const EdgeInsets.only(left: 20.0),
-                child: Row(
-                  children: const [
+                child: const Row(
+                  children: [
                     Icon(Icons.archive, color: Colors.white),
                     SizedBox(width: 8),
                     Text('Archive', style: TextStyle(color: Colors.white)),
@@ -251,19 +264,20 @@ class _RecipeWidgetState extends State<RecipeWidget> {
                 color: Colors.red,
                 alignment: Alignment.centerRight,
                 padding: const EdgeInsets.only(right: 20.0),
-                child: Row(
+                child: const Row(
                   mainAxisAlignment: MainAxisAlignment.end,
-                  children: const [
+                  children: [
                     Text('Delete', style: TextStyle(color: Colors.white)),
                     SizedBox(width: 8),
                     Icon(Icons.delete, color: Colors.white),
                   ],
                 ),
               ),
-              confirmDismiss: (direction) => _handleDismiss(direction, index),
+              confirmDismiss: (direction) =>
+                  _handleDismiss(direction, playlist.id!),
               child: SpotifyStylePlaylistTile(
                 playlist: playlist,
-                trailingButton: buildQuantityDropdown(row, index),
+                trailingButton: buildQuantityDropdown(row),
               ),
             );
           }),

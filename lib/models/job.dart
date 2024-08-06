@@ -32,7 +32,8 @@ class Job {
           json['target_playlist'] as Map<String, dynamic>),
       description: json['description'] ?? '',
       removeLowEnergy: json['remove_low_energy'] == true,
-      lastTracks: List<Track>.from(json['last_tracks'] ?? []),
+      lastTracks: List<Track>.from(
+          json['last_tracks']?.map((x) => Track.fromJson(x)) ?? []),
       bannedArtists: List<Artist>.from(
           json['banned_artists']?.map((x) => Artist.fromJson(x)) ?? []),
       bannedTracks: List<Track>.from(
