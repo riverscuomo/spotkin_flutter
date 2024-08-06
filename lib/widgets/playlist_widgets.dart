@@ -43,10 +43,11 @@ Widget playlistSubtitle(PlaylistSimple playlist, BuildContext context) {
       : const SizedBox();
 }
 
-Text PlaylistTitle(BuildContext context, PlaylistSimple playlist) {
+Text PlaylistTitle(BuildContext context, PlaylistSimple playlist,
+    {TextStyle? style}) {
   return Text(
     playlist.name ?? 'Unknown Playlist',
-    style: Theme.of(context).textTheme.titleMedium,
+    style: style,
     overflow: TextOverflow.ellipsis,
     maxLines: 1,
   );
