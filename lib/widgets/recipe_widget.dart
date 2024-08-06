@@ -278,6 +278,7 @@ class _RecipeWidgetState extends State<RecipeWidget> {
               child: SpotifyStylePlaylistTile(
                 playlist: playlist,
                 trailingButton: buildQuantityDropdown(row),
+                active: row.quantityController.text != '0',
               ),
             );
           }),

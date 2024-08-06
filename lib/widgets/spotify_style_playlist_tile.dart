@@ -6,16 +6,20 @@ class SpotifyStylePlaylistTile extends StatelessWidget {
   final PlaylistSimple playlist;
   final Widget? trailingButton;
   final VoidCallback? onTileTapped;
+  final bool active;
 
   const SpotifyStylePlaylistTile({
     Key? key,
     required this.playlist,
     this.trailingButton,
     this.onTileTapped,
+    this.active = true,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    var style = Theme.of(context).textTheme.titleMedium;
+    if (!active) style = style!.copyWith(color: Colors.grey[600]);
     return InkWell(
       onTap: () {
         final url = playlist.externalUrls!.spotify;
@@ -34,9 +38,12 @@ class SpotifyStylePlaylistTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  PlaylistTitle(context, playlist,
-                      style: Theme.of(context).textTheme.titleMedium),
-                  playlistSubtitle(playlist, context)
+                  PlaylistTitle(
+                    context,
+                    playlist,
+                    style: style,
+                  ),
+                  playlistSubtitle(playlist, context),
                 ],
               ),
             ),
