@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/widgets.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:spotkin_flutter/app_core.dart';
 
@@ -99,24 +100,27 @@ final spotifyThemeData = ThemeData(
     textTheme: ButtonTextTheme.primary,
     // padding: const EdgeInsets.all(16.0),
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(25),
+      borderRadius: BorderRadius.circular(20),
     ),
   ),
   expansionTileTheme: ExpansionTileThemeData(
     backgroundColor: spotifyWidgetColor,
     collapsedBackgroundColor: spotifyWidgetColor,
-    textColor: Colors.white,
-    collapsedTextColor: Colors.white,
-    iconColor: Colors.white,
-    collapsedIconColor: Colors.white,
-    // shape: RoundedRectangleBorder(
-    //   borderRadius: BorderRadius.circular(4),
-    //   // side: BorderSide(color: Colors.white24),
-    // ),
+    collapsedShape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(20),
+    ),
+    // textColor: Colors.white,
+    // collapsedTextColor: Colors.white,
+    // iconColor: Colors.white,
+    // collapsedIconColor: Colors.white,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(25),
+      // side: BorderSide(color: Colors.white24),
+    ),
   ),
   textTheme: TextTheme(
-    titleLarge:
-        const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+    titleLarge: const TextStyle(
+        color: Colors.white, fontWeight: FontWeight.bold, fontSize: 28),
     bodyMedium: const TextStyle(color: Colors.white70),
     // titleMedium: TextStyle(color: Colors.white54),
     labelMedium: TextStyle(color: Colors.grey[400]),
