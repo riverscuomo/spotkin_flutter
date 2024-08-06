@@ -34,7 +34,8 @@ class SpotifyStylePlaylistTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  PlaylistTitle(context, playlist),
+                  PlaylistTitle(context, playlist,
+                      style: Theme.of(context).textTheme.titleMedium),
                   playlistSubtitle(playlist, context)
                 ],
               ),
@@ -64,21 +65,26 @@ class PlaylistImageIcon extends StatelessWidget {
     final imageUrl =
         playlist.images?.isNotEmpty == true ? playlist.images!.first.url : null;
 
-    return SizedBox(
-      width: size,
-      height: size,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: imageUrl != null
-            ? Image.network(
-                imageUrl,
-                width: size,
-                height: size,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) =>
-                    _buildPlaceholder(),
-              )
-            : _buildPlaceholder(),
+    return InkWell(
+      onTap: () {
+        Utils.myLaunch(playlist.externalUrls?.spotify ?? '');
+      },
+      child: SizedBox(
+        width: size,
+        height: size,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: imageUrl != null
+              ? Image.network(
+                  imageUrl,
+                  width: size,
+                  height: size,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) =>
+                      _buildPlaceholder(),
+                )
+              : _buildPlaceholder(),
+        ),
       ),
     );
   }
