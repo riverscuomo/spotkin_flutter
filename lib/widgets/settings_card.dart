@@ -21,13 +21,22 @@ class SettingsCard extends StatefulWidget {
 }
 
 class _SettingsCardState extends State<SettingsCard> {
-  late StorageService _storageService;
   late Job _job;
 
   @override
   void initState() {
     super.initState();
     _job = widget.job;
+  }
+
+  @override
+  void didUpdateWidget(SettingsCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.job != oldWidget.job) {
+      setState(() {
+        _job = widget.job;
+      });
+    }
   }
 
   void updateJob(Job updatedJob) {
@@ -37,7 +46,7 @@ class _SettingsCardState extends State<SettingsCard> {
     widget.updateJob(widget.index, updatedJob);
   }
 
-  void _navigateToListScreen(BuildContext context, String title,
+  void _navigateSettingManagementScreen(BuildContext context, String title,
       String fieldName, String tooltip, List<SearchType> searchTypes) {
     Navigator.push(
       context,
@@ -48,11 +57,21 @@ class _SettingsCardState extends State<SettingsCard> {
           jobIndex: widget.index,
           fieldName: fieldName,
           tooltip: tooltip,
-          updateJob: widget.updateJob, // Pass the function from the widget
+          updateJob: (index, updatedJob) {
+            widget.updateJob(index, updatedJob);
+            setState(() {
+              _job = updatedJob;
+            });
+          },
           searchTypes: searchTypes,
         ),
       ),
-    );
+    ).then((_) {
+      // Refresh the state when returning from SettingManagementScreen
+      setState(() {
+        _job = widget.job;
+      });
+    });
   }
 
   void _navigateToEditDescriptionScreen(BuildContext context, Job job) {
@@ -70,7 +89,6 @@ class _SettingsCardState extends State<SettingsCard> {
 
   @override
   Widget build(BuildContext context) {
-    final job = _job;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(8),
@@ -79,9 +97,9 @@ class _SettingsCardState extends State<SettingsCard> {
           children: [
             ListTile(
               title:
-                  SettingsRowTitle('Banned Artists', job.bannedArtists.length),
+                  SettingsRowTitle('Banned Artists', _job.bannedArtists.length),
               trailing: const Icon(Icons.chevron_right),
-              onTap: () => _navigateToListScreen(
+              onTap: () => _navigateSettingManagementScreen(
                 context,
                 'Banned Artists',
                 'bannedArtists',
@@ -90,9 +108,9 @@ class _SettingsCardState extends State<SettingsCard> {
               ),
             ),
             ListTile(
-              title: SettingsRowTitle('Banned Songs', job.bannedTracks.length),
+              title: SettingsRowTitle('Banned Songs', _job.bannedTracks.length),
               trailing: const Icon(Icons.chevron_right),
-              onTap: () => _navigateToListScreen(
+              onTap: () => _navigateSettingManagementScreen(
                 context,
                 'Banned Songs',
                 'bannedTracks',
@@ -101,9 +119,10 @@ class _SettingsCardState extends State<SettingsCard> {
               ),
             ),
             ListTile(
-              title: SettingsRowTitle('Banned Genres', job.bannedGenres.length),
+              title:
+                  SettingsRowTitle('Banned Genres', _job.bannedGenres.length),
               trailing: const Icon(Icons.chevron_right),
-              onTap: () => _navigateToListScreen(
+              onTap: () => _navigateSettingManagementScreen(
                 context,
                 'Banned Genres',
                 'bannedGenres',
@@ -113,9 +132,9 @@ class _SettingsCardState extends State<SettingsCard> {
             ),
             ListTile(
               title: SettingsRowTitle('Exceptions to Banned Genres',
-                  job.exceptionsToBannedGenres.length),
+                  _job.exceptionsToBannedGenres.length),
               trailing: const Icon(Icons.chevron_right),
-              onTap: () => _navigateToListScreen(
+              onTap: () => _navigateSettingManagementScreen(
                 context,
                 'Exceptions to Banned Genres',
                 'exceptionsToBannedGenres',
@@ -124,9 +143,9 @@ class _SettingsCardState extends State<SettingsCard> {
               ),
             ),
             ListTile(
-              title: SettingsRowTitle('Last Songs', job.lastTracks.length),
+              title: SettingsRowTitle('Last Songs', _job.lastTracks.length),
               trailing: const Icon(Icons.chevron_right),
-              onTap: () => _navigateToListScreen(
+              onTap: () => _navigateSettingManagementScreen(
                 context,
                 'Last Songs',
                 'lastTracks',
@@ -140,7 +159,7 @@ class _SettingsCardState extends State<SettingsCard> {
                 'Tracks with low energy will be removed from your Spotify playlist',
                 style: Theme.of(context).textTheme.labelSmall,
               ),
-              value: job.removeLowEnergy,
+              value: _job.removeLowEnergy,
               inactiveTrackColor: Colors.grey,
               onChanged: (value) => updateJob(
                 _job.copyWith(removeLowEnergy: value),
@@ -150,7 +169,7 @@ class _SettingsCardState extends State<SettingsCard> {
               title: const Text('Description'),
               trailing: const Icon(Icons.edit),
               onTap: () {
-                _navigateToEditDescriptionScreen(context, job);
+                _navigateToEditDescriptionScreen(context, _job);
               },
             ),
           ],
