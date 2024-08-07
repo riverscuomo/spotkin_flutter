@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:spotify/spotify.dart';
 import 'package:spotkin_flutter/app_core.dart';
-import '../widgets/spotify_button.dart';
+import 'package:spotkin_flutter/widgets/home_job_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   final Map<String, dynamic> config;
@@ -25,8 +24,6 @@ class _HomeScreenState extends State<HomeScreen> {
   late ApiService _apiService;
   late StorageService _storageService;
   final SpotifyService spotifyService = getIt<SpotifyService>();
-  bool _isExpanded = false;
-  Key _expansionTileKey = UniqueKey();
   final widgetPadding = 3.0;
 
   // bool _isResettingTargetPlaylist = false;
@@ -41,16 +38,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
     _storageService = StorageService();
     _loadJobs();
-    _isExpanded = jobs.isEmpty;
-  }
-
-  void _addNewJob(Job newJob) {
-    setState(
-      () {
-        jobs.add(newJob);
-      },
-    );
-    _storageService.saveJobs(jobs);
   }
 
   Future<void> _verifyToken() async {
@@ -104,76 +91,14 @@ class _HomeScreenState extends State<HomeScreen> {
     _storageService.saveJobs(jobs);
   }
 
-  void _replaceJob(Job newJob) {
-    setState(() {
-      jobs.clear();
-      jobs.add(newJob);
-    });
-    _storageService.saveJobs(jobs);
-  }
-
-  Widget buildTargetPlaylistSelectionOptions() {
-    return TargetPlaylistSelectionOptions(
-      onPlaylistSelected: (PlaylistSimple selectedPlaylist) {
-        if (jobs.isEmpty) {
-          final newJob = Job(
-            targetPlaylist: selectedPlaylist,
-          );
-          _addNewJob(newJob);
-        } else {
-          final updateJob = jobs[0].copyWith(targetPlaylist: selectedPlaylist);
-          _replaceJob(updateJob);
-        }
-
-        // Collapse the ExpansionTile
-        setState(() {
-          _isExpanded = false;
-          _expansionTileKey = UniqueKey(); // This forces a rebuild
-        });
-      },
-    );
-  }
-
-  Widget _buildRecipeCard(Job job, int index) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            RecipeWidget(
-              initialIngredients: job.recipe,
-              jobs: jobs,
-              updateJob: updateJob,
-              onIngredientsChanged: (updatedIngredients) {
-                setState(() {
-                  job = job.copyWith(recipe: updatedIngredients);
-                  updateJob(index, job);
-                });
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   void _refreshJobs() {
     _loadJobs();
-    setState(() {
-      _isExpanded = jobs.isEmpty;
-      _expansionTileKey = UniqueKey();
-    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final job = jobs.isEmpty ? Job.empty() : jobs[0];
-    final targetPlaylist = job.targetPlaylist;
+    final jobsIterable =
+        jobs.isNotEmpty ? jobs.asMap().entries : [MapEntry(0, Job.empty())];
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -206,91 +131,56 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Column(
                 children: [
-                  ExpansionTile(
-                    key: _expansionTileKey,
-                    title: Column(children: [
-                      PlaylistImageIcon(
-                        playlist: targetPlaylist,
-                        size: 160,
-                      ),
-                      const SizedBox(height: 16),
-                      jobs.isEmpty
-                          ? const SizedBox()
-                          : Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        PlaylistTitle(context, targetPlaylist,
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .titleLarge),
-                                        const SizedBox(height: 5),
-                                        Row(
-                                          children: [
-                                            playlistSubtitle(
-                                                targetPlaylist, context),
-                                            const SizedBox(width: 10),
-                                            if (jobResults.isNotEmpty)
-                                              Text(
-                                                jobResults[0]['result'],
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .labelMedium!
-                                                    .copyWith(
-                                                        fontStyle:
-                                                            FontStyle.italic),
-                                              ),
-                                            const SizedBox(width: 10),
-                                            if (jobResults.isNotEmpty)
-                                              Icon(
-                                                size: 14,
-                                                jobResults[0]['status'] ==
-                                                        'Success'
-                                                    ? Icons.check_circle
-                                                    : Icons.error,
-                                                color: jobResults[0]
-                                                            ['status'] ==
-                                                        'Success'
-                                                    ? Colors.green
-                                                    : Colors.red,
-                                              ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                    SpotifyButton(
-                                        isProcessing: isProcessing,
-                                        processJobs: _processJobs),
-                                  ],
-                                )
-                              ],
+                  DefaultTabController(
+                    length: jobsIterable.length + 1,
+                    child: Column(children: [
+                      Container(
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                        child: TabBar(
+                          isScrollable: true,
+                          tabAlignment: TabAlignment.start,
+                          labelStyle: Theme.of(context).textTheme.labelMedium,
+                          tabs: [
+                            ...jobsIterable.map((entry) {
+                              return Tab(
+                                child: Text(
+                                  entry.value.targetPlaylist.name ?? 'New job',
+                                  style:
+                                      Theme.of(context).textTheme.labelMedium,
+                                ),
+                              );
+                            }),
+                            Tab(
+                              child: IconButton(
+                                icon: const Icon(Icons.add),
+                                onPressed: () {},
+                              ),
                             )
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.9,
+                        child: TabBarView(
+                          children: [
+                            ...jobsIterable.map((jobEntry) {
+                              return HomeJobWidget(
+                                  job: jobEntry.value,
+                                  index: jobEntry.key,
+                                  jobs: jobs,
+                                  processJobs: _processJobs,
+                                  onJobUpdate: (j) {
+                                    updateJob(jobEntry.key, j);
+                                  });
+                            }),
+                            Container(),
+                          ],
+                        ),
+                      ),
                     ]),
-                    initiallyExpanded: _isExpanded,
-                    onExpansionChanged: (expanded) {
-                      setState(() {
-                        _isExpanded = expanded;
-                      });
-                    },
-                    children: [
-                      buildTargetPlaylistSelectionOptions(),
-                    ],
-                  ),
-                  SizedBox(height: widgetPadding),
-                  ...jobs.asMap().entries.map((entry) {
-                    return _buildRecipeCard(entry.value, entry.key);
-                  }),
+                  )
                 ],
               ),
-              const SizedBox(height: 20),
             ],
           ),
         ),
