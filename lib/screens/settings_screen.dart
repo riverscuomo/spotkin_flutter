@@ -57,13 +57,23 @@ class SettingsScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              ElevatedButton(
+              ElevatedButton.icon(
+                icon: const Icon(Icons.backup),
+                label: const Text('Create Backup'),
                 onPressed: () => _createBackup(context),
-                child: const Text('Create Backup'),
+                style: ElevatedButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
               ),
-              ElevatedButton(
+              ElevatedButton.icon(
+                icon: const Icon(Icons.restore),
+                label: const Text('Import Backup'),
                 onPressed: () => _importBackup(context),
-                child: const Text('Import Backup'),
+                style: ElevatedButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
               ),
             ],
           ),

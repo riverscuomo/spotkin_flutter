@@ -141,7 +141,7 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
           item.images?.isNotEmpty == true ? item.images!.first.url : null;
     } else if (item is String) {
       name = item;
-      subtitle = 'Genre';
+      subtitle = '';
     }
 
     Widget leadingWidget;
