@@ -198,6 +198,15 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
       ),
       body: Column(
         children: [
+          _items.isEmpty
+              ? Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    getEmptySettingString(widget.fieldName),
+                    style: Theme.of(context).textTheme.labelMedium,
+                  ),
+                )
+              : const SizedBox.shrink(),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: ElevatedButton(
@@ -214,5 +223,22 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
         ],
       ),
     );
+  }
+}
+
+String getEmptySettingString(String fieldName) {
+  switch (fieldName) {
+    case 'bannedArtists':
+      return 'No artists banned yet';
+    case 'bannedTracks':
+      return 'No tracks banned yet';
+    case 'bannedGenres':
+      return 'No genres banned yet';
+    case 'exceptionsToBannedGenres':
+      return 'No exceptions to banned genres yet';
+    case 'lastTracks':
+      return 'No last tracks added yet';
+    default:
+      return '';
   }
 }
