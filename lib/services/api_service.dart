@@ -19,20 +19,21 @@ class ApiService {
       try {
         final url = '$backendUrl/process_job';
 
-        // Use SpotifyService to get the access token
-        final accessToken = await spotifyService.retrieveAccessToken();
+        // Use SpotifyService to get the tokens
         final credentials = await spotifyService.retrieveCredentials();
 
-        if (accessToken == null || credentials == null) {
-          throw Exception('Access token or credentials are missing');
+        if (credentials == null ||
+            credentials.accessToken == null ||
+            credentials.refreshToken == null) {
+          throw Exception('Spotify credentials are missing or incomplete');
         }
 
         final response = await http
             .post(
               Uri.parse(url),
               headers: {
-                'Authorization': 'Bearer $accessToken',
-                'Refresh-Token': credentials.refreshToken ?? '',
+                'Authorization': 'Bearer ${credentials.accessToken}',
+                'Refresh-Token': credentials.refreshToken!,
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
               },
