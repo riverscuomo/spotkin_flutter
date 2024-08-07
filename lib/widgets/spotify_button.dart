@@ -12,16 +12,16 @@ class SpotifyButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(
-        maxWidth: 200,
-        minHeight: 38,
-      ),
+    return SizedBox(
+      width: 100, // Fixed width
+      height: 40, // Fixed height
       child: ElevatedButton(
         onPressed: isProcessing ? null : processJobs,
         style: ElevatedButton.styleFrom(
-          minimumSize: const Size(90, 50),
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
         ),
         child: Text(
           isProcessing ? 'Processing...' : 'Update',

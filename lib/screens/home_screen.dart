@@ -2,17 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:spotify/spotify.dart';
 import 'package:spotkin_flutter/app_core.dart';
 import '../widgets/spotify_button.dart';
+import '../widgets/target_playlist_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   final Map<String, dynamic> config;
   final String accessToken;
   final String backendUrl;
 
-  HomeScreen({
+  const HomeScreen({
+    Key? key,
     required this.config,
     required this.accessToken,
     required this.backendUrl,
-  });
+  }) : super(key: key);
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -25,11 +27,8 @@ class _HomeScreenState extends State<HomeScreen> {
   late ApiService _apiService;
   late StorageService _storageService;
   final SpotifyService spotifyService = getIt<SpotifyService>();
-  bool _isExpanded = false;
-  Key _expansionTileKey = UniqueKey();
   final widgetPadding = 3.0;
-
-  // bool _isResettingTargetPlaylist = false;
+  bool _isExpanded = false;
 
   @override
   void initState() {
@@ -104,36 +103,6 @@ class _HomeScreenState extends State<HomeScreen> {
     _storageService.saveJobs(jobs);
   }
 
-  void _replaceJob(Job newJob) {
-    setState(() {
-      jobs.clear();
-      jobs.add(newJob);
-    });
-    _storageService.saveJobs(jobs);
-  }
-
-  Widget buildTargetPlaylistSelectionOptions() {
-    return TargetPlaylistSelectionOptions(
-      onPlaylistSelected: (PlaylistSimple selectedPlaylist) {
-        if (jobs.isEmpty) {
-          final newJob = Job(
-            targetPlaylist: selectedPlaylist,
-          );
-          _addNewJob(newJob);
-        } else {
-          final updateJob = jobs[0].copyWith(targetPlaylist: selectedPlaylist);
-          _replaceJob(updateJob);
-        }
-
-        // Collapse the ExpansionTile
-        setState(() {
-          _isExpanded = false;
-          _expansionTileKey = UniqueKey(); // This forces a rebuild
-        });
-      },
-    );
-  }
-
   Widget _buildRecipeCard(Job job, int index) {
     return Container(
       decoration: BoxDecoration(
@@ -165,10 +134,39 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _refreshJobs() {
     _loadJobs();
+    // setState(() {
+    //   _isExpanded = jobs.isEmpty;
+    //   _expansionTileKey = UniqueKey();
+    // });
+  }
+
+  void _replaceJob(Job newJob) {
     setState(() {
-      _isExpanded = jobs.isEmpty;
-      _expansionTileKey = UniqueKey();
+      jobs.clear();
+      jobs.add(newJob);
+      _isExpanded = false; // Collapse after changing the target playlist
     });
+    _storageService.saveJobs(jobs);
+  }
+
+  Widget buildTargetPlaylistSelectionOptions() {
+    return TargetPlaylistSelectionOptions(
+      onPlaylistSelected: (PlaylistSimple selectedPlaylist) {
+        if (jobs.isEmpty) {
+          final newJob = Job(
+            targetPlaylist: selectedPlaylist,
+          );
+          _addNewJob(newJob);
+        } else {
+          final updateJob = jobs[0].copyWith(targetPlaylist: selectedPlaylist);
+          _replaceJob(updateJob);
+        }
+        // Auto-collapse after selection
+        setState(() {
+          _isExpanded = false;
+        });
+      },
+    );
   }
 
   @override
@@ -207,58 +205,19 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Column(
                 children: [
-                  ExpansionTile(
-                    key: _expansionTileKey,
-                    title: Column(children: [
-                      PlaylistImageIcon(
-                        playlist: targetPlaylist,
-                        size: 160,
-                      ),
-                      const SizedBox(height: 16),
-                      jobs.isEmpty
-                          ? const SizedBox()
-                          : Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        PlaylistTitle(context, targetPlaylist,
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .titleLarge),
-                                        const SizedBox(height: 5),
-                                        Row(
-                                          children: [
-                                            playlistSubtitle(
-                                                targetPlaylist, context),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                    SpotifyButton(
-                                        isProcessing: isProcessing,
-                                        processJobs: _processJobs),
-                                  ],
-                                )
-                              ],
-                            )
-                    ]),
-                    initiallyExpanded: _isExpanded,
-                    onExpansionChanged: (expanded) {
+                  TargetPlaylistWidget(
+                    targetPlaylist: targetPlaylist,
+                    jobs: jobs,
+                    isProcessing: isProcessing,
+                    processJobs: _processJobs,
+                    buildTargetPlaylistSelectionOptions:
+                        buildTargetPlaylistSelectionOptions,
+                    isExpanded: _isExpanded,
+                    onExpandChanged: (expanded) {
                       setState(() {
                         _isExpanded = expanded;
                       });
                     },
-                    children: [
-                      buildTargetPlaylistSelectionOptions(),
-                    ],
                   ),
                   SizedBox(height: widgetPadding),
                   ...jobs.asMap().entries.map((entry) {
