@@ -6,7 +6,7 @@ import 'package:spotkin_flutter/app_core.dart';
 class BannedGenresBottomSheet extends StatefulWidget {
   final Job job;
   final int jobIndex;
-  final Function(Job) updateJob;
+  final Function(int, Job) updateJob;
 
   const BannedGenresBottomSheet({
     Key? key,
@@ -40,12 +40,16 @@ class _BannedGenresBottomSheetState extends State<BannedGenresBottomSheet> {
         _updateJob();
         _feedbackMessage = '$genre added to banned genres';
       });
+      print(
+          'Genre added: $genre. Total banned genres: ${_bannedGenres.length}');
     }
   }
 
   void _updateJob() {
     final updatedJob = widget.job.copyWith(bannedGenres: _bannedGenres);
-    widget.updateJob(updatedJob);
+    widget.updateJob(widget.jobIndex, updatedJob);
+    print(
+        'Job updated. Banned genres count: ${updatedJob.bannedGenres.length}');
   }
 
   void _getPlaylistArtists() async {
@@ -71,12 +75,10 @@ class _BannedGenresBottomSheetState extends State<BannedGenresBottomSheet> {
 
       _artistsInTargetPlaylist = await spotifyService.getArtists(artistIds);
 
-      // remove any artists whose genres are null or empty
       _artistsInTargetPlaylist = _artistsInTargetPlaylist
           .where((artist) => artist.genres != null && artist.genres!.isNotEmpty)
           .toList();
 
-      // sort artists alphabetically by name, ignoring case
       _artistsInTargetPlaylist.sort(
           (a, b) => a.name!.toLowerCase().compareTo(b.name!.toLowerCase()));
 
@@ -105,8 +107,9 @@ class _BannedGenresBottomSheetState extends State<BannedGenresBottomSheet> {
                   child: Icon(Icons.person),
                 ),
           Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(artist.name ?? 'Unknown Artist')),
+            padding: const EdgeInsets.all(8.0),
+            child: Text(artist.name ?? 'Unknown Artist'),
+          ),
           genres.isNotEmpty
               ? Padding(
                   padding: const EdgeInsets.all(8.0),

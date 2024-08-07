@@ -68,12 +68,14 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
     }
   }
 
-  void _updateJobAndState(Job updatedJob) {
+  void _updateJobAndState(int index, Job updatedJob) {
     setState(() {
       _job = updatedJob;
       _items = _getItems();
     });
-    widget.updateJob(widget.jobIndex, updatedJob);
+    widget.updateJob(index, updatedJob);
+    print(
+        'Job updated in SettingManagementScreen. ${widget.fieldName} count: ${_items.length}');
   }
 
   void showSearchBottomSheet() {
@@ -92,14 +94,18 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
                 searchTypes: widget.searchTypes,
               );
       },
-    );
+    ).then((_) {
+      setState(() {
+        _items = _getItems();
+      });
+    });
   }
 
   void _addItem(dynamic item) {
     setState(() {
       if (!_items.any((existingItem) => existingItem.id == item.id)) {
         _items.add(item);
-        _updateJobAndState(_job);
+        _updateJobAndState(widget.jobIndex, _createUpdatedJob());
       }
     });
   }
@@ -107,8 +113,25 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
   void _removeItem(int index) {
     setState(() {
       _items.removeAt(index);
-      _updateJobAndState(_job);
+      _updateJobAndState(widget.jobIndex, _createUpdatedJob());
     });
+  }
+
+  Job _createUpdatedJob() {
+    switch (widget.fieldName) {
+      case 'bannedArtists':
+        return _job.copyWith(bannedArtists: _items as List<Artist>);
+      case 'bannedTracks':
+        return _job.copyWith(bannedTracks: _items as List<Track>);
+      case 'bannedGenres':
+        return _job.copyWith(bannedGenres: _items as List<String>);
+      case 'exceptionsToBannedGenres':
+        return _job.copyWith(exceptionsToBannedGenres: _items as List<Artist>);
+      case 'lastTracks':
+        return _job.copyWith(lastTracks: _items as List<Track>);
+      default:
+        return _job;
+    }
   }
 
   Widget _buildListItem(dynamic item) {

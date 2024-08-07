@@ -48,7 +48,7 @@ class _SettingsCardState extends State<SettingsCard> {
 
   void _navigateSettingManagementScreen(BuildContext context, String title,
       String fieldName, String tooltip, List<SearchType> searchTypes) {
-    Navigator.push(
+    Navigator.push<Job>(
       context,
       MaterialPageRoute(
         builder: (context) => SettingManagementScreen(
@@ -66,11 +66,13 @@ class _SettingsCardState extends State<SettingsCard> {
           searchTypes: searchTypes,
         ),
       ),
-    ).then((_) {
-      // Refresh the state when returning from SettingManagementScreen
-      setState(() {
-        _job = widget.job;
-      });
+    ).then((updatedJob) {
+      if (updatedJob != null) {
+        setState(() {
+          _job = updatedJob;
+        });
+        widget.updateJob(widget.index, updatedJob);
+      }
     });
   }
 
