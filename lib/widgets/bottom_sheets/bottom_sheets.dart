@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'spotkin_info_content.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import 'spotkin_info_content.dart';
 
 class CustomBottomSheet extends StatelessWidget {
   final Widget title;
@@ -67,6 +70,13 @@ class CustomBottomSheet extends StatelessWidget {
               child: DefaultTextStyle(
                 style: Theme.of(context).textTheme.titleLarge!,
                 child: title,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Image.asset(
+                'assets/images/spotkin.jpg',
+                fit: BoxFit.cover,
               ),
             ),
             Expanded(
