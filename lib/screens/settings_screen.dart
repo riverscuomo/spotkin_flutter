@@ -41,6 +41,15 @@ class SettingsScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
+          jobs.isEmpty
+              ? Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(
+                    'No spotkins found. Add a new spotkin to get started.',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                )
+              : const SizedBox.shrink(),
           Expanded(
             child: ListView.builder(
               itemCount: jobs.length,

@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'spotkin_info_content.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
-import 'spotkin_info_content.dart';
 
 class CustomBottomSheet extends StatelessWidget {
   final Widget title;
@@ -10,6 +7,7 @@ class CustomBottomSheet extends StatelessWidget {
   final double initialChildSize;
   final double minChildSize;
   final double maxChildSize;
+  final bool showImage;
 
   const CustomBottomSheet({
     Key? key,
@@ -18,6 +16,7 @@ class CustomBottomSheet extends StatelessWidget {
     this.initialChildSize = 0.9,
     this.minChildSize = 0.5,
     this.maxChildSize = 0.9,
+    this.showImage = false,
   }) : super(key: key);
 
   static Future<void> show({
@@ -27,6 +26,7 @@ class CustomBottomSheet extends StatelessWidget {
     double initialChildSize = 0.9,
     double minChildSize = 0.5,
     double maxChildSize = 0.9,
+    showImage = false,
   }) {
     return showModalBottomSheet(
       context: context,
@@ -41,6 +41,7 @@ class CustomBottomSheet extends StatelessWidget {
           initialChildSize: initialChildSize,
           minChildSize: minChildSize,
           maxChildSize: maxChildSize,
+          showImage: showImage,
         );
       },
     );
@@ -72,13 +73,15 @@ class CustomBottomSheet extends StatelessWidget {
                 child: title,
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Image.asset(
-                'assets/images/spotkin.jpg',
-                fit: BoxFit.cover,
-              ),
-            ),
+            showImage
+                ? Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Image.asset(
+                      'assets/images/spotkin.jpg',
+                      fit: BoxFit.cover,
+                    ),
+                  )
+                : const SizedBox(),
             Expanded(
               child: ListView.builder(
                 controller: controller,
@@ -106,5 +109,6 @@ void showInfoBottomSheet(BuildContext context) {
     context: context,
     title: const Text('About Spotkin'),
     content: infoSheetContent,
+    showImage: true,
   );
 }
