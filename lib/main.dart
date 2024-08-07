@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
           color: Colors.black, // Match your scaffold background color
           child: Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 600),
+              constraints: const BoxConstraints(maxWidth: 750),
               child: child!,
             ),
           ),
