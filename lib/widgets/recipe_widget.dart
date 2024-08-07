@@ -9,6 +9,7 @@ class RecipeWidget extends StatefulWidget {
   final Function(List<Ingredient>) onIngredientsChanged;
   final List<Job> jobs;
   final Function(int, Job) updateJob;
+  final List<Map<String, dynamic>> jobResults;
 
   const RecipeWidget({
     Key? key,
@@ -16,6 +17,7 @@ class RecipeWidget extends StatefulWidget {
     required this.onIngredientsChanged,
     required this.jobs,
     required this.updateJob,
+    required this.jobResults,
   }) : super(key: key);
 
   @override
@@ -203,12 +205,33 @@ class _RecipeWidgetState extends State<RecipeWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final List<Map<String, dynamic>> jobResults = widget.jobResults;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
+            const SizedBox(width: 10),
+            if (jobResults.isNotEmpty)
+              Text(
+                jobResults[0]['result'],
+                style: Theme.of(context)
+                    .textTheme
+                    .labelMedium!
+                    .copyWith(fontStyle: FontStyle.italic),
+              ),
+            const SizedBox(width: 10),
+            if (jobResults.isNotEmpty)
+              Icon(
+                size: 14,
+                jobResults[0]['status'] == 'Success'
+                    ? Icons.check_circle
+                    : Icons.error,
+                color: jobResults[0]['status'] == 'Success'
+                    ? Colors.green
+                    : Colors.red,
+              ),
             IconButton(
               icon: const Icon(Icons.add),
               onPressed: () async {

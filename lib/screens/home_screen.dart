@@ -149,6 +149,7 @@ class _HomeScreenState extends State<HomeScreen> {
               initialIngredients: job.recipe,
               jobs: jobs,
               updateJob: updateJob,
+              jobResults: jobResults,
               onIngredientsChanged: (updatedIngredients) {
                 setState(() {
                   job = job.copyWith(recipe: updatedIngredients);
@@ -237,31 +238,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                           children: [
                                             playlistSubtitle(
                                                 targetPlaylist, context),
-                                            const SizedBox(width: 10),
-                                            if (jobResults.isNotEmpty)
-                                              Text(
-                                                jobResults[0]['result'],
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .labelMedium!
-                                                    .copyWith(
-                                                        fontStyle:
-                                                            FontStyle.italic),
-                                              ),
-                                            const SizedBox(width: 10),
-                                            if (jobResults.isNotEmpty)
-                                              Icon(
-                                                size: 14,
-                                                jobResults[0]['status'] ==
-                                                        'Success'
-                                                    ? Icons.check_circle
-                                                    : Icons.error,
-                                                color: jobResults[0]
-                                                            ['status'] ==
-                                                        'Success'
-                                                    ? Colors.green
-                                                    : Colors.red,
-                                              ),
                                           ],
                                         ),
                                       ],
