@@ -157,6 +157,28 @@ class SpotifyService {
   }
 
   // Future<String?> getAccessToken() async {
+  // Future<SpotifyApiCredentials?> retrieveCredentials() async {
+  //   print('SPOTIFY SERVICE: Retrieving credentials...');
+  //   final accessToken = await _secureStorage.read(key: _accessTokenKey);
+  //   final refreshToken = await _secureStorage.read(key: _refreshTokenKey);
+  //   final expirationString = await _secureStorage.read(key: _expirationKey);
+
+  //   if (accessToken == null ||
+  //       refreshToken == null ||
+  //       expirationString == null) {
+  //     return null;
+  //   }
+
+  //   final expiration = DateTime.parse(expirationString);
+  //   return SpotifyApiCredentials(
+  //     clientId,
+  //     clientSecret,
+  //     accessToken: accessToken,
+  //     refreshToken: refreshToken,
+  //     expiration: expiration,
+  //     scopes: scope.split(' '),
+  //   );
+  // }
   Future<SpotifyApiCredentials?> retrieveCredentials() async {
     print('SPOTIFY SERVICE: Retrieving credentials...');
     final accessToken = await _secureStorage.read(key: _accessTokenKey);
@@ -166,10 +188,25 @@ class SpotifyService {
     if (accessToken == null ||
         refreshToken == null ||
         expirationString == null) {
+      print('SPOTIFY SERVICE: Incomplete credentials stored');
       return null;
     }
 
     final expiration = DateTime.parse(expirationString);
+    final now = DateTime.now();
+
+    if (now.isAfter(expiration)) {
+      print('SPOTIFY SERVICE: Token expired, attempting to refresh...');
+      final refreshSuccess = await refreshAccessToken();
+      if (!refreshSuccess) {
+        print('SPOTIFY SERVICE: Failed to refresh token');
+        return null;
+      }
+      // After successful refresh, retrieve the new credentials
+      return await retrieveCredentials();
+    }
+
+    print('SPOTIFY SERVICE: Retrieved valid credentials');
     return SpotifyApiCredentials(
       clientId,
       clientSecret,
@@ -178,23 +215,6 @@ class SpotifyService {
       expiration: expiration,
       scopes: scope.split(' '),
     );
-  }
-
-  Future<void> saveCredentials(SpotifyApiCredentials credentials) async {
-    print('SPOTIFY SERVICE: Saving credentials...');
-    if (credentials.accessToken == null ||
-        credentials.refreshToken == null ||
-        credentials.expiration == null) {
-      throw Exception('Invalid credentials');
-    } else {
-      await _secureStorage.write(
-          key: _accessTokenKey, value: credentials.accessToken);
-      await _secureStorage.write(
-          key: _refreshTokenKey, value: credentials.refreshToken);
-      await _secureStorage.write(
-          key: _expirationKey,
-          value: credentials.expiration!.toIso8601String());
-    }
   }
 
   Future<bool> refreshAccessToken() async {
@@ -217,7 +237,7 @@ class SpotifyService {
           'grant_type': 'refresh_token',
           'refresh_token': refreshToken,
         },
-      );
+      ).timeout(const Duration(seconds: 15));
 
       if (response.statusCode == 200) {
         final tokenData = json.decode(response.body);
@@ -257,6 +277,23 @@ class SpotifyService {
     } catch (e) {
       print('Error refreshing access token: $e');
       return false;
+    }
+  }
+
+  Future<void> saveCredentials(SpotifyApiCredentials credentials) async {
+    print('SPOTIFY SERVICE: Saving credentials...');
+    if (credentials.accessToken == null ||
+        credentials.refreshToken == null ||
+        credentials.expiration == null) {
+      throw Exception('Invalid credentials');
+    } else {
+      await _secureStorage.write(
+          key: _accessTokenKey, value: credentials.accessToken);
+      await _secureStorage.write(
+          key: _refreshTokenKey, value: credentials.refreshToken);
+      await _secureStorage.write(
+          key: _expirationKey,
+          value: credentials.expiration!.toIso8601String());
     }
   }
 
