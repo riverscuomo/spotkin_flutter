@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:spotify/spotify.dart';
 import 'package:spotkin_flutter/app_core.dart';
 
@@ -49,7 +50,7 @@ class _BannedGenresBottomSheetState extends State<BannedGenresBottomSheet> {
 
   void _getPlaylistArtists() async {
     final spotifyService = getIt<SpotifyService>();
-    final targetPlaylistId = widget.job.targetPlaylist?.id;
+    final targetPlaylistId = widget.job.targetPlaylist.id;
 
     if (targetPlaylistId == null) {
       setState(() {
@@ -69,6 +70,16 @@ class _BannedGenresBottomSheetState extends State<BannedGenresBottomSheet> {
           .toList();
 
       _artistsInTargetPlaylist = await spotifyService.getArtists(artistIds);
+
+      // remove any artists whose genres are null or empty
+      _artistsInTargetPlaylist = _artistsInTargetPlaylist
+          .where((artist) => artist.genres != null && artist.genres!.isNotEmpty)
+          .toList();
+
+      // sort artists alphabetically by name, ignoring case
+      _artistsInTargetPlaylist.sort(
+          (a, b) => a.name!.toLowerCase().compareTo(b.name!.toLowerCase()));
+
       setState(() {
         _isLoading = false;
       });
@@ -82,26 +93,27 @@ class _BannedGenresBottomSheetState extends State<BannedGenresBottomSheet> {
 
   Widget _buildArtistWidget(Artist artist) {
     final genres = artist.genres ?? [];
-    return ListTile(
-      leading: artist.images?.isNotEmpty == true
-          ? CircleAvatar(
-              backgroundImage: NetworkImage(artist.images!.first.url!),
-            )
-          : const CircleAvatar(
-              child: Icon(Icons.person),
-            ),
-      title: Row(
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
         children: [
-          Text(artist.name ?? 'Unknown Artist'),
+          artist.images?.isNotEmpty == true
+              ? CircleAvatar(
+                  backgroundImage: NetworkImage(artist.images!.first.url!),
+                )
+              : const CircleAvatar(
+                  child: Icon(Icons.person),
+                ),
+          Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(artist.name ?? 'Unknown Artist')),
           genres.isNotEmpty
               ? Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: genres
-                        // .take(3)
-                        .map((genre) {
+                    children: genres.map((genre) {
                       return ElevatedButton(
                         style: _bannedGenres.contains(genre)
                             ? ElevatedButton.styleFrom(

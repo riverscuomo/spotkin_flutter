@@ -407,6 +407,7 @@ class SpotifyService {
   Future<List<Artist>> getArtists(List<String> artistIds) async {
     await _ensureAuthenticated();
     final artistsIterable = await _spotify.artists.list(artistIds);
+
     return artistsIterable.toList();
   }
 
