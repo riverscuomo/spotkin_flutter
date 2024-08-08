@@ -43,7 +43,7 @@ class SpotifyButton extends StatelessWidget {
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) =>
                       _buildDefaultIcon(),
-                ), // : _buildDefaultIcon(),
+                ),
         ),
       ),
     );
