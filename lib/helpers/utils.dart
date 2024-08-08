@@ -15,12 +15,18 @@ class Utils {
     return playlistId;
   }
 
-  static Widget getPlaylistImageOrIcon(PlaylistSimple playlist) {
-    return playlist.images?.isNotEmpty ??
-            playlist.images?.last.url?.isNotEmpty == true
-        ? Image.network(playlist.images?.last.url ?? '')
-        : const Icon(Icons.music_note);
-  }
+  // static Widget getPlaylistImageOrIcon(
+  //     PlaylistSimple playlist, int? imageIndex) {
+  //   if (playlist.images?.isNotEmpty == true) {
+  //     if (imageIndex != null && playlist.images!.length > imageIndex) {
+  //       return Image.network(playlist.images![imageIndex].url ?? '');
+  //     } else {
+  //       return Image.network(playlist.images!.first.url ?? '');
+  //     }
+  //   } else {
+  //     return const Icon(Icons.music_note);
+  //   }
+  // }
 
   static Future<void> myLaunch(String url) async {
     print('Launching URL: $url');
