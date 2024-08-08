@@ -34,63 +34,71 @@ class TargetPlaylistWidget extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
+        child: Stack(
           children: [
-            PlaylistImageIcon(
-              playlist: targetPlaylist,
-              size: 160,
-            ),
-            const SizedBox(height: 16),
-            if (jobs.isEmpty)
-              Column(
-                children: [
-                  Text(
-                    'Select a playlist',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 16),
-                  buildTargetPlaylistSelectionOptions(),
-                ],
-              )
-            else
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        PlaylistTitle(
-                          context,
-                          targetPlaylist,
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
-                        const SizedBox(height: 5),
-                        playlistSubtitle(targetPlaylist, context),
-                      ],
-                    ),
-                  ),
-                  Row(
+            Column(
+              children: [
+                PlaylistImageIcon(
+                  playlist: targetPlaylist,
+                  size: 160,
+                ),
+                const SizedBox(height: 16),
+                if (jobs.isEmpty)
+                  Column(
                     children: [
-                      IconButton(
-                        icon: Icon(isExpanded ? Icons.edit_off : Icons.edit),
-                        onPressed: () {
-                          onExpandChanged(!isExpanded);
-                        },
+                      Text(
+                        'Select a playlist',
+                        style: Theme.of(context).textTheme.titleLarge,
                       ),
-                      // const SizedBox(width: 8),
-                      SpotifyButton(
-                        isProcessing: isProcessing,
-                        processJobs: processJobs,
+                      const SizedBox(height: 16),
+                      buildTargetPlaylistSelectionOptions(),
+                    ],
+                  )
+                else
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            PlaylistTitle(
+                              context,
+                              targetPlaylist,
+                              style: Theme.of(context).textTheme.titleLarge,
+                            ),
+                            const SizedBox(height: 5),
+                            playlistSubtitle(targetPlaylist, context),
+                          ],
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          // const SizedBox(width: 8),
+                          SpotifyButton(
+                            isProcessing: isProcessing,
+                            processJobs: processJobs,
+                          ),
+                        ],
                       ),
                     ],
                   ),
+                if (isExpanded && jobs.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  buildTargetPlaylistSelectionOptions(),
                 ],
+              ],
+            ),
+            Positioned(
+              top: 0,
+              right: 0,
+              child: IconButton(
+                icon: Icon(isExpanded ? Icons.edit_off : Icons.edit),
+                onPressed: () {
+                  onExpandChanged(!isExpanded);
+                },
               ),
-            if (isExpanded && jobs.isNotEmpty) ...[
-              const SizedBox(height: 16),
-              buildTargetPlaylistSelectionOptions(),
-            ],
+            ),
           ],
         ),
       ),
