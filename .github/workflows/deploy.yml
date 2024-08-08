@@ -52,4 +52,4 @@ jobs:
         flutter config --enable-web
         flutter pub get
         flutter build web --release
-        firebase deploy --only hosting --project spotkin --token ${{ secrets.FIREBASE_TOKEN }}
+        firebase deploy --only hosting --project spotkin-fd416 --token ${{ secrets.FIREBASE_TOKEN }}
