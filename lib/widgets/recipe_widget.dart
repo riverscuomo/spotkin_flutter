@@ -225,8 +225,28 @@ class _RecipeWidgetState extends State<RecipeWidget> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: () async {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  builder: (BuildContext context) {
+                    return SearchBottomSheet(
+                      onItemSelected: (dynamic item) {
+                        if (item is PlaylistSimple) {
+                          _addNewRow(item, storageService.getJobs().first);
+                        }
+                      },
+                      searchTypes: const [SearchType.playlist],
+                      title: 'Add a playlist',
+                    );
+                  },
+                );
+              },
+            ),
             const SizedBox(width: 10),
             if (jobResults.isNotEmpty)
               Text(
@@ -251,26 +271,6 @@ class _RecipeWidgetState extends State<RecipeWidget> {
               jobs: widget.jobs,
               updateJob: widget.updateJob,
               onJobsImported: loadJobs,
-            ),
-            IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: () async {
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  builder: (BuildContext context) {
-                    return SearchBottomSheet(
-                      onItemSelected: (dynamic item) {
-                        if (item is PlaylistSimple) {
-                          _addNewRow(item, storageService.getJobs().first);
-                        }
-                      },
-                      searchTypes: const [SearchType.playlist],
-                      title: 'Add a playlist',
-                    );
-                  },
-                );
-              },
             ),
           ],
         ),
