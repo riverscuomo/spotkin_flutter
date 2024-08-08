@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:spotify/spotify.dart';
 import 'package:spotkin_flutter/app_core.dart';
-import '../widgets/spotify_button.dart';
+import '../widgets/settings_button.dart';
 import '../widgets/target_playlist_widget.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -180,21 +180,8 @@ class _HomeScreenState extends State<HomeScreen> {
         titleTextStyle: Theme.of(context).textTheme.titleLarge,
         automaticallyImplyLeading: false,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => SettingsScreen(
-                    jobs: jobs,
-                    updateJob: updateJob,
-                    onJobsImported: _refreshJobs,
-                  ),
-                ),
-              );
-            },
-          ),
+          SettingsButton(
+              jobs: jobs, updateJob: updateJob, onJobsImported: _refreshJobs),
         ],
       ),
       body: SingleChildScrollView(
