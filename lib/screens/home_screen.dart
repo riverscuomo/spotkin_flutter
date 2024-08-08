@@ -40,7 +40,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
     _storageService = StorageService();
     _loadJobs();
-    _isExpanded = jobs.isEmpty;
   }
 
   void _addNewJob(Job newJob) {
@@ -117,14 +116,9 @@ class _HomeScreenState extends State<HomeScreen> {
             RecipeWidget(
               initialIngredients: job.recipe,
               jobs: jobs,
+              jobIndex: index,
               updateJob: updateJob,
               jobResults: jobResults,
-              onIngredientsChanged: (updatedIngredients) {
-                setState(() {
-                  job = job.copyWith(recipe: updatedIngredients);
-                  updateJob(index, job);
-                });
-              },
             ),
           ],
         ),
@@ -171,8 +165,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final job = jobs.isEmpty ? Job.empty() : jobs[0];
-    final targetPlaylist = job.targetPlaylist;
+    final jobsIterable =
+        jobs.isNotEmpty ? jobs.asMap().entries : [MapEntry(0, Job.empty())];
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -197,35 +191,65 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: widgetPadding),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Column(
-                children: [
-                  TargetPlaylistWidget(
-                    targetPlaylist: targetPlaylist,
-                    jobs: jobs,
-                    isProcessing: isProcessing,
-                    processJobs: _processJobs,
-                    buildTargetPlaylistSelectionOptions:
-                        buildTargetPlaylistSelectionOptions,
-                    isExpanded: _isExpanded,
-                    onExpandChanged: (expanded) {
-                      setState(() {
-                        _isExpanded = expanded;
-                      });
-                    },
-                  ),
-                  SizedBox(height: widgetPadding),
-                  ...jobs.asMap().entries.map((entry) {
-                    return _buildRecipeCard(entry.value, entry.key);
-                  }),
-                ],
+      body: DefaultTabController(
+        length: jobsIterable.length + 1,
+        child: NestedScrollView(
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            return <Widget>[
+              SliverAppBar(
+                pinned: true,
+                floating: true,
+                expandedHeight: 0,
+                bottom: TabBar(
+                  isScrollable: true,
+                  tabAlignment: TabAlignment.start,
+                  labelStyle: Theme.of(context).textTheme.labelMedium,
+                  tabs: [
+                    ...jobsIterable.map((entry) {
+                      return Tab(
+                        child: Text(
+                          entry.value.targetPlaylist.name ?? 'New job',
+                          style: Theme.of(context).textTheme.labelMedium,
+                        ),
+                      );
+                    }),
+                    const Tab(
+                      icon: Icon(Icons.add),
+                    )
+                  ],
+                ),
               ),
-              const SizedBox(height: 20),
+            ];
+          },
+          body: TabBarView(
+            children: [
+              ...jobsIterable.map((jobEntry) {
+                final job = jobEntry.value;
+
+                return SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      TargetPlaylistWidget(
+                        targetPlaylist: job.targetPlaylist,
+                        jobs: jobs,
+                        isProcessing: isProcessing,
+                        processJobs: _processJobs,
+                        buildTargetPlaylistSelectionOptions:
+                            buildTargetPlaylistSelectionOptions,
+                        isExpanded: _isExpanded,
+                        onExpandChanged: (expanded) {
+                          setState(() {
+                            _isExpanded = expanded;
+                          });
+                        },
+                      ),
+                      SizedBox(height: widgetPadding),
+                      _buildRecipeCard(job, jobEntry.key),
+                    ],
+                  ),
+                );
+              }),
+              Container(),
             ],
           ),
         ),
