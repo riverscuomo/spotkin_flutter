@@ -62,7 +62,7 @@ class TargetPlaylistWidget extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            PlaylistTitle(
+                            playlistTitle(
                               context,
                               targetPlaylist,
                               style: Theme.of(context).textTheme.titleLarge,

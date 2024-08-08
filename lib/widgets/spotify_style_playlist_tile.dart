@@ -38,7 +38,7 @@ class SpotifyStylePlaylistTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  PlaylistTitle(
+                  playlistTitle(
                     context,
                     playlist,
                     style: style,
