@@ -10,6 +10,7 @@ class RecipeWidget extends StatefulWidget {
   final List<Job> jobs;
   final Function(int, Job) updateJob;
   final List<Map<String, dynamic>> jobResults;
+  final Function() onJobsReloaded; // Add this new callback
 
   const RecipeWidget({
     Key? key,
@@ -18,6 +19,7 @@ class RecipeWidget extends StatefulWidget {
     required this.jobs,
     required this.updateJob,
     required this.jobResults,
+    required this.onJobsReloaded, // Add this to the constructor
   }) : super(key: key);
 
   @override
@@ -41,6 +43,19 @@ class _RecipeWidgetState extends State<RecipeWidget> {
       row.quantityController.dispose();
     }
     super.dispose();
+  }
+
+  void loadJobs() async {
+    // Reload jobs from storage
+    List<Job> updatedJobs = await storageService.getJobs();
+
+    // Call the callback to update jobs in the parent widget
+    widget.onJobsReloaded();
+
+    // Optionally, you can update the local state if needed
+    setState(() {
+      // If you need to use the updated jobs locally
+    });
   }
 
   void _initIngredientRows() {
@@ -232,6 +247,11 @@ class _RecipeWidgetState extends State<RecipeWidget> {
                     ? Colors.green
                     : Colors.red,
               ),
+            SettingsButton(
+              jobs: widget.jobs,
+              updateJob: widget.updateJob,
+              onJobsImported: loadJobs,
+            ),
             IconButton(
               icon: const Icon(Icons.add),
               onPressed: () async {

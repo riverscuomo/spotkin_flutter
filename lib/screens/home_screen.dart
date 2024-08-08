@@ -117,6 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
             RecipeWidget(
               initialIngredients: job.recipe,
               jobs: jobs,
+              onJobsReloaded: _loadJobs,
               updateJob: updateJob,
               jobResults: jobResults,
               onIngredientsChanged: (updatedIngredients) {
@@ -130,14 +131,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
-  }
-
-  void _refreshJobs() {
-    _loadJobs();
-    // setState(() {
-    //   _isExpanded = jobs.isEmpty;
-    //   _expansionTileKey = UniqueKey();
-    // });
   }
 
   void _replaceJob(Job newJob) {
@@ -179,9 +172,8 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text('Spotkin'),
         titleTextStyle: Theme.of(context).textTheme.titleLarge,
         automaticallyImplyLeading: false,
-        actions: [
-          SettingsButton(
-              jobs: jobs, updateJob: updateJob, onJobsImported: _refreshJobs),
+        actions: const [
+          InfoButton(),
         ],
       ),
       body: SingleChildScrollView(
