@@ -2,7 +2,7 @@
 
 (in development)
 
-A Flutter web front-end for [Spotkin](<https://github.com/riverscuomo/spotkin>) currently deployed at <https://spotkin-fd416.web.app>
+A Flutter web front-end for [Spotkin](<https://github.com/riverscuomo/spotkin>) currently deployed at <https://spotkin.web.app>
 
  Right now, you can:
 
