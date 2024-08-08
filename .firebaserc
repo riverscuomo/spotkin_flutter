@@ -1,5 +1,19 @@
 {
   "projects": {
     "default": "spotkin-fd416"
-  }
+  },
+  "targets": {
+    "spotkin-fd416": {
+      "hosting": {
+        "spotkin": [
+          "spotkin"
+        ],
+        "spotkin-fd416": [
+          "spotkin-fd416"
+        ]
+      }
+    }
+  },
+  "etags": {},
+  "dataconnectEmulatorConfig": {}
 }
