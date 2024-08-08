@@ -76,9 +76,12 @@ class CustomBottomSheet extends StatelessWidget {
             showImage
                 ? Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Image.asset(
-                      'assets/images/spotkin.jpg',
-                      fit: BoxFit.cover,
+                    child: SizedBox(
+                      height: 300,
+                      child: Image.asset(
+                        'assets/images/spotkin.jpg',
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   )
                 : const SizedBox(),

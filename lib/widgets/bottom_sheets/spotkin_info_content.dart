@@ -1,33 +1,40 @@
 import 'package:flutter/material.dart';
 
+const gap = SizedBox(
+  height: 5,
+);
+
 const infoSheetContent = [
   Text(
-      'Hi! My name is Spotkin! Every day, I update one of your Spotify playlists with random tracks from your other playlists. Exciting, right?'),
-  SizedBox(height: 10),
+      '👋 Hi there! I\'m Spotkin, your personal music discovery assistant! 🎵'),
+  gap,
   Text(
-      'I was created so you don’t have to fiddle with the Spotify app. I bring you a delightful mix of music in one playlist every day!'),
-  SizedBox(height: 10),
+      'My mission is to help you discover lots of great music without the hassle of constant searching or relying solely on generic algorithms. 🎶'),
+  gap,
   Text(
-      'I can run automatically... or you can click the "Update Spotkin On Spotify" button.'),
-  SizedBox(height: 10),
-  Text('I work best with a variety of playlists, like:'),
+      'I combine the best of Spotify\'s algorithms and curated playlists, but YOU get the final say and fine-tuned control. No more overly obvious recommendations, too-popular songs, or tracks you know you don\'t like!'),
+  gap,
+  Text(
+      'Every day, I update one of your Spotify playlists with carefully selected tracks from your other playlists and sources.🎧'),
+  gap,
+  Text(
+      'I can run automatically... or you can activate me by clicking the "Update Spotkin On Spotify" button. ✨'),
+  gap,
+  Text('I work best when drawing from a variety of sources, such as:'),
   Text('• Dynamic playlists like "New Music Friday" or "Today\'s Top Hits"'),
-  Text('• Big curated playlists like Rolling Stone\'s "fivehundredalbums"'),
+  Text('• Curated playlists like Rolling Stone\'s "fivehundredalbums"'),
+  Text('• New releases from genres you love via the new_albums script'),
+  Text('• Your personal "Daily Mix" playlists and "Discover Weekly"'),
+  gap,
   Text(
-      '• New releases from genres you love, brought to you by the new_albums script'),
-  SizedBox(height: 10),
+      'You can create a custom recipe for each playlist, choosing which sources to pull music from.'),
+  gap,
   Text(
-      'You can make a special recipe for each playlist, picking other playlists to mix music from.'),
-  SizedBox(height: 10),
+      'You have precise control over your music experience: you can include or exclude specific artists, tracks, genres, and even set energy levels. This increases the odds you only get music you\'ll love!'),
+  gap,
   Text(
-      'I let you ban artists, tracks, or genres, so you won’t hear music you don’t like or want to avoid.'),
-  SizedBox(height: 10),
+      'When you hit the "Update" button, I use your personalized recipe to refresh your playlists with fresh, tailored tunes!'),
+  gap,
   Text(
-      'You can even choose specific artists, tracks, genres, and energy levels to add or leave out of your playlist.'),
-  SizedBox(height: 10),
-  Text(
-      'When you press the "Update" button, I use your recipe to add fresh tunes to your playlists!'),
-  SizedBox(height: 10),
-  Text(
-      'I keep your music experience fresh and exciting with new songs tailored to your taste!'),
+      'Experience a constantly evolving, personalized music journey without the limitations of standard algorithms. Ready to discover your new favorite songs? Let\'s go! 🚀🎵'),
 ];
