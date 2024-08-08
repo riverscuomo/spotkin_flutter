@@ -39,7 +39,7 @@ class SpotifyButton extends StatelessWidget {
           child: isProcessing
               ? const Text('...')
               : Image.asset(
-                  'assets/images/spotkin.jpg',
+                  'assets/images/updatespotkinbutton.jpg',
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) =>
                       _buildDefaultIcon(),

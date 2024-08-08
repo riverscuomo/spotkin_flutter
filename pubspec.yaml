@@ -71,6 +71,7 @@ flutter:
     - assets/config.json
     - assets/sample_jobs.json
     - assets/images/spotkin.jpg
+    - assets/images/updatespotkinbutton.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
