@@ -71,7 +71,6 @@ flutter:
     - assets/config.json
     - assets/sample_jobs.json
     - assets/images/spotkin.jpg
-    - assets/images/updatespotkinbutton.jpg
     - assets/images/cropped_spotkin.jpg
     - assets/images/transparent_spotkin.png
 
