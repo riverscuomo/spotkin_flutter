@@ -5,7 +5,7 @@ import 'package:spotkin_flutter/widgets/spotify_button.dart';
 
 class TargetPlaylistWidget extends StatelessWidget {
   final PlaylistSimple targetPlaylist;
-  final List<Job> jobs;
+  final Job job;
   final bool isProcessing;
   final void Function() processJobs;
   final Widget Function() buildTargetPlaylistSelectionOptions;
@@ -15,7 +15,7 @@ class TargetPlaylistWidget extends StatelessWidget {
   const TargetPlaylistWidget({
     Key? key,
     required this.targetPlaylist,
-    required this.jobs,
+    required this.job,
     required this.isProcessing,
     required this.processJobs,
     required this.buildTargetPlaylistSelectionOptions,
@@ -43,7 +43,7 @@ class TargetPlaylistWidget extends StatelessWidget {
                   size: 160,
                 ),
                 const SizedBox(height: 16),
-                if (jobs.isEmpty)
+                if (job == Job.empty())
                   Column(
                     children: [
                       Text(
@@ -75,16 +75,17 @@ class TargetPlaylistWidget extends StatelessWidget {
                       Row(
                         children: [
                           // const SizedBox(width: 8),
-                          SpotifyButton(
-                            isProcessing: isProcessing,
-                            processJobs: processJobs,
-                            onPressed: processJobs,
-                          ),
+                          if (job != Job.empty() && job.recipe.isNotEmpty)
+                            SpotifyButton(
+                              isProcessing: isProcessing,
+                              processJobs: processJobs,
+                              onPressed: processJobs,
+                            ),
                         ],
                       ),
                     ],
                   ),
-                if (isExpanded && jobs.isNotEmpty) ...[
+                if (isExpanded && job != null) ...[
                   const SizedBox(height: 16),
                   buildTargetPlaylistSelectionOptions(),
                 ],

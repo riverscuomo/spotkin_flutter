@@ -186,7 +186,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   TargetPlaylistWidget(
                     targetPlaylist: targetPlaylist,
-                    jobs: jobs,
+                    job: job,
                     isProcessing: isProcessing,
                     processJobs: _processJobs,
                     buildTargetPlaylistSelectionOptions:

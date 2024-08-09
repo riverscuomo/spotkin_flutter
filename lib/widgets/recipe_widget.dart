@@ -276,14 +276,15 @@ class _RecipeWidgetState extends State<RecipeWidget> {
           ],
         ),
         if (_ingredientRows.isEmpty)
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              "Let's start building your Spotkin",
-              style: Theme.of(context).textTheme.bodyMedium,
-              textAlign: TextAlign.center,
-            ),
-          )
+          // Padding(
+          //   padding: const EdgeInsets.all(16.0),
+          //   child: Text(
+          //     "Let's start building your Spotkin",
+          //     style: Theme.of(context).textTheme.bodyMedium,
+          //     textAlign: TextAlign.center,
+          //   ),
+          // )
+          const SizedBox.shrink()
         else
           ..._ingredientRows.map((row) {
             final playlist = row.playlist;
