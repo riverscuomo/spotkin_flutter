@@ -140,8 +140,9 @@ class _RecipeWidgetState extends State<RecipeWidget> {
 
   Widget buildQuantityDropdown(IngredientRow row) {
     return SizedBox(
-      width: 70,
+      width: 65,
       child: DropdownButtonFormField<int>(
+        style: Theme.of(context).textTheme.labelLarge,
         value: int.tryParse(row.quantityController.text) ?? 5,
         items: List.generate(21, (index) {
           return DropdownMenuItem<int>(

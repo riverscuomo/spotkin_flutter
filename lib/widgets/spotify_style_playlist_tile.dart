@@ -9,12 +9,12 @@ class SpotifyStylePlaylistTile extends StatelessWidget {
   final bool active;
 
   const SpotifyStylePlaylistTile({
-    Key? key,
+    super.key,
     required this.playlist,
     this.trailingButton,
     this.onTileTapped,
     this.active = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
