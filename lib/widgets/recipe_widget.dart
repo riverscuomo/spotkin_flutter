@@ -6,7 +6,7 @@ import 'ingredient_row.dart';
 
 class RecipeWidget extends StatefulWidget {
   final List<Ingredient> initialIngredients;
-  final Function(List<Ingredient>) onIngredientsChanged;
+  final int jobIndex;
   final List<Job> jobs;
   final Function(int, Job) updateJob;
   final List<Map<String, dynamic>> jobResults;
@@ -15,7 +15,7 @@ class RecipeWidget extends StatefulWidget {
   const RecipeWidget({
     Key? key,
     required this.initialIngredients,
-    required this.onIngredientsChanged,
+    required this.jobIndex,
     required this.jobs,
     required this.updateJob,
     required this.jobResults,
@@ -109,12 +109,12 @@ class _RecipeWidgetState extends State<RecipeWidget> {
     });
 
     final updatedJob = job.copyWith(recipe: [...job.recipe, newIngredient]);
-    storageService.updateJob(updatedJob);
-    widget.onIngredientsChanged(updatedJob.recipe);
+    widget.updateJob(widget.jobIndex, updatedJob);
+    // widget.onIngredientsChanged(updatedJob.recipe);
   }
 
   void _updateJobInStorage(String playlistId, int newQuantity) {
-    final job = storageService.getJobs().first;
+    final job = widget.jobs[widget.jobIndex];
     final updatedRecipe = job.recipe.map((ingredient) {
       if (ingredient.playlist.id == playlistId) {
         return ingredient.copyWith(quantity: newQuantity);
@@ -135,7 +135,8 @@ class _RecipeWidgetState extends State<RecipeWidget> {
       _sortIngredientRows();
     });
 
-    widget.onIngredientsChanged(updatedJob.recipe);
+    widget.updateJob(widget.jobIndex, updatedJob);
+    // widget.onIngredientsChanged(updatedJob.recipe);
   }
 
   Widget buildQuantityDropdown(IngredientRow row) {
@@ -203,19 +204,19 @@ class _RecipeWidgetState extends State<RecipeWidget> {
   }
 
   void _removeIngredient(String playlistId) {
-    final job = storageService.getJobs().first;
+    final job = widget.jobs[widget.jobIndex];
     final updatedRecipe = job.recipe
         .where((ingredient) => ingredient.playlist.id != playlistId)
         .toList();
-    final updatedJob = job.copyWith(recipe: updatedRecipe);
-    storageService.updateJob(updatedJob);
 
     setState(() {
       _ingredientRows.removeWhere((row) => row.playlist?.id == playlistId);
       _sortIngredientRows();
     });
 
-    widget.onIngredientsChanged(updatedJob.recipe);
+    final updatedJob = job.copyWith(recipe: updatedRecipe);
+    widget.updateJob(widget.jobIndex, updatedJob);
+    // widget.onIngredientsChanged(updatedRecipe);
   }
 
   @override
