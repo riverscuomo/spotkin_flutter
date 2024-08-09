@@ -76,7 +76,7 @@ class TargetPlaylistWidget extends StatelessWidget {
                         children: [
                           // const SizedBox(width: 8),
                           if (job != Job.empty() && job.recipe.isNotEmpty)
-                            SpotifyButton(
+                            UpdateButton(
                               isProcessing: isProcessing,
                               processJobs: processJobs,
                               onPressed: processJobs,
