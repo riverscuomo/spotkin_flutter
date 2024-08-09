@@ -31,7 +31,20 @@ final spotifyThemeData = ThemeData(
   ),
   textTheme: TextTheme(
     titleLarge: const TextStyle(
-        color: Colors.white, fontWeight: FontWeight.bold, fontSize: 28),
+      color: Colors.white,
+      fontWeight: FontWeight.bold,
+      fontSize: 28,
+    ),
+    titleMedium: const TextStyle(
+      color: Colors.white,
+      fontWeight: FontWeight.bold,
+      fontSize: 20,
+    ),
+    titleSmall: const TextStyle(
+      color: Colors.white,
+      // fontWeight: FontWeight.bold,
+      fontSize: 18,
+    ),
     bodyMedium: const TextStyle(color: Colors.white70),
     labelMedium: TextStyle(color: Colors.grey[400]),
   ),

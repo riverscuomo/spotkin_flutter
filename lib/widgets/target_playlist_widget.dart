@@ -57,6 +57,7 @@ class TargetPlaylistWidget extends StatelessWidget {
                 else
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Expanded(
                         child: Column(
@@ -65,27 +66,25 @@ class TargetPlaylistWidget extends StatelessWidget {
                             playlistTitle(
                               context,
                               targetPlaylist,
-                              style: Theme.of(context).textTheme.titleLarge,
+                              style: Theme.of(context).textTheme.titleMedium,
                             ),
                             const SizedBox(height: 5),
-                            playlistSubtitle(targetPlaylist, context),
+                            Text(targetPlaylist.description ?? '',
+                                style: Theme.of(context).textTheme.bodyMedium),
+                            // const SizedBox(height: 5),
+                            // playlistSubtitle(targetPlaylist, context),
                           ],
                         ),
                       ),
-                      Row(
-                        children: [
-                          // const SizedBox(width: 8),
-                          if (job != Job.empty() && job.recipe.isNotEmpty)
-                            UpdateButton(
-                              isProcessing: isProcessing,
-                              processJobs: processJobs,
-                              onPressed: processJobs,
-                            ),
-                        ],
-                      ),
+                      if (job != Job.empty() && job.recipe.isNotEmpty)
+                        UpdateButton(
+                          isProcessing: isProcessing,
+                          processJobs: processJobs,
+                          onPressed: processJobs,
+                        ),
                     ],
                   ),
-                if (isExpanded && job != null) ...[
+                if (isExpanded) ...[
                   const SizedBox(height: 16),
                   buildTargetPlaylistSelectionOptions(),
                 ],
