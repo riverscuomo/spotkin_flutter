@@ -267,11 +267,12 @@ class _RecipeWidgetState extends State<RecipeWidget> {
                     ? Colors.green
                     : Colors.red,
               ),
-            SettingsButton(
-              jobs: widget.jobs,
-              updateJob: widget.updateJob,
-              onJobsImported: loadJobs,
-            ),
+            if (_ingredientRows.isNotEmpty)
+              SettingsButton(
+                jobs: widget.jobs,
+                updateJob: widget.updateJob,
+                onJobsImported: loadJobs,
+              ),
           ],
         ),
         if (_ingredientRows.isEmpty)
