@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:spotify/spotify.dart';
 import 'package:spotkin_flutter/app_core.dart';
-import '../widgets/spotify_button.dart';
+import '../widgets/settings_button.dart';
 import '../widgets/target_playlist_widget.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -117,6 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
               initialIngredients: job.recipe,
               jobs: jobs,
               jobIndex: index,
+              onJobsReloaded: _loadJobs,
               updateJob: updateJob,
               jobResults: jobResults,
             ),
@@ -124,14 +125,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
-  }
-
-  void _refreshJobs() {
-    _loadJobs();
-    // setState(() {
-    //   _isExpanded = jobs.isEmpty;
-    //   _expansionTileKey = UniqueKey();
-    // });
   }
 
   void _replaceJob(Job newJob) {
@@ -173,22 +166,8 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text('Spotkin'),
         titleTextStyle: Theme.of(context).textTheme.titleLarge,
         automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => SettingsScreen(
-                    jobs: jobs,
-                    updateJob: updateJob,
-                    onJobsImported: _refreshJobs,
-                  ),
-                ),
-              );
-            },
-          ),
+        actions: const [
+          InfoButton(),
         ],
       ),
       body: DefaultTabController(

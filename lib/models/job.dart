@@ -72,10 +72,11 @@ class Job {
       'description': description,
       'remove_low_energy': removeLowEnergy,
       'last_track_ids': lastTracks.map((t) => t.id).toList(),
-      'banned_artists': bannedArtists,
+      'banned_artists': bannedArtists.map((a) => a.id).toList(),
       'banned_tracks': bannedTracks.map((t) => t.id).toList(),
       'banned_genres': bannedGenres,
-      'exceptions_to_banned_genres': exceptionsToBannedGenres,
+      'exceptions_to_banned_genres':
+          exceptionsToBannedGenres.map((a) => a.id).toList(),
       'recipe': recipe.map((r) => r.toJsonForPost()).toList(),
     };
   }

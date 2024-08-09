@@ -156,29 +156,6 @@ class SpotifyService {
     return await _secureStorage.read(key: _accessTokenKey);
   }
 
-  // Future<String?> getAccessToken() async {
-  // Future<SpotifyApiCredentials?> retrieveCredentials() async {
-  //   print('SPOTIFY SERVICE: Retrieving credentials...');
-  //   final accessToken = await _secureStorage.read(key: _accessTokenKey);
-  //   final refreshToken = await _secureStorage.read(key: _refreshTokenKey);
-  //   final expirationString = await _secureStorage.read(key: _expirationKey);
-
-  //   if (accessToken == null ||
-  //       refreshToken == null ||
-  //       expirationString == null) {
-  //     return null;
-  //   }
-
-  //   final expiration = DateTime.parse(expirationString);
-  //   return SpotifyApiCredentials(
-  //     clientId,
-  //     clientSecret,
-  //     accessToken: accessToken,
-  //     refreshToken: refreshToken,
-  //     expiration: expiration,
-  //     scopes: scope.split(' '),
-  //   );
-  // }
   Future<SpotifyApiCredentials?> retrieveCredentials() async {
     print('SPOTIFY SERVICE: Retrieving credentials...');
     final accessToken = await _secureStorage.read(key: _accessTokenKey);

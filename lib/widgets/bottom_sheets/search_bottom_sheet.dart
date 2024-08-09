@@ -107,6 +107,21 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
             [SearchType.track, SearchType.artist, SearchType.playlist],
         limit: 20,
       );
+
+      // If the type is SimplePlaylist, if it contains "tracks" key, if "tracks" contains "href" key,
+      // and if the "tracks"["total"] is 0, arbirtraitly set the total to 50. This is a 'For You' generated playlist?
+      for (var element in results) {
+        if (element is PlaylistSimple) {
+          if (element.tracksLink != null) {
+            if (element.tracksLink!.href != null) {
+              if (element.tracksLink!.total == 0) {
+                element.tracksLink!.total = 50;
+              }
+            }
+          }
+        }
+      }
+
       setState(() {
         _searchResults = results.toList();
         _isLoading = false;

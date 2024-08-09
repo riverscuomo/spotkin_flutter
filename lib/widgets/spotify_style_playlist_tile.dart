@@ -38,7 +38,7 @@ class SpotifyStylePlaylistTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  PlaylistTitle(
+                  playlistTitle(
                     context,
                     playlist,
                     style: style,
@@ -69,8 +69,16 @@ class PlaylistImageIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final imageUrl =
-        playlist.images?.isNotEmpty == true ? playlist.images!.first.url : null;
+    String? imageUrl;
+    if (size > 100) {
+      imageUrl = playlist.images?.isNotEmpty == true
+          ? playlist.images!.first.url
+          : null;
+    } else {
+      imageUrl = playlist.images?.isNotEmpty == true
+          ? playlist.images!.last.url
+          : null;
+    }
 
     return InkWell(
       onTap: () {
