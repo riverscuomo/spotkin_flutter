@@ -100,11 +100,12 @@ class _SettingsCardState extends State<SettingsCard> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title,
-            style: Theme.of(context)
-                .textTheme
-                .titleMedium
-                ?.copyWith(color: Colors.white)),
+        Text(
+          title,
+          style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                fontSize: 16,
+              ),
+        ),
         const SizedBox(height: 8),
         RangeSlider(
           min: min,
@@ -236,7 +237,7 @@ class _SettingsCardState extends State<SettingsCard> {
                   const Divider(color: Colors.white10),
                   const SizedBox(height: 16),
                   Text('Audio Features',
-                      style: Theme.of(context).textTheme.titleLarge),
+                      style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 16),
                   _buildRangeSlider(
                     title: 'Energy',
