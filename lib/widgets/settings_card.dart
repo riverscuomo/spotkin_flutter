@@ -174,6 +174,24 @@ class _SettingsCardState extends State<SettingsCard> {
                 _navigateToEditDescriptionScreen(context, _job);
               },
             ),
+            ListTile(
+              title: const Text('Scheduled Update Time'),
+              trailing: DropdownButton<int>(
+                value: Utils.utcToLocal(_job.scheduledTime),
+                onChanged: (int? newValue) {
+                  if (newValue != null) {
+                    int utcHour = Utils.localToUtc(newValue);
+                    updateJob(_job.copyWith(scheduledTime: utcHour));
+                  }
+                },
+                items: List.generate(24, (index) {
+                  return DropdownMenuItem<int>(
+                    value: index,
+                    child: Text(Utils.formatTime(Utils.localToUtc(index))),
+                  );
+                }),
+              ),
+            ),
           ],
         ),
       ),

@@ -24,7 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Job> jobs = [];
   List<Map<String, dynamic>> jobResults = [];
   bool isProcessing = false;
-  late ApiService _apiService;
+  late BackendService _BackendService;
   late StorageService _storageService;
   final SpotifyService spotifyService = getIt<SpotifyService>();
   final widgetPadding = 3.0;
@@ -34,7 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _verifyToken();
-    _apiService = ApiService(
+    _BackendService = BackendService(
       accessToken: widget.accessToken,
       backendUrl: widget.backendUrl,
     );
@@ -74,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
       jobResults.clear();
     });
 
-    final results = await _apiService.processJobs(jobs);
+    final results = await _BackendService.processJobs(jobs);
 
     if (results.isNotEmpty) {
       // If the token has expired, re-authenticate
@@ -186,7 +186,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   TargetPlaylistWidget(
                     targetPlaylist: targetPlaylist,
-                    jobs: jobs,
+                    job: job,
                     isProcessing: isProcessing,
                     processJobs: _processJobs,
                     buildTargetPlaylistSelectionOptions:

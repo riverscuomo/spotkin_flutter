@@ -5,11 +5,11 @@ import 'package:http/http.dart' as http;
 import 'package:spotify/spotify.dart';
 import 'package:spotkin_flutter/app_core.dart';
 
-class ApiService {
+class BackendService {
   final String accessToken;
   final String backendUrl;
 
-  ApiService({required this.accessToken, required this.backendUrl});
+  BackendService({required this.accessToken, required this.backendUrl});
 
   Future<List<Map<String, dynamic>>> processJobs(List<Job> jobs) async {
     List<Map<String, dynamic>> results = [];
