@@ -26,6 +26,8 @@ class Job {
     this.recipe = const [],
   });
 
+  bool get isNull => targetPlaylist.id == null;
+
   factory Job.fromJson(Map<String, dynamic> json) {
     return Job(
       targetPlaylist: PlaylistSimple.fromJson(

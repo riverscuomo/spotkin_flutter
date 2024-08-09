@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:spotify/spotify.dart';
 import 'package:spotkin_flutter/app_core.dart';
-import '../widgets/settings_button.dart';
 import '../widgets/target_playlist_widget.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -114,8 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             RecipeWidget(
-              initialIngredients: job.recipe,
-              jobs: jobs,
+              job: job,
               jobIndex: index,
               onJobsReloaded: _loadJobs,
               updateJob: updateJob,

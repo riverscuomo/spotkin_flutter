@@ -5,18 +5,16 @@ import 'package:spotkin_flutter/app_core.dart';
 import 'ingredient_row.dart';
 
 class RecipeWidget extends StatefulWidget {
-  final List<Ingredient> initialIngredients;
+  final Job job;
   final int jobIndex;
-  final List<Job> jobs;
   final Function(int, Job) updateJob;
   final List<Map<String, dynamic>> jobResults;
   final Function() onJobsReloaded; // Add this new callback
 
   const RecipeWidget({
     Key? key,
-    required this.initialIngredients,
     required this.jobIndex,
-    required this.jobs,
+    required this.job,
     required this.updateJob,
     required this.jobResults,
     required this.onJobsReloaded, // Add this to the constructor
@@ -59,7 +57,7 @@ class _RecipeWidgetState extends State<RecipeWidget> {
   }
 
   void _initIngredientRows() {
-    _ingredientRows = widget.initialIngredients
+    _ingredientRows = widget.job.recipe
         .map((ingredient) => IngredientRow(
               quantityController:
                   TextEditingController(text: ingredient.quantity.toString()),
@@ -82,7 +80,7 @@ class _RecipeWidgetState extends State<RecipeWidget> {
   @override
   void didUpdateWidget(RecipeWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.initialIngredients != oldWidget.initialIngredients) {
+    if (widget.job.recipe != oldWidget.job.recipe) {
       _initIngredientRows();
     }
   }
@@ -110,11 +108,10 @@ class _RecipeWidgetState extends State<RecipeWidget> {
 
     final updatedJob = job.copyWith(recipe: [...job.recipe, newIngredient]);
     widget.updateJob(widget.jobIndex, updatedJob);
-    // widget.onIngredientsChanged(updatedJob.recipe);
   }
 
   void _updateJobInStorage(String playlistId, int newQuantity) {
-    final job = widget.jobs[widget.jobIndex];
+    final job = widget.job;
     final updatedRecipe = job.recipe.map((ingredient) {
       if (ingredient.playlist.id == playlistId) {
         return ingredient.copyWith(quantity: newQuantity);
@@ -136,7 +133,6 @@ class _RecipeWidgetState extends State<RecipeWidget> {
     });
 
     widget.updateJob(widget.jobIndex, updatedJob);
-    // widget.onIngredientsChanged(updatedJob.recipe);
   }
 
   Widget buildQuantityDropdown(IngredientRow row) {
@@ -204,7 +200,7 @@ class _RecipeWidgetState extends State<RecipeWidget> {
   }
 
   void _removeIngredient(String playlistId) {
-    final job = widget.jobs[widget.jobIndex];
+    final job = widget.job;
     final updatedRecipe = job.recipe
         .where((ingredient) => ingredient.playlist.id != playlistId)
         .toList();
@@ -216,7 +212,6 @@ class _RecipeWidgetState extends State<RecipeWidget> {
 
     final updatedJob = job.copyWith(recipe: updatedRecipe);
     widget.updateJob(widget.jobIndex, updatedJob);
-    // widget.onIngredientsChanged(updatedRecipe);
   }
 
   @override
@@ -269,7 +264,8 @@ class _RecipeWidgetState extends State<RecipeWidget> {
                     : Colors.red,
               ),
             SettingsButton(
-              jobs: widget.jobs,
+              job: widget.job,
+              index: widget.jobIndex,
               updateJob: widget.updateJob,
               onJobsImported: loadJobs,
             ),
