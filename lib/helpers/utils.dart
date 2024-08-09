@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:spotify/spotify.dart' hide Image;
 import 'package:url_launcher/url_launcher.dart' as url_launcher;
 
@@ -13,6 +14,26 @@ class Utils {
 
     String playlistId = uri.pathSegments.last;
     return playlistId;
+  }
+
+  static String formatTime(int hour) {
+    final time = DateTime(2023, 1, 1, hour, 0);
+    final format = DateFormat.jm(); // This will use the local time format
+    return format.format(time);
+  }
+
+  static int localToUtc(int localHour) {
+    final now = DateTime.now();
+    final localTime = DateTime(now.year, now.month, now.day, localHour);
+    final utcTime = localTime.toUtc();
+    return utcTime.hour;
+  }
+
+  static int utcToLocal(int utcHour) {
+    final now = DateTime.now();
+    final utcTime = DateTime.utc(now.year, now.month, now.day, utcHour);
+    final localTime = utcTime.toLocal();
+    return localTime.hour;
   }
 
   // static Widget getPlaylistImageOrIcon(
