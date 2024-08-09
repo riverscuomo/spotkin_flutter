@@ -13,6 +13,7 @@ class Job {
   final List<String> bannedGenres;
   final List<Artist> exceptionsToBannedGenres;
   final List<Ingredient> recipe;
+  final int scheduledTime;
 
   Job({
     required this.targetPlaylist,
@@ -24,6 +25,7 @@ class Job {
     this.bannedGenres = const [],
     this.exceptionsToBannedGenres = const [],
     this.recipe = const [],
+    this.scheduledTime = 0,
   });
 
   factory Job.fromJson(Map<String, dynamic> json) {
@@ -31,6 +33,7 @@ class Job {
       targetPlaylist: PlaylistSimple.fromJson(
           json['target_playlist'] as Map<String, dynamic>),
       description: json['description'] ?? '',
+      scheduledTime: json['scheduled_time'] ?? 0,
       removeLowEnergy: json['remove_low_energy'] == true,
       lastTracks: List<Track>.from(
           json['last_tracks']?.map((x) => Track.fromJson(x)) ?? []),
@@ -55,6 +58,7 @@ class Job {
     return {
       'target_playlist': targetPlaylist.toJson(),
       'description': description,
+      'scheduled_time': scheduledTime,
       'remove_low_energy': removeLowEnergy,
       'last_tracks': lastTracks,
       'banned_artists': bannedArtists,
@@ -69,6 +73,7 @@ class Job {
     return {
       'name': targetPlaylist.name,
       'playlist_id': targetPlaylist.id,
+      'scheduled_time': scheduledTime,
       'description': description,
       'remove_low_energy': removeLowEnergy,
       'last_track_ids': lastTracks.map((t) => t.id).toList(),
@@ -86,6 +91,7 @@ class Job {
   Job copyWith({
     PlaylistSimple? targetPlaylist,
     String? description,
+    int? scheduledTime,
     bool? removeLowEnergy,
     List<Track>? lastTracks,
     List<Artist>? bannedArtists,
@@ -97,6 +103,7 @@ class Job {
     return Job(
       targetPlaylist: targetPlaylist ?? this.targetPlaylist,
       description: description ?? this.description,
+      scheduledTime: scheduledTime ?? this.scheduledTime,
       removeLowEnergy: removeLowEnergy ?? this.removeLowEnergy,
       lastTracks: lastTracks ?? this.lastTracks,
       bannedArtists: bannedArtists ?? this.bannedArtists,
