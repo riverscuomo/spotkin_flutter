@@ -17,54 +17,55 @@ class SpotifyButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ConstrainedBox(
-      constraints: const BoxConstraints(minWidth: 150, minHeight: 48),
-      child: ElevatedButton.icon(
+      constraints: const BoxConstraints(minWidth: 55, minHeight: 60),
+      child: ElevatedButton(
         onPressed: isProcessing ? null : processJobs,
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.green[400],
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(vertical: 8),
         ),
-        icon: SizedBox(
-          width: 30,
-          height: 30,
-          child: Center(
-            child: isProcessing
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      strokeWidth: 2,
-                    ),
-                  )
-                : CircleAvatar(
-                    radius: 15,
-                    backgroundImage:
-                        imageUrl != null ? NetworkImage(imageUrl!) : null,
-                    backgroundColor: Colors.green[400],
-                    child: imageUrl == null
-                        ? Image.asset(
-                            'assets/images/transparent_spotkin.png',
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                _buildDefaultIcon(),
-                          )
-                        : null,
-                  ),
-          ),
-        ),
-        label: SizedBox(
-          width: 82, // Fixed width for the label
-          child: Center(
-            child: Text(
-              isProcessing ? 'Processing...' : 'Update',
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 20,
+              height: 20,
+              child: Center(
+                child: isProcessing
+                    ? const SizedBox(
+                        width: 30,
+                        height: 30,
+                        child: CircularProgressIndicator(
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : CircleAvatar(
+                        radius: 25,
+                        backgroundImage:
+                            imageUrl != null ? NetworkImage(imageUrl!) : null,
+                        backgroundColor: Colors.green[400],
+                        child: imageUrl == null
+                            ? Image.asset(
+                                'assets/images/transparent_spotkin.png',
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    _buildDefaultIcon(),
+                              )
+                            : null,
+                      ),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              isProcessing ? '...' : 'Update',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-          ),
-
+          ],
         ),
       ),
     );
@@ -74,10 +75,10 @@ class SpotifyButton extends StatelessWidget {
     return const Icon(
       Icons.music_note,
       color: Colors.white,
+      size: 30,
     );
   }
 }
-
 // class SpotifyButton extends StatelessWidget {
 //   const SpotifyButton({
 //     super.key,
