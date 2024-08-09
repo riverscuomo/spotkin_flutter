@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-class SpotifyButton extends StatelessWidget {
+class UpdateButton extends StatelessWidget {
   final String? imageUrl;
   final VoidCallback onPressed;
   final bool isProcessing;
   final void Function() processJobs;
 
-  const SpotifyButton({
+  const UpdateButton({
     Key? key,
     this.imageUrl,
     required this.onPressed,
@@ -25,7 +25,7 @@ class SpotifyButton extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         ),
         icon: SizedBox(
           width: 30,
@@ -64,7 +64,6 @@ class SpotifyButton extends StatelessWidget {
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
-
         ),
       ),
     );
@@ -78,8 +77,8 @@ class SpotifyButton extends StatelessWidget {
   }
 }
 
-// class SpotifyButton extends StatelessWidget {
-//   const SpotifyButton({
+// class UpdateButton extends StatelessWidget {
+//   const UpdateButton({
 //     super.key,
 //     required this.isProcessing,
 //     required this.processJobs,
