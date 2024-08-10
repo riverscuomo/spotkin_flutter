@@ -19,15 +19,19 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  List<Job> jobs = [];
-  List<Map<String, dynamic>> jobResults = [];
-  bool isProcessing = false;
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late ApiService _apiService;
   late StorageService _storageService;
   final SpotifyService spotifyService = getIt<SpotifyService>();
-  final widgetPadding = 3.0;
+  late TabController? _tabController;
+
+  List<Job> jobs = [];
+  List<Map<String, dynamic>> jobResults = [];
+  bool isProcessing = false;
   bool _isExpanded = false;
+
+  final widgetPadding = 3.0;
+  final maxJobs = 3;
 
   @override
   void initState() {
@@ -39,14 +43,18 @@ class _HomeScreenState extends State<HomeScreen> {
     );
     _storageService = StorageService();
     _loadJobs();
+    _tabController = TabController(
+        length:
+            (jobs.isEmpty ? 1 : jobs.length) + (jobs.length > maxJobs ? 0 : 1),
+        vsync: this);
   }
 
   void _addNewJob(Job newJob) {
-    setState(
-      () {
-        jobs.add(newJob);
-      },
-    );
+    setState(() {
+      jobs.add(newJob);
+      _tabController = TabController(
+          length: jobs.length + (jobs.length < maxJobs ? 1 : 0), vsync: this);
+    });
     _storageService.saveJobs(jobs);
   }
 
@@ -169,7 +177,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       body: DefaultTabController(
-        length: jobsIterable.length + 1,
+        length: jobsIterable.length + (jobs.length < maxJobs ? 1 : 0),
         child: NestedScrollView(
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
             return <Widget>[
@@ -181,6 +189,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   isScrollable: true,
                   tabAlignment: TabAlignment.start,
                   labelStyle: Theme.of(context).textTheme.labelMedium,
+                  controller: _tabController,
+                  onTap: (index) {
+                    if (index == jobsIterable.length) {
+                      _tabController?.animateTo(jobsIterable.length);
+                      _addNewJob(Job.empty());
+                    }
+                  },
                   tabs: [
                     ...jobsIterable.map((entry) {
                       return Tab(
@@ -190,15 +205,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       );
                     }),
-                    const Tab(
-                      icon: Icon(Icons.add),
-                    )
+                    if (jobs.length < maxJobs) const Tab(icon: Icon(Icons.add))
                   ],
                 ),
               ),
             ];
           },
           body: TabBarView(
+            controller: _tabController,
             children: [
               ...jobsIterable.map((jobEntry) {
                 final job = jobEntry.value;
@@ -226,11 +240,31 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 );
               }),
-              Container(),
+              if (jobs.length < maxJobs)
+                SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 15),
+                      ElevatedButton(
+                        onPressed: () {
+                          _tabController?.animateTo(jobsIterable.length);
+                          _addNewJob(Job.empty());
+                        },
+                        child: const Text('Add new job'),
+                      ),
+                    ],
+                  ),
+                )
             ],
           ),
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _tabController?.dispose();
+    super.dispose();
   }
 }

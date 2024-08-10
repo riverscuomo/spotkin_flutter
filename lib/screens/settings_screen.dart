@@ -43,40 +43,44 @@ class SettingsScreen extends StatelessWidget {
         actions: const [InfoButton()],
       ),
       body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          SettingsCard(
-            index: index,
-            job: job,
-            updateJob: updateJob,
-          ),
-          Column(children: [
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          Expanded(
+            child: ListView(
               children: [
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.backup),
-                  label: const Text('Create Backup'),
-                  onPressed: () => _createBackup(context),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
-                  ),
-                ),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.restore),
-                  label: const Text('Import Backup'),
-                  onPressed: () => _importBackup(context),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
-                  ),
+                const SizedBox(height: 16),
+                SettingsCard(
+                  index: index,
+                  job: job,
+                  updateJob: updateJob,
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-          ]),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              ElevatedButton.icon(
+                icon: const Icon(Icons.backup),
+                label: const Text('Create Backup'),
+                onPressed: () => _createBackup(context),
+                style: ElevatedButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
+              ),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.restore),
+                label: const Text('Import Backup'),
+                onPressed: () => _importBackup(context),
+                style: ElevatedButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
         ],
       ),
     );
