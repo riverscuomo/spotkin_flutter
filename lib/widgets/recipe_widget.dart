@@ -8,6 +8,7 @@ class RecipeWidget extends StatefulWidget {
   final Job job;
   final int jobIndex;
   final Function(int, Job) updateJob;
+  final Function(Job) addJob;
   final List<Map<String, dynamic>?> jobResults;
   final Function() onJobsReloaded; // Add this new callback
 
@@ -16,6 +17,7 @@ class RecipeWidget extends StatefulWidget {
     required this.jobIndex,
     required this.job,
     required this.updateJob,
+    required this.addJob,
     required this.jobResults,
     required this.onJobsReloaded, // Add this to the constructor
   }) : super(key: key);
@@ -270,6 +272,7 @@ class _RecipeWidgetState extends State<RecipeWidget> {
                 index: widget.jobIndex,
                 job: widget.job,
                 updateJob: widget.updateJob,
+                addJob: widget.addJob,
                 onJobsImported: loadJobs,
               ),
           ],

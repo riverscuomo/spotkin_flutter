@@ -5,6 +5,7 @@ class SettingsScreen extends StatelessWidget {
   final Job job;
   final int index;
   final Function(int, Job) updateJob;
+  final Function(Job) addJob;
   final StorageService storageService = StorageService();
   late final BackupService backupService;
   final VoidCallback onJobsImported;
@@ -14,9 +15,10 @@ class SettingsScreen extends StatelessWidget {
     required this.job,
     required this.index,
     required this.updateJob,
+    required this.addJob,
     required this.onJobsImported,
   }) {
-    backupService = BackupService(storageService);
+    backupService = BackupService(storageService, addJob, updateJob);
   }
 
   void _createBackup(BuildContext context) {

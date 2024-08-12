@@ -82,7 +82,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       jobResults = List.filled(jobs.length, null);
     });
 
-    final results = await _BackendService.processJobs([job]);
+    final results = await _BackendService.processJobs(
+        jobs, [index]); // only process the job at the given index
 
     if (results.isNotEmpty) {
       // If the token has expired, re-authenticate
@@ -127,6 +128,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               jobIndex: index,
               onJobsReloaded: _loadJobs,
               updateJob: updateJob,
+              addJob: _addNewJob,
               jobResults: jobResults,
             ),
           ],

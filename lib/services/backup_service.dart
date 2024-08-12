@@ -5,8 +5,10 @@ import 'package:spotkin_flutter/app_core.dart';
 
 class BackupService {
   final StorageService _storageService;
+  final Function(Job) addJob;
+  final Function(int, Job) updateJob;
 
-  BackupService(this._storageService);
+  BackupService(this._storageService, this.addJob, this.updateJob);
 
   void createBackup() {
     List<Job> jobs = _storageService.getJobs();
@@ -64,9 +66,11 @@ class BackupService {
               (job) => job.targetPlaylist.id == importedJob.targetPlaylist.id);
           if (existingIndex != -1) {
             // Update existing job
+            updateJob(existingIndex, importedJob);
             existingJobs[existingIndex] = importedJob;
           } else {
             // Add new job
+            addJob(importedJob);
             existingJobs.add(importedJob);
           }
         }
