@@ -8,7 +8,7 @@ class RecipeWidget extends StatefulWidget {
   final Job job;
   final int jobIndex;
   final Function(int, Job) updateJob;
-  final List<Map<String, dynamic>> jobResults;
+  final List<Map<String, dynamic>?> jobResults;
   final Function() onJobsReloaded; // Add this new callback
 
   const RecipeWidget({
@@ -216,7 +216,8 @@ class _RecipeWidgetState extends State<RecipeWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Map<String, dynamic>> jobResults = widget.jobResults;
+    final Map<String, dynamic>? jobResult =
+        widget.jobResults.isEmpty ? null : widget.jobResults[widget.jobIndex];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -233,7 +234,7 @@ class _RecipeWidgetState extends State<RecipeWidget> {
                     return SearchBottomSheet(
                       onItemSelected: (dynamic item) {
                         if (item is PlaylistSimple) {
-                          _addNewRow(item, storageService.getJobs().first);
+                          _addNewRow(item, widget.job);
                         }
                       },
                       searchTypes: const [SearchType.playlist],
@@ -244,22 +245,22 @@ class _RecipeWidgetState extends State<RecipeWidget> {
               },
             ),
             const SizedBox(width: 10),
-            if (jobResults.isNotEmpty)
+            if (jobResult != null)
               Text(
-                jobResults[0]['result'],
+                jobResult['result'],
                 style: Theme.of(context)
                     .textTheme
                     .labelMedium!
                     .copyWith(fontStyle: FontStyle.italic),
               ),
             const SizedBox(width: 10),
-            if (jobResults.isNotEmpty)
+            if (jobResult != null)
               Icon(
                 size: 14,
-                jobResults[0]['status'] == 'Success'
+                jobResult['status'] == 'Success'
                     ? Icons.check_circle
                     : Icons.error,
-                color: jobResults[0]['status'] == 'Success'
+                color: jobResult['status'] == 'Success'
                     ? Colors.green
                     : Colors.red,
               ),

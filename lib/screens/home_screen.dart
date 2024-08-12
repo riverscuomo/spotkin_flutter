@@ -26,9 +26,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late TabController? _tabController;
 
   List<Job> jobs = [];
-  List<Map<String, dynamic>> jobResults = [];
+  List<Map<String, dynamic>?> jobResults = [];
   bool isProcessing = false;
   bool _isExpanded = false;
+  bool _showAddJobButton = false;
 
   final widgetPadding = 3.0;
   final maxJobs = 3;
@@ -43,17 +44,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
     _storageService = StorageService();
     _loadJobs();
+    _showAddJobButton = jobs.isNotEmpty &&
+        !jobs.any((job) => job.isNull) &&
+        jobs.length < maxJobs;
     _tabController = TabController(
-        length:
-            (jobs.isEmpty ? 1 : jobs.length) + (jobs.length > maxJobs ? 0 : 1),
+        length: (jobs.isEmpty ? 1 : jobs.length) + (_showAddJobButton ? 1 : 0),
         vsync: this);
   }
 
   void _addNewJob(Job newJob) {
     setState(() {
       jobs.add(newJob);
-      _tabController = TabController(
-          length: jobs.length + (jobs.length < maxJobs ? 1 : 0), vsync: this);
+      _updateTabController();
     });
     _storageService.saveJobs(jobs);
   }
@@ -74,13 +76,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     });
   }
 
-  Future<void> _processJobs() async {
+  Future<void> _processJob(Job job, int index) async {
     setState(() {
       isProcessing = true;
-      jobResults.clear();
+      jobResults = List.filled(jobs.length, null);
     });
 
-    final results = await _apiService.processJobs(jobs);
+    final results = await _apiService.processJobs([job]);
 
     if (results.isNotEmpty) {
       // If the token has expired, re-authenticate
@@ -95,7 +97,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         }
       }
       setState(() {
-        jobResults = results;
+        jobResults[index] = results[0];
         isProcessing = false;
       });
     }
@@ -133,16 +135,24 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  void _replaceJob(Job newJob) {
+  void _replaceJob(Job newJob, int index) {
     setState(() {
-      jobs.clear();
-      jobs.add(newJob);
+      jobs[index] = newJob;
       _isExpanded = false; // Collapse after changing the target playlist
+      _updateTabController();
     });
     _storageService.saveJobs(jobs);
   }
 
-  Widget buildTargetPlaylistSelectionOptions() {
+  void _updateTabController() {
+    final index = _tabController?.index ?? 0;
+    _showAddJobButton = jobs.length < maxJobs && !jobs.any((job) => job.isNull);
+    _tabController = TabController(
+        length: jobs.length + (_showAddJobButton ? 1 : 0), vsync: this);
+    _tabController?.index = index;
+  }
+
+  Widget buildTargetPlaylistSelectionOptions(int index) {
     return TargetPlaylistSelectionOptions(
       onPlaylistSelected: (PlaylistSimple selectedPlaylist) {
         if (jobs.isEmpty) {
@@ -151,8 +161,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           );
           _addNewJob(newJob);
         } else {
-          final updateJob = jobs[0].copyWith(targetPlaylist: selectedPlaylist);
-          _replaceJob(updateJob);
+          if (jobs.any((job) => job.targetPlaylist.id == selectedPlaylist.id)) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Playlist already selected for another job.'),
+              ),
+            );
+            return;
+          }
+          final updateJob =
+              jobs[index].copyWith(targetPlaylist: selectedPlaylist);
+          _replaceJob(updateJob, index);
         }
         // Auto-collapse after selection
         setState(() {
@@ -177,7 +196,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ],
       ),
       body: DefaultTabController(
-        length: jobsIterable.length + (jobs.length < maxJobs ? 1 : 0),
+        length: jobsIterable.length + (_showAddJobButton ? 1 : 0),
         child: NestedScrollView(
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
             return <Widget>[
@@ -191,7 +210,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   labelStyle: Theme.of(context).textTheme.labelMedium,
                   controller: _tabController,
                   onTap: (index) {
-                    if (index == jobsIterable.length) {
+                    if (index == jobsIterable.length && _showAddJobButton) {
                       _tabController?.animateTo(jobsIterable.length);
                       _addNewJob(Job.empty());
                     }
@@ -205,7 +224,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         ),
                       );
                     }),
-                    if (jobs.length < maxJobs) const Tab(icon: Icon(Icons.add))
+                    if (_showAddJobButton) const Tab(icon: Icon(Icons.add))
                   ],
                 ),
               ),
@@ -222,9 +241,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     children: [
                       TargetPlaylistWidget(
                         targetPlaylist: job.targetPlaylist,
-                        jobs: jobs,
+                        job: job,
+                        index: jobEntry.key,
                         isProcessing: isProcessing,
-                        processJobs: _processJobs,
+                        processJob: _processJob,
                         buildTargetPlaylistSelectionOptions:
                             buildTargetPlaylistSelectionOptions,
                         isExpanded: _isExpanded,
@@ -240,7 +260,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   ),
                 );
               }),
-              if (jobs.length < maxJobs)
+              if (_showAddJobButton)
                 SingleChildScrollView(
                   child: Column(
                     children: [

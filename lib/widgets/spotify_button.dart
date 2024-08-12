@@ -4,22 +4,20 @@ class SpotifyButton extends StatelessWidget {
   final String? imageUrl;
   final VoidCallback onPressed;
   final bool isProcessing;
-  final void Function() processJobs;
 
   const SpotifyButton({
-    Key? key,
+    super.key,
     this.imageUrl,
     required this.onPressed,
     required this.isProcessing,
-    required this.processJobs,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return ConstrainedBox(
       constraints: const BoxConstraints(minWidth: 150, minHeight: 48),
       child: ElevatedButton.icon(
-        onPressed: isProcessing ? null : processJobs,
+        onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.green[400],
           shape: RoundedRectangleBorder(
@@ -64,7 +62,6 @@ class SpotifyButton extends StatelessWidget {
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
-
         ),
       ),
     );
