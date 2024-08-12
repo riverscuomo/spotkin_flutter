@@ -20,7 +20,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
-  late ApiService _apiService;
+  late BackendService _BackendService;
   late StorageService _storageService;
   final SpotifyService spotifyService = getIt<SpotifyService>();
   late TabController? _tabController;
@@ -38,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _verifyToken();
-    _apiService = ApiService(
+    _BackendService = BackendService(
       accessToken: widget.accessToken,
       backendUrl: widget.backendUrl,
     );
@@ -82,7 +82,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       jobResults = List.filled(jobs.length, null);
     });
 
-    final results = await _apiService.processJobs([job]);
+    final results = await _BackendService.processJobs([job]);
 
     if (results.isNotEmpty) {
       // If the token has expired, re-authenticate
@@ -255,7 +255,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         },
                       ),
                       SizedBox(height: widgetPadding),
-                      _buildRecipeCard(job, jobEntry.key),
+                      if (!job.isNull) _buildRecipeCard(job, jobEntry.key),
                     ],
                   ),
                 );

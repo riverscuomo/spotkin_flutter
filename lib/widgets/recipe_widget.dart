@@ -137,8 +137,9 @@ class _RecipeWidgetState extends State<RecipeWidget> {
 
   Widget buildQuantityDropdown(IngredientRow row) {
     return SizedBox(
-      width: 70,
+      width: 65,
       child: DropdownButtonFormField<int>(
+        style: Theme.of(context).textTheme.labelLarge,
         value: int.tryParse(row.quantityController.text) ?? 5,
         items: List.generate(21, (index) {
           return DropdownMenuItem<int>(
@@ -264,23 +265,25 @@ class _RecipeWidgetState extends State<RecipeWidget> {
                     ? Colors.green
                     : Colors.red,
               ),
-            SettingsButton(
-              job: widget.job,
-              index: widget.jobIndex,
-              updateJob: widget.updateJob,
-              onJobsImported: loadJobs,
-            ),
+            if (_ingredientRows.isNotEmpty)
+              SettingsButton(
+                index: widget.jobIndex,
+                job: widget.job,
+                updateJob: widget.updateJob,
+                onJobsImported: loadJobs,
+              ),
           ],
         ),
         if (_ingredientRows.isEmpty)
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              "Let's start building your Spotkin",
-              style: Theme.of(context).textTheme.bodyMedium,
-              textAlign: TextAlign.center,
-            ),
-          )
+          // Padding(
+          //   padding: const EdgeInsets.all(16.0),
+          //   child: Text(
+          //     "Let's start building your Spotkin",
+          //     style: Theme.of(context).textTheme.bodyMedium,
+          //     textAlign: TextAlign.center,
+          //   ),
+          // )
+          const SizedBox.shrink()
         else
           ..._ingredientRows.map((row) {
             final playlist = row.playlist;
