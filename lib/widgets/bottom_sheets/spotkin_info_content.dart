@@ -1,10 +1,17 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:spotkin_flutter/helpers/utils.dart';
 
 const gap = SizedBox(
   height: 5,
 );
 
-const infoSheetContent = [
+Future <void>
+_onOpen(String url) async{
+  Utils.myLaunch(url);
+}
+
+final infoSheetContent = [
   Text(
       '👋 Hi there! I\'m Spotkin, your personal music discovery assistant! 🎵'),
   gap,
@@ -23,7 +30,23 @@ const infoSheetContent = [
   Text('I work best when drawing from a variety of sources, such as:'),
   Text('• Dynamic playlists like "New Music Friday" or "Today\'s Top Hits"'),
   Text('• Curated playlists like Rolling Stone\'s "fivehundredalbums"'),
-  Text('• New releases from genres you love via the new_albums script'),
+  RichText(
+    text: TextSpan(
+      children: [
+        TextSpan(
+          text: '• New releases from genres you love via the ',
+          ),
+          TextSpan(
+            text: 'new_albums script',
+            style: TextStyle(color: Colors.blue, decoration: TextDecoration.underline),
+          recognizer: TapGestureRecognizer()
+          ..onTap = () {
+           _onOpen('https://github.com/riverscuomo/new-albums'); 
+          }, 
+        ),
+      ],
+    ),
+  ),
   Text('• Your personal "Daily Mix" playlists and "Discover Weekly"'),
   gap,
   Text(
