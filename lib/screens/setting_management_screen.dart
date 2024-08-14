@@ -54,15 +54,15 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
   List<dynamic> _getItems() {
     switch (widget.fieldName) {
       case 'bannedArtists':
-        return _job.bannedArtists;
+        return List<Artist>.from(_job.bannedArtists);
       case 'bannedTracks':
-        return _job.bannedTracks;
+        return List<Track>.from(_job.bannedTracks);
       case 'bannedGenres':
-        return _job.bannedGenres;
+        return List<String>.from(_job.bannedGenres);
       case 'exceptionsToBannedGenres':
-        return _job.exceptionsToBannedGenres;
+        return List<Artist>.from(_job.exceptionsToBannedGenres);
       case 'lastTracks':
-        return _job.lastTracks;
+        return List<Track>.from(_job.lastTracks);
       default:
         return [];
     }
