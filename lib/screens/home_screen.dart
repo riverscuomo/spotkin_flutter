@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:spotify/spotify.dart';
 import 'package:spotkin_flutter/app_core.dart';
-import '../widgets/settings_button.dart';
 import '../widgets/target_playlist_widget.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -20,15 +19,20 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  List<Job> jobs = [];
-  List<Map<String, dynamic>> jobResults = [];
-  bool isProcessing = false;
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late BackendService _BackendService;
   late StorageService _storageService;
   final SpotifyService spotifyService = getIt<SpotifyService>();
-  final widgetPadding = 3.0;
+  late TabController? _tabController;
+
+  List<Job> jobs = [];
+  List<Map<String, dynamic>?> jobResults = [];
+  bool isProcessing = false;
   bool _isExpanded = false;
+  bool _showAddJobButton = false;
+
+  final widgetPadding = 3.0;
+  final maxJobs = 3;
 
   @override
   void initState() {
@@ -40,15 +44,19 @@ class _HomeScreenState extends State<HomeScreen> {
     );
     _storageService = StorageService();
     _loadJobs();
-    _isExpanded = jobs.isEmpty;
+    _showAddJobButton = jobs.isNotEmpty &&
+        !jobs.any((job) => job.isNull) &&
+        jobs.length < maxJobs;
+    _tabController = TabController(
+        length: (jobs.isEmpty ? 1 : jobs.length) + (_showAddJobButton ? 1 : 0),
+        vsync: this);
   }
 
   void _addNewJob(Job newJob) {
-    setState(
-      () {
-        jobs.add(newJob);
-      },
-    );
+    setState(() {
+      jobs.add(newJob);
+      _updateTabController();
+    });
     _storageService.saveJobs(jobs);
   }
 
@@ -68,13 +76,14 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  Future<void> _processJobs() async {
+  Future<void> _processJob(Job job, int index) async {
     setState(() {
       isProcessing = true;
-      jobResults.clear();
+      jobResults = List.filled(jobs.length, null);
     });
 
-    final results = await _BackendService.processJobs(jobs);
+    final results = await _BackendService.processJobs(
+        jobs, [index]); // only process the job at the given index
 
     if (results.isNotEmpty) {
       // If the token has expired, re-authenticate
@@ -89,7 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       }
       setState(() {
-        jobResults = results;
+        jobResults[index] = results[0];
         isProcessing = false;
       });
     }
@@ -115,17 +124,12 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             RecipeWidget(
-              initialIngredients: job.recipe,
-              jobs: jobs,
+              job: job,
+              jobIndex: index,
               onJobsReloaded: _loadJobs,
               updateJob: updateJob,
+              addJob: _addNewJob,
               jobResults: jobResults,
-              onIngredientsChanged: (updatedIngredients) {
-                setState(() {
-                  job = job.copyWith(recipe: updatedIngredients);
-                  updateJob(index, job);
-                });
-              },
             ),
           ],
         ),
@@ -133,16 +137,24 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _replaceJob(Job newJob) {
+  void _replaceJob(Job newJob, int index) {
     setState(() {
-      jobs.clear();
-      jobs.add(newJob);
+      jobs[index] = newJob;
       _isExpanded = false; // Collapse after changing the target playlist
+      _updateTabController();
     });
     _storageService.saveJobs(jobs);
   }
 
-  Widget buildTargetPlaylistSelectionOptions() {
+  void _updateTabController() {
+    final index = _tabController?.index ?? 0;
+    _showAddJobButton = jobs.length < maxJobs && !jobs.any((job) => job.isNull);
+    _tabController = TabController(
+        length: jobs.length + (_showAddJobButton ? 1 : 0), vsync: this);
+    _tabController?.index = index;
+  }
+
+  Widget buildTargetPlaylistSelectionOptions(int index) {
     return TargetPlaylistSelectionOptions(
       onPlaylistSelected: (PlaylistSimple selectedPlaylist) {
         if (jobs.isEmpty) {
@@ -151,8 +163,17 @@ class _HomeScreenState extends State<HomeScreen> {
           );
           _addNewJob(newJob);
         } else {
-          final updateJob = jobs[0].copyWith(targetPlaylist: selectedPlaylist);
-          _replaceJob(updateJob);
+          if (jobs.any((job) => job.targetPlaylist.id == selectedPlaylist.id)) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Playlist already selected for another job.'),
+              ),
+            );
+            return;
+          }
+          final updateJob =
+              jobs[index].copyWith(targetPlaylist: selectedPlaylist);
+          _replaceJob(updateJob, index);
         }
         // Auto-collapse after selection
         setState(() {
@@ -164,8 +185,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final job = jobs.isEmpty ? Job.empty() : jobs[0];
-    final targetPlaylist = job.targetPlaylist;
+    final jobsIterable =
+        jobs.isNotEmpty ? jobs.asMap().entries : [MapEntry(0, Job.empty())];
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -176,39 +197,96 @@ class _HomeScreenState extends State<HomeScreen> {
           InfoButton(),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: widgetPadding),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Column(
-                children: [
-                  TargetPlaylistWidget(
-                    targetPlaylist: targetPlaylist,
-                    job: job,
-                    isProcessing: isProcessing,
-                    processJobs: _processJobs,
-                    buildTargetPlaylistSelectionOptions:
-                        buildTargetPlaylistSelectionOptions,
-                    isExpanded: _isExpanded,
-                    onExpandChanged: (expanded) {
-                      setState(() {
-                        _isExpanded = expanded;
-                      });
-                    },
-                  ),
-                  SizedBox(height: widgetPadding),
-                  ...jobs.asMap().entries.map((entry) {
-                    return _buildRecipeCard(entry.value, entry.key);
-                  }),
-                ],
+      body: DefaultTabController(
+        length: jobsIterable.length + (_showAddJobButton ? 1 : 0),
+        child: NestedScrollView(
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            return <Widget>[
+              SliverAppBar(
+                pinned: true,
+                floating: true,
+                expandedHeight: 0,
+                bottom: TabBar(
+                  isScrollable: true,
+                  tabAlignment: TabAlignment.start,
+                  labelStyle: Theme.of(context).textTheme.labelMedium,
+                  controller: _tabController,
+                  onTap: (index) {
+                    if (index == jobsIterable.length && _showAddJobButton) {
+                      _tabController?.animateTo(jobsIterable.length);
+                      _addNewJob(Job.empty());
+                    }
+                  },
+                  tabs: [
+                    ...jobsIterable.map((entry) {
+                      return Tab(
+                        child: Text(
+                          entry.value.targetPlaylist.name ?? 'New job',
+                          style: Theme.of(context).textTheme.labelMedium,
+                        ),
+                      );
+                    }),
+                    if (_showAddJobButton) const Tab(icon: Icon(Icons.add))
+                  ],
+                ),
               ),
-              const SizedBox(height: 20),
+            ];
+          },
+          body: TabBarView(
+            controller: _tabController,
+            children: [
+              ...jobsIterable.map((jobEntry) {
+                final job = jobEntry.value;
+
+                return SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      TargetPlaylistWidget(
+                        targetPlaylist: job.targetPlaylist,
+                        job: job,
+                        index: jobEntry.key,
+                        isProcessing: isProcessing,
+                        processJob: _processJob,
+                        buildTargetPlaylistSelectionOptions:
+                            buildTargetPlaylistSelectionOptions,
+                        isExpanded: _isExpanded,
+                        onExpandChanged: (expanded) {
+                          setState(() {
+                            _isExpanded = expanded;
+                          });
+                        },
+                      ),
+                      SizedBox(height: widgetPadding),
+                      if (!job.isNull) _buildRecipeCard(job, jobEntry.key),
+                    ],
+                  ),
+                );
+              }),
+              if (_showAddJobButton)
+                SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 15),
+                      ElevatedButton(
+                        onPressed: () {
+                          _tabController?.animateTo(jobsIterable.length);
+                          _addNewJob(Job.empty());
+                        },
+                        child: const Text('Add new job'),
+                      ),
+                    ],
+                  ),
+                )
             ],
           ),
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _tabController?.dispose();
+    super.dispose();
   }
 }

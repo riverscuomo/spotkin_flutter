@@ -2,32 +2,37 @@ import 'package:flutter/material.dart';
 import 'package:spotkin_flutter/app_core.dart';
 
 class SettingsScreen extends StatelessWidget {
-  final List<Job> jobs;
+  final Job job;
+  final int index;
   final Function(int, Job) updateJob;
+  final Function(Job) addJob;
   final StorageService storageService = StorageService();
   late final BackupService backupService;
   final VoidCallback onJobsImported;
 
   SettingsScreen({
-    Key? key,
-    required this.jobs,
+    super.key,
+    required this.job,
+    required this.index,
     required this.updateJob,
+    required this.addJob,
     required this.onJobsImported,
-  }) : super(key: key) {
-    backupService = BackupService(storageService);
+  }) {
+    backupService = BackupService(storageService, addJob, updateJob);
   }
 
   void _createBackup(BuildContext context) {
     backupService.createBackup();
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Backup file created. Check your downloads.')),
+      const SnackBar(
+          content: Text('Backup file created. Check your downloads.')),
     );
   }
 
   Future<void> _importBackup(BuildContext context) async {
     await backupService.importBackup();
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Backup imported and jobs updated.')),
+      const SnackBar(content: Text('Backup imported and jobs updated.')),
     );
     onJobsImported();
   }
@@ -41,25 +46,16 @@ class SettingsScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
-          jobs.isEmpty
-              ? Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Text(
-                    'No spotkins found. Add a new spotkin to get started.',
-                    style: Theme.of(context).textTheme.titleSmall,
-                  ),
-                )
-              : const SizedBox.shrink(),
           Expanded(
-            child: ListView.builder(
-              itemCount: jobs.length,
-              itemBuilder: (context, index) {
-                return SettingsCard(
+            child: ListView(
+              children: [
+                const SizedBox(height: 16),
+                SettingsCard(
                   index: index,
-                  job: jobs[index],
+                  job: job,
                   updateJob: updateJob,
-                );
-              },
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 16),

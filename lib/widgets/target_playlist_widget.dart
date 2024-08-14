@@ -6,9 +6,10 @@ import 'package:spotkin_flutter/widgets/spotify_button.dart';
 class TargetPlaylistWidget extends StatelessWidget {
   final PlaylistSimple targetPlaylist;
   final Job job;
+  final int index;
   final bool isProcessing;
-  final void Function() processJobs;
-  final Widget Function() buildTargetPlaylistSelectionOptions;
+  final void Function(Job, int) processJob;
+  final Widget Function(int) buildTargetPlaylistSelectionOptions;
   final bool isExpanded;
   final Function(bool) onExpandChanged;
 
@@ -16,8 +17,9 @@ class TargetPlaylistWidget extends StatelessWidget {
     Key? key,
     required this.targetPlaylist,
     required this.job,
+    required this.index,
     required this.isProcessing,
-    required this.processJobs,
+    required this.processJob,
     required this.buildTargetPlaylistSelectionOptions,
     required this.isExpanded,
     required this.onExpandChanged,
@@ -43,7 +45,7 @@ class TargetPlaylistWidget extends StatelessWidget {
                   size: 160,
                 ),
                 const SizedBox(height: 16),
-                if (job == Job.empty())
+                if (job.isNull)
                   Column(
                     children: [
                       Text(
@@ -51,7 +53,7 @@ class TargetPlaylistWidget extends StatelessWidget {
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       const SizedBox(height: 16),
-                      buildTargetPlaylistSelectionOptions(),
+                      buildTargetPlaylistSelectionOptions(index),
                     ],
                   )
                 else
@@ -76,17 +78,20 @@ class TargetPlaylistWidget extends StatelessWidget {
                           ],
                         ),
                       ),
-                      if (job != Job.empty() && job.recipe.isNotEmpty)
-                        UpdateButton(
-                          isProcessing: isProcessing,
-                          processJobs: processJobs,
-                          onPressed: processJobs,
-                        ),
+                      Row(
+                        children: [
+                          // const SizedBox(width: 8),
+                          UpdateButton(
+                            isProcessing: isProcessing,
+                            onPressed: () => processJob(job, index),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
-                if (isExpanded) ...[
+                if (isExpanded && !job.isNull) ...[
                   const SizedBox(height: 16),
-                  buildTargetPlaylistSelectionOptions(),
+                  buildTargetPlaylistSelectionOptions(index),
                 ],
               ],
             ),
