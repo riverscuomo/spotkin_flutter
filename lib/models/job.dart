@@ -50,6 +50,8 @@ class Job {
     this.maxAcousticness,
   });
 
+  bool get isNull => targetPlaylist.id == null;
+
   factory Job.fromJson(Map<String, dynamic> json) {
     return Job(
       targetPlaylist: PlaylistSimple.fromJson(

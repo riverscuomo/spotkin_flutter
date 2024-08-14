@@ -2,14 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:spotkin_flutter/app_core.dart';
 
 class SettingsButton extends StatelessWidget {
-  final List<Job> jobs;
+  final Job job;
+  final int index;
   final Function(int, Job) updateJob;
+  final Function(Job) addJob;
   final Function() onJobsImported;
 
   const SettingsButton({
     Key? key,
-    required this.jobs,
+    required this.job,
+    required this.index,
     required this.updateJob,
+    required this.addJob,
     required this.onJobsImported,
   }) : super(key: key);
 
@@ -22,8 +26,10 @@ class SettingsButton extends StatelessWidget {
           context,
           MaterialPageRoute(
             builder: (context) => SettingsScreen(
-              jobs: jobs,
+              job: job,
+              index: index,
               updateJob: updateJob,
+              addJob: addJob,
               onJobsImported: onJobsImported,
             ),
           ),
