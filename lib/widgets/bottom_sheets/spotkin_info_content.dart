@@ -35,6 +35,7 @@ final infoSheetContent = [
       children: [
         TextSpan(
           text: '• New releases from genres you love via the ',
+          style: TextStyle(color: Colors.white70),
           ),
           TextSpan(
             text: 'new_albums script',
