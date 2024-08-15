@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 const spotifyWidgetColor = Color(0xFF121212);
+
 final spotifyThemeData = ThemeData(
   primarySwatch: Colors.green,
   brightness: Brightness.dark,
