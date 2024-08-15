@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:spotify/spotify.dart' hide Image;
 import 'package:spotkin_flutter/app_core.dart';
-import 'package:spotkin_flutter/widgets/spotify_button.dart';
+import 'package:spotkin_flutter/widgets/update_button.dart';
 
 class TargetPlaylistWidget extends StatelessWidget {
   final PlaylistSimple targetPlaylist;

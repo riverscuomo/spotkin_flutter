@@ -46,8 +46,8 @@ class _RecipeWidgetState extends State<RecipeWidget> {
   }
 
   void loadJobs() async {
-    // Reload jobs from storage
-    List<Job> updatedJobs = await storageService.getJobs();
+    // // Reload jobs from storage
+    // List<Job> updatedJobs = await storageService.getJobs();
 
     // Call the callback to update jobs in the parent widget
     widget.onJobsReloaded();
