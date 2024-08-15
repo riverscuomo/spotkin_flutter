@@ -32,7 +32,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   bool _showAddJobButton = false;
 
   final widgetPadding = 3.0;
-  final maxJobs = 3;
+  final maxJobs = 2;
 
   @override
   void initState() {
