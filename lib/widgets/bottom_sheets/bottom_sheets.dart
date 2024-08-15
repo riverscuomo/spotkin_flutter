@@ -111,7 +111,7 @@ void showInfoBottomSheet(BuildContext context) {
   CustomBottomSheet.show(
     context: context,
     title: const Text('About Spotkin'),
-    content: infoSheetContent,
+    content: buildInfoSheetContent(context),
     showImage: true,
   );
 }

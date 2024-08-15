@@ -9,16 +9,16 @@ class SpotifyStylePlaylistTile extends StatelessWidget {
   final bool active;
 
   const SpotifyStylePlaylistTile({
-    Key? key,
+    super.key,
     required this.playlist,
     this.trailingButton,
     this.onTileTapped,
     this.active = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    var style = Theme.of(context).textTheme.titleMedium;
+    var style = Theme.of(context).textTheme.titleSmall;
     if (!active) style = style!.copyWith(color: Colors.grey[600]);
     return InkWell(
       onTap: () {

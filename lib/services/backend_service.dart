@@ -5,19 +5,21 @@ import 'package:http/http.dart' as http;
 import 'package:spotify/spotify.dart';
 import 'package:spotkin_flutter/app_core.dart';
 
-class ApiService {
+class BackendService {
   final String accessToken;
   final String backendUrl;
 
-  ApiService({required this.accessToken, required this.backendUrl});
+  BackendService({required this.accessToken, required this.backendUrl});
 
-  Future<List<Map<String, dynamic>>> processJobs(List<Job> jobs) async {
+  Future<List<Map<String, dynamic>>> processJobs(
+      List<Job> jobs, List<int> indexes) async {
     List<Map<String, dynamic>> results = [];
     final spotifyService = GetIt.instance<SpotifyService>();
 
-    for (var job in jobs) {
+    for (final index in indexes) {
       try {
         final url = '$backendUrl/process_job';
+        final job = jobs[index];
 
         // Use SpotifyService to get the tokens
         final credentials = await spotifyService.retrieveCredentials();
@@ -28,6 +30,8 @@ class ApiService {
           throw Exception('Spotify credentials are missing or incomplete');
         }
 
+        var jobJson = job.toJsonForPostRequest();
+        jobJson['index'] = index;
         final response = await http
             .post(
               Uri.parse(url),
@@ -37,9 +41,9 @@ class ApiService {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
               },
-              body: json.encode(job.toJsonForPostRequest()),
+              body: json.encode(jobJson),
             )
-            .timeout(Duration(seconds: 60));
+            .timeout(const Duration(seconds: 60));
 
         if (response.statusCode == 200) {
           final responseData = json.decode(response.body);
@@ -53,7 +57,7 @@ class ApiService {
               accessToken: responseData['new_access_token'],
               refreshToken: credentials.refreshToken,
               expiration: DateTime.now()
-                  .add(Duration(hours: 1)), // Assuming 1 hour validity
+                  .add(const Duration(hours: 1)), // Assuming 1 hour validity
               scopes: credentials.scopes,
             );
             await spotifyService.saveCredentials(newCredentials);
@@ -73,7 +77,9 @@ class ApiService {
         }
       } catch (e) {
         results.add({
-          'name': job.targetPlaylist.name,
+          'name': jobs[index].isNull
+              ? 'Unknown job'
+              : jobs[index].targetPlaylist.name,
           'status': 'Error',
           'result': e.toString(),
         });

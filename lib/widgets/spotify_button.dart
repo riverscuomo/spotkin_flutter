@@ -1,25 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 
-class SpotifyButton extends StatefulWidget {
+class UpdateButton extends StatefulWidget {
   final String? imageUrl;
   final VoidCallback onPressed;
   final bool isProcessing;
-  final void Function() processJobs;
 
-  const SpotifyButton({
-    Key? key,
+  const UpdateButton({
+    super.key,
     this.imageUrl,
     required this.onPressed,
     required this.isProcessing,
-    required this.processJobs,
-  }) : super(key: key);
+  });
 
   @override
-  _SpotifyButtonState createState() => _SpotifyButtonState();
+  _UpdateButtonState createState() => _UpdateButtonState();
 }
 
-class _SpotifyButtonState extends State<SpotifyButton> {
+class _UpdateButtonState extends State<UpdateButton> {
   final AudioPlayer _audioPlayer = AudioPlayer();
 
   @override
@@ -37,7 +35,7 @@ class _SpotifyButtonState extends State<SpotifyButton> {
   void _handlePress() async {
     if (!widget.isProcessing) {
       await _audioPlayer.play(AssetSource('sounds/update_button_sound.mp3'));
-      widget.processJobs();
+      widget.onPressed();
     }
   }
 
@@ -52,7 +50,7 @@ class _SpotifyButtonState extends State<SpotifyButton> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         ),
         icon: SizedBox(
           width: 30,
@@ -104,36 +102,3 @@ class _SpotifyButtonState extends State<SpotifyButton> {
     );
   }
 }
-
-
-// class SpotifyButton extends StatelessWidget {
-//   const SpotifyButton({
-//     super.key,
-//     required this.isProcessing,
-//     required this.processJobs,
-//   });
-
-//   final bool isProcessing;
-//   final void Function() processJobs;
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return SizedBox(
-//       width: 100, // Fixed width
-//       height: 40, // Fixed height
-//       child: ElevatedButton(
-//         onPressed: isProcessing ? null : processJobs,
-//         style: ElevatedButton.styleFrom(
-//           padding: EdgeInsets.zero,
-//           shape: RoundedRectangleBorder(
-//             borderRadius: BorderRadius.circular(20),
-//           ),
-//         ),
-//         child: Text(
-//           isProcessing ? 'Processing...' : 'Update',
-//           textAlign: TextAlign.center,
-//         ),
-//       ),
-//     );
-//   }
-// }

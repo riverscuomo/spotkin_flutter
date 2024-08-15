@@ -5,19 +5,19 @@ import 'package:spotkin_flutter/app_core.dart';
 import 'ingredient_row.dart';
 
 class RecipeWidget extends StatefulWidget {
-  final List<Ingredient> initialIngredients;
-  final Function(List<Ingredient>) onIngredientsChanged;
-  final List<Job> jobs;
+  final Job job;
+  final int jobIndex;
   final Function(int, Job) updateJob;
-  final List<Map<String, dynamic>> jobResults;
+  final Function(Job) addJob;
+  final List<Map<String, dynamic>?> jobResults;
   final Function() onJobsReloaded; // Add this new callback
 
   const RecipeWidget({
     Key? key,
-    required this.initialIngredients,
-    required this.onIngredientsChanged,
-    required this.jobs,
+    required this.jobIndex,
+    required this.job,
     required this.updateJob,
+    required this.addJob,
     required this.jobResults,
     required this.onJobsReloaded, // Add this to the constructor
   }) : super(key: key);
@@ -59,7 +59,7 @@ class _RecipeWidgetState extends State<RecipeWidget> {
   }
 
   void _initIngredientRows() {
-    _ingredientRows = widget.initialIngredients
+    _ingredientRows = widget.job.recipe
         .map((ingredient) => IngredientRow(
               quantityController:
                   TextEditingController(text: ingredient.quantity.toString()),
@@ -82,7 +82,7 @@ class _RecipeWidgetState extends State<RecipeWidget> {
   @override
   void didUpdateWidget(RecipeWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.initialIngredients != oldWidget.initialIngredients) {
+    if (widget.job.recipe != oldWidget.job.recipe) {
       _initIngredientRows();
     }
   }
@@ -109,12 +109,11 @@ class _RecipeWidgetState extends State<RecipeWidget> {
     });
 
     final updatedJob = job.copyWith(recipe: [...job.recipe, newIngredient]);
-    storageService.updateJob(updatedJob);
-    widget.onIngredientsChanged(updatedJob.recipe);
+    widget.updateJob(widget.jobIndex, updatedJob);
   }
 
   void _updateJobInStorage(String playlistId, int newQuantity) {
-    final job = storageService.getJobs().first;
+    final job = widget.job;
     final updatedRecipe = job.recipe.map((ingredient) {
       if (ingredient.playlist.id == playlistId) {
         return ingredient.copyWith(quantity: newQuantity);
@@ -135,13 +134,14 @@ class _RecipeWidgetState extends State<RecipeWidget> {
       _sortIngredientRows();
     });
 
-    widget.onIngredientsChanged(updatedJob.recipe);
+    widget.updateJob(widget.jobIndex, updatedJob);
   }
 
   Widget buildQuantityDropdown(IngredientRow row) {
     return SizedBox(
-      width: 70,
+      width: 65,
       child: DropdownButtonFormField<int>(
+        style: Theme.of(context).textTheme.labelLarge,
         value: int.tryParse(row.quantityController.text) ?? 5,
         items: List.generate(21, (index) {
           return DropdownMenuItem<int>(
@@ -203,24 +203,24 @@ class _RecipeWidgetState extends State<RecipeWidget> {
   }
 
   void _removeIngredient(String playlistId) {
-    final job = storageService.getJobs().first;
+    final job = widget.job;
     final updatedRecipe = job.recipe
         .where((ingredient) => ingredient.playlist.id != playlistId)
         .toList();
-    final updatedJob = job.copyWith(recipe: updatedRecipe);
-    storageService.updateJob(updatedJob);
 
     setState(() {
       _ingredientRows.removeWhere((row) => row.playlist?.id == playlistId);
       _sortIngredientRows();
     });
 
-    widget.onIngredientsChanged(updatedJob.recipe);
+    final updatedJob = job.copyWith(recipe: updatedRecipe);
+    widget.updateJob(widget.jobIndex, updatedJob);
   }
 
   @override
   Widget build(BuildContext context) {
-    final List<Map<String, dynamic>> jobResults = widget.jobResults;
+    final Map<String, dynamic>? jobResult =
+        widget.jobResults.isEmpty ? null : widget.jobResults[widget.jobIndex];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -237,7 +237,7 @@ class _RecipeWidgetState extends State<RecipeWidget> {
                     return SearchBottomSheet(
                       onItemSelected: (dynamic item) {
                         if (item is PlaylistSimple) {
-                          _addNewRow(item, storageService.getJobs().first);
+                          _addNewRow(item, widget.job);
                         }
                       },
                       searchTypes: const [SearchType.playlist],
@@ -248,41 +248,45 @@ class _RecipeWidgetState extends State<RecipeWidget> {
               },
             ),
             const SizedBox(width: 10),
-            if (jobResults.isNotEmpty)
+            if (jobResult != null)
               Text(
-                jobResults[0]['result'],
+                jobResult['result'],
                 style: Theme.of(context)
                     .textTheme
                     .labelMedium!
                     .copyWith(fontStyle: FontStyle.italic),
               ),
             const SizedBox(width: 10),
-            if (jobResults.isNotEmpty)
+            if (jobResult != null)
               Icon(
                 size: 14,
-                jobResults[0]['status'] == 'Success'
+                jobResult['status'] == 'Success'
                     ? Icons.check_circle
                     : Icons.error,
-                color: jobResults[0]['status'] == 'Success'
+                color: jobResult['status'] == 'Success'
                     ? Colors.green
                     : Colors.red,
               ),
-            SettingsButton(
-              jobs: widget.jobs,
-              updateJob: widget.updateJob,
-              onJobsImported: loadJobs,
-            ),
+            if (_ingredientRows.isNotEmpty)
+              SettingsButton(
+                index: widget.jobIndex,
+                job: widget.job,
+                updateJob: widget.updateJob,
+                addJob: widget.addJob,
+                onJobsImported: loadJobs,
+              ),
           ],
         ),
         if (_ingredientRows.isEmpty)
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              "Let's start building your Spotkin",
-              style: Theme.of(context).textTheme.bodyMedium,
-              textAlign: TextAlign.center,
-            ),
-          )
+          // Padding(
+          //   padding: const EdgeInsets.all(16.0),
+          //   child: Text(
+          //     "Let's start building your Spotkin",
+          //     style: Theme.of(context).textTheme.bodyMedium,
+          //     textAlign: TextAlign.center,
+          //   ),
+          // )
+          const SizedBox.shrink()
         else
           ..._ingredientRows.map((row) {
             final playlist = row.playlist;
