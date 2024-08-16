@@ -13,20 +13,16 @@
           "source": "**",
           "destination": "/index.html"
         }
-      ]
-    },
-    {
-      "target": "spotkin-fd416",
-      "public": "build/web",
-      "ignore": [
-        "firebase.json",
-        "**/.*",
-        "**/node_modules/**"
       ],
-      "rewrites": [
+      "headers": [
         {
-          "source": "**",
-          "destination": "/index.html"
+          "source": "/assets/config.json",
+          "headers": [
+            {
+              "key": "Cache-Control",
+              "value": "no-cache"
+            }
+          ]
         }
       ]
     }
