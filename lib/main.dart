@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:flutter/widgets.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:spotkin_flutter/app_core.dart';
 
@@ -14,23 +13,15 @@ void main() async {
 
   setUrlStrategy(PathUrlStrategy()); // Use path URL strategy
   Map<String, dynamic> config = await loadConfig();
-  print(config);
-
   setupServiceLocator(config: config);
   // await getIt.allReady(); // Wait for all async registrations
-  String jobs = await loadJobs();
-  runApp(MyApp(config, jobs));
-}
-
-Future<String> loadJobs() async {
-  return await rootBundle.loadString('assets/sample_jobs.json');
+  runApp(MyApp(config));
 }
 
 class MyApp extends StatelessWidget {
   final Map<String, dynamic> config;
-  final String jobs;
 
-  MyApp(this.config, this.jobs);
+  const MyApp(this.config, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -40,10 +31,10 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       builder: (context, child) {
         return Container(
-          color: Colors.black, // Match your scaffold background color
+          color: Colors.black,
           child: Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 750),
+              constraints: const BoxConstraints(maxWidth: 800),
               child: child!,
             ),
           ),

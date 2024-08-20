@@ -3,6 +3,8 @@ import 'package:spotify/spotify.dart';
 import 'package:spotkin_flutter/app_core.dart';
 import '../widgets/target_playlist_widget.dart';
 
+const maxJobs = 2;
+
 class HomeScreen extends StatefulWidget {
   final Map<String, dynamic> config;
   final String accessToken;
@@ -20,7 +22,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
-  late BackendService _BackendService;
+  late BackendService _backendService;
   late StorageService _storageService;
   final SpotifyService spotifyService = getIt<SpotifyService>();
   late TabController? _tabController;
@@ -32,13 +34,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   bool _showAddJobButton = false;
 
   final widgetPadding = 3.0;
-  final maxJobs = 2;
 
   @override
   void initState() {
     super.initState();
     _verifyToken();
-    _BackendService = BackendService(
+    _backendService = BackendService(
       accessToken: widget.accessToken,
       backendUrl: widget.backendUrl,
     );
@@ -58,6 +59,41 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       _updateTabController();
     });
     _storageService.saveJobs(jobs);
+  }
+
+  void _deleteJob(BuildContext context, int index) {
+    final playlist = jobs[index].targetPlaylist;
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Delete ${playlist.name}'),
+          content: const Text(
+              'Are you sure you want to delete this Spotkin? This action cannot be undone.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  jobs.removeAt(index);
+                  _updateTabController();
+                });
+                _storageService.saveJobs(jobs);
+                Navigator.of(context).pop();
+                _tabController?.animateTo(0);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+              ),
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _verifyToken() async {
@@ -82,8 +118,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       jobResults = List.filled(jobs.length, null);
     });
 
-    final results = await _BackendService.processJobs(
-        jobs, [index]); // only process the job at the given index
+    final results = await _backendService
+        .processJobs(jobs, [index]); // only process the job at the given index
 
     if (results.isNotEmpty) {
       // If the token has expired, re-authenticate
@@ -156,6 +192,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   Widget buildTargetPlaylistSelectionOptions(int index) {
     return TargetPlaylistSelectionOptions(
+      playlist: jobs[index].targetPlaylist,
+      deleteJob: () => _deleteJob(context, index),
       onPlaylistSelected: (PlaylistSimple selectedPlaylist) {
         if (jobs.isEmpty) {
           final newJob = Job(

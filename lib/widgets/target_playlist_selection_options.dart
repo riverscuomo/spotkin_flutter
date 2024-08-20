@@ -1,25 +1,30 @@
+import 'dart:js';
+
 import 'package:flutter/material.dart';
 import 'package:spotify/spotify.dart';
 import 'package:spotkin_flutter/app_core.dart';
 
 class TargetPlaylistSelectionOptions extends StatelessWidget {
   final Function(PlaylistSimple) onPlaylistSelected;
+  final PlaylistSimple playlist;
+  final Function() deleteJob;
 
   const TargetPlaylistSelectionOptions({
-    Key? key,
+    super.key,
     required this.onPlaylistSelected,
-  }) : super(key: key);
+    required this.playlist,
+    required this.deleteJob,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      // mainAxisSize: MainAxisSize.min,
       children: [
         const SizedBox(
           height: 24,
         ),
         Text(
-          'Step 1: Select which playlist you want to use for Spotkin',
+          'Select which playlist you want to use for Spotkin',
           style: Theme.of(context).textTheme.titleLarge,
           textAlign: TextAlign.center,
         ),
@@ -52,6 +57,26 @@ class TargetPlaylistSelectionOptions extends StatelessWidget {
                 minimumSize: const Size(200, 50),
               ),
               child: const Text('Select Existing Playlist'),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'or',
+          style: Theme.of(context).textTheme.titleMedium,
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 16),
+        Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 250),
+            child: ElevatedButton(
+              onPressed: () => deleteJob(),
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(200, 50),
+                backgroundColor: Colors.red,
+              ),
+              child: const Text('Delete this Spotkin'),
             ),
           ),
         ),
