@@ -39,6 +39,7 @@ class BackupService {
     print('Backup file "$fileName" created and download initiated.');
   }
 
+  /// Replaces the first job that has the same target playlist ID OR adds the job if no match is found.
   Future<void> importBackup() async {
     final uploadInput = html.FileUploadInputElement();
     uploadInput.accept = '.json';
@@ -69,9 +70,14 @@ class BackupService {
             updateJob(existingIndex, importedJob);
             existingJobs[existingIndex] = importedJob;
           } else {
-            // Add new job
-            addJob(importedJob);
-            existingJobs.add(importedJob);
+            if (existingJobs.length < maxJobs) {
+              // Add new job
+              addJob(importedJob);
+              existingJobs.add(importedJob);
+            } else {
+              print(
+                  'Max jobs limit reached. Skipping import of job for playlist ${importedJob.targetPlaylist.name}');
+            }
           }
         }
 

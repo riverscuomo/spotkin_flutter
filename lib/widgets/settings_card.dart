@@ -213,7 +213,7 @@ class _SettingsCardState extends State<SettingsCard> {
             ),
             ListTile(
               title: const Text('Scheduled Update Time'),
-              subtitle: Text('Current UTC time: ${_job.scheduledTime}'),
+              // subtitle: Text('Current UTC time: ${_job.scheduledTime}'),
               trailing: DropdownButton<int>(
                 value: Utils.utcToLocal(_job.scheduledTime),
                 onChanged: (int? newValue) {

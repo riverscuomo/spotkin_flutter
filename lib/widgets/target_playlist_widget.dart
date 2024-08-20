@@ -80,11 +80,12 @@ class TargetPlaylistWidget extends StatelessWidget {
                       ),
                       Row(
                         children: [
-                          // const SizedBox(width: 8),
-                          UpdateButton(
-                            isProcessing: isProcessing,
-                            onPressed: () => processJob(job, index),
-                          ),
+                          job.recipe.isEmpty
+                              ? const SizedBox()
+                              : UpdateButton(
+                                  isProcessing: isProcessing,
+                                  onPressed: () => processJob(job, index),
+                                ),
                         ],
                       ),
                     ],

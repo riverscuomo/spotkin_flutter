@@ -37,7 +37,7 @@ class Job {
     this.bannedGenres = const [],
     this.exceptionsToBannedGenres = const [],
     this.recipe = const [],
-    this.scheduledTime = 0,
+    int? scheduledTime,
     this.minPopularity,
     this.maxPopularity,
     this.minDuration,
@@ -48,7 +48,13 @@ class Job {
     this.maxEnergy,
     this.minAcousticness,
     this.maxAcousticness,
-  });
+  }) : scheduledTime = scheduledTime ?? _getLocalMidnightInUTC();
+
+  static int _getLocalMidnightInUTC() {
+    final now = DateTime.now();
+    final localOffset = now.timeZoneOffset.inHours;
+    return (24 - localOffset) % 24;
+  }
 
   bool get isNull => targetPlaylist.id == null;
 
@@ -57,7 +63,7 @@ class Job {
       targetPlaylist: PlaylistSimple.fromJson(
           json['target_playlist'] as Map<String, dynamic>),
       description: json['description'] ?? '',
-      scheduledTime: json['scheduled_time'] ?? 0,
+      scheduledTime: json['scheduled_time'] ?? _getLocalMidnightInUTC(),
       banSkits: json['ban_skits'] == true,
       lastTracks: List<Track>.from(
           json['last_tracks']?.map((x) => Track.fromJson(x)) ?? []),
