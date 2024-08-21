@@ -25,8 +25,7 @@ class _AuthScreenState extends State<AuthScreen> {
     spotifyService = SpotifyService(
       clientId: widget.config['SPOTIFY_CLIENT_ID']!,
       clientSecret: widget.config['SPOTIFY_CLIENT_SECRET']!,
-      // redirectUri: widget.config['SPOTIFY_REDIRECT_URI']!,
-      redirectUri: 'https://spotkin.web.app/',
+      redirectUri: widget.config['SPOTIFY_REDIRECT_URI']!,
       scope: widget.config['SPOTIFY_SCOPE']!,
     );
 
@@ -193,7 +192,12 @@ class _AuthScreenState extends State<AuthScreen> {
                 children: [
                   ElevatedButton(
                     onPressed: _initiateSpotifyLogin,
-                    child: const Text('Login with Spotify'),
+                    child: Column(
+                      children: [
+                        const Text('Login with Spotify'),
+                        Text(widget.config['SPOTIFY_REDIRECT_URI']!),
+                      ],
+                    ),
                   ),
                   if (_authAttempts > 0)
                     Text(
