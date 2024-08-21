@@ -25,7 +25,8 @@ class _AuthScreenState extends State<AuthScreen> {
     spotifyService = SpotifyService(
       clientId: widget.config['SPOTIFY_CLIENT_ID']!,
       clientSecret: widget.config['SPOTIFY_CLIENT_SECRET']!,
-      redirectUri: widget.config['SPOTIFY_REDIRECT_URI']!,
+      // redirectUri: widget.config['SPOTIFY_REDIRECT_URI']!,
+      redirectUri: 'https://spotkin.web.app/',
       scope: widget.config['SPOTIFY_SCOPE']!,
     );
 
