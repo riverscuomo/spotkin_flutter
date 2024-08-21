@@ -10,8 +10,8 @@ class StorageService {
     final String? storedJobs = html.window.localStorage[_storageKey];
     if (storedJobs == null) {
       print("No jobs found in localStorage");
-      // return [Job.empty()];
-      return [];
+      return [Job.empty()];
+      // return [];
     }
     List<Job> jobs = parseJobs(storedJobs);
     print("Loaded ${jobs.length} jobs from localStorage");
