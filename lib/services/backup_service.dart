@@ -10,7 +10,7 @@ class BackupService {
 
   BackupService(this._storageService, this.addJob, this.updateJob);
 
-  void createBackup() {
+  String createBackup() {
     List<Job> jobs = _storageService.getJobs();
     final jobsJson = jobs.map((job) => job.toJson()).toList();
     final jsonString = jsonEncode(jobsJson);
@@ -36,11 +36,11 @@ class BackupService {
     html.document.body!.children.remove(anchor);
     html.Url.revokeObjectUrl(url);
 
-    print('Backup file "$fileName" created and download initiated.');
+    return 'Backup file "$fileName" created and download initiated.';
   }
 
   /// Replaces the first job that has the same target playlist ID OR adds the job if no match is found.
-  Future<void> importBackup() async {
+  Future<String> importBackup() async {
     final uploadInput = html.FileUploadInputElement();
     uploadInput.accept = '.json';
     uploadInput.click();
@@ -83,13 +83,12 @@ class BackupService {
 
         // Save merged jobs
         _storageService.saveJobs(existingJobs);
-        print(
-            'Imported and merged ${importedJobs.length} jobs from ${file.name}.');
+        return 'Imported and merged ${importedJobs.length} jobs from ${file.name}.';
       } catch (e) {
-        print('Error importing jobs from ${file.name}: $e');
+        return 'Error importing jobs from ${file.name}: $e';
       }
     } else {
-      print('No file selected for import.');
+      return 'No file selected for import.';
     }
   }
 }

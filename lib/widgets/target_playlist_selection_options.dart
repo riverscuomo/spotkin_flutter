@@ -18,17 +18,16 @@ class TargetPlaylistSelectionOptions extends StatelessWidget {
   });
 
   void _createBackup(BuildContext context) {
-    backupService.createBackup();
+    String message = backupService.createBackup();
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-          content: Text('Backup file created. Check your downloads.')),
+      SnackBar(content: Text(message)),
     );
   }
 
   Future<void> _importBackup(BuildContext context) async {
-    await backupService.importBackup();
+    String message = await backupService.importBackup();
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Backup imported and jobs updated.')),
+      SnackBar(content: Text(message)),
     );
     Provider.of<JobProvider>(context, listen: false).loadJobs();
   }
