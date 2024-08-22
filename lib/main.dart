@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
+import 'package:provider/provider.dart';
 import 'package:spotkin_flutter/app_core.dart';
 
 import 'helpers/load_config.dart';
@@ -11,12 +12,41 @@ import 'spotify_theme_data.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  setUrlStrategy(PathUrlStrategy()); // Use path URL strategy
+  setUrlStrategy(PathUrlStrategy());
   Map<String, dynamic> config = await loadConfig();
   setupServiceLocator(config: config);
-  // await getIt.allReady(); // Wait for all async registrations
-  runApp(MyApp(config));
+
+  runApp(
+    MultiProvider(
+      providers: [
+        Provider<StorageService>(
+          create: (_) => StorageService(),
+        ),
+        ChangeNotifierProxyProvider<StorageService, JobProvider>(
+          create: (context) => JobProvider(context.read<StorageService>()),
+          update: (context, storage, previous) =>
+              previous ?? JobProvider(storage),
+        ),
+      ],
+      child: MyApp(config),
+    ),
+  );
 }
+
+// void main() async {
+//   WidgetsFlutterBinding.ensureInitialized();
+
+//   setUrlStrategy(PathUrlStrategy());
+//   Map<String, dynamic> config = await loadConfig();
+//   setupServiceLocator(config: config);
+
+//   runApp(
+//     ChangeNotifierProvider(
+//       create: (context) => JobProvider(),
+//       child: MyApp(config),
+//     ),
+//   );
+// }
 
 class MyApp extends StatelessWidget {
   final Map<String, dynamic> config;
