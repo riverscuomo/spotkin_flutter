@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:provider/provider.dart';
 import 'package:spotify/spotify.dart';
 import 'package:spotkin_flutter/app_core.dart';
 
 class BannedGenresBottomSheet extends StatefulWidget {
-  final Job job;
   final int jobIndex;
-  final Function(int, Job) updateJob;
 
   const BannedGenresBottomSheet({
     Key? key,
-    required this.job,
     required this.jobIndex,
-    required this.updateJob,
   }) : super(key: key);
 
   @override
@@ -29,8 +26,14 @@ class _BannedGenresBottomSheetState extends State<BannedGenresBottomSheet> {
   @override
   void initState() {
     super.initState();
-    _bannedGenres = List.from(widget.job.bannedGenres);
+    _initBannedGenres();
     _getPlaylistArtists();
+  }
+
+  void _initBannedGenres() {
+    final jobProvider = Provider.of<JobProvider>(context, listen: false);
+    final job = jobProvider.jobs[widget.jobIndex];
+    _bannedGenres = List.from(job.bannedGenres);
   }
 
   void _addGenreToBanned(String genre) {
@@ -46,15 +49,19 @@ class _BannedGenresBottomSheetState extends State<BannedGenresBottomSheet> {
   }
 
   void _updateJob() {
-    final updatedJob = widget.job.copyWith(bannedGenres: _bannedGenres);
-    widget.updateJob(widget.jobIndex, updatedJob);
+    final jobProvider = Provider.of<JobProvider>(context, listen: false);
+    final job = jobProvider.jobs[widget.jobIndex];
+    final updatedJob = job.copyWith(bannedGenres: _bannedGenres);
+    jobProvider.updateJob(widget.jobIndex, updatedJob);
     print(
         'Job updated. Banned genres count: ${updatedJob.bannedGenres.length}');
   }
 
   void _getPlaylistArtists() async {
+    final jobProvider = Provider.of<JobProvider>(context, listen: false);
+    final job = jobProvider.jobs[widget.jobIndex];
     final spotifyService = getIt<SpotifyService>();
-    final targetPlaylistId = widget.job.targetPlaylist.id;
+    final targetPlaylistId = job.targetPlaylist.id;
 
     if (targetPlaylistId == null) {
       setState(() {

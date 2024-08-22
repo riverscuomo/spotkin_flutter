@@ -1,25 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:spotkin_flutter/app_core.dart';
 
 class SettingsScreen extends StatelessWidget {
-  final Job job;
   final int index;
-  final Function(int, Job) updateJob;
-  final Function(Job) addJob;
   final StorageService storageService = StorageService();
   late final BackupService backupService;
-  final VoidCallback onJobsImported;
 
   SettingsScreen({
     super.key,
-    required this.job,
     required this.index,
-    required this.updateJob,
-    required this.addJob,
-    required this.onJobsImported,
-  }) {
-    backupService = BackupService(storageService, addJob, updateJob);
-  }
+  });
 
   void _createBackup(BuildContext context) {
     backupService.createBackup();
@@ -34,11 +25,20 @@ class SettingsScreen extends StatelessWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Backup imported and jobs updated.')),
     );
-    onJobsImported();
+    Provider.of<JobProvider>(context, listen: false).loadJobs();
   }
 
   @override
   Widget build(BuildContext context) {
+    final jobProvider = Provider.of<JobProvider>(context, listen: false);
+
+    // Initialize backupService here to have access to the context
+    backupService = BackupService(
+      storageService,
+      jobProvider.addJob,
+      jobProvider.updateJob,
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
@@ -52,8 +52,6 @@ class SettingsScreen extends StatelessWidget {
                 const SizedBox(height: 16),
                 SettingsCard(
                   index: index,
-                  job: job,
-                  updateJob: updateJob,
                 ),
               ],
             ),

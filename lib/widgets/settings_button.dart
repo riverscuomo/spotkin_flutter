@@ -26,11 +26,7 @@ class SettingsButton extends StatelessWidget {
           context,
           MaterialPageRoute(
             builder: (context) => SettingsScreen(
-              job: job,
               index: index,
-              updateJob: updateJob,
-              addJob: addJob,
-              onJobsImported: onJobsImported,
             ),
           ),
         );

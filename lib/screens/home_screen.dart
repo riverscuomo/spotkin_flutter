@@ -268,8 +268,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       child: Column(
                         children: [
                           TargetPlaylistWidget(
-                            targetPlaylist: job.targetPlaylist,
-                            job: job,
+                            // targetPlaylist: job.targetPlaylist,
+                            // job: job,
                             index: jobEntry.key,
                             isProcessing: isProcessing,
                             processJob: _processJob,
