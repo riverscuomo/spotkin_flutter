@@ -1,6 +1,5 @@
-import 'dart:js';
-
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:spotify/spotify.dart';
 import 'package:spotkin_flutter/app_core.dart';
 
@@ -8,27 +7,56 @@ class TargetPlaylistSelectionOptions extends StatelessWidget {
   final Function(PlaylistSimple) onPlaylistSelected;
   final PlaylistSimple playlist;
   final Function() deleteJob;
+  final StorageService storageService = StorageService();
+  late final BackupService backupService;
 
-  const TargetPlaylistSelectionOptions({
+  TargetPlaylistSelectionOptions({
     super.key,
     required this.onPlaylistSelected,
     required this.playlist,
     required this.deleteJob,
   });
 
+  void _createBackup(BuildContext context) {
+    backupService.createBackup();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+          content: Text('Backup file created. Check your downloads.')),
+    );
+  }
+
+  Future<void> _importBackup(BuildContext context) async {
+    await backupService.importBackup();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Backup imported and jobs updated.')),
+    );
+    Provider.of<JobProvider>(context, listen: false).loadJobs();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final jobProvider = Provider.of<JobProvider>(context, listen: false);
+
+    // Initialize backupService here to have access to the context
+    backupService = BackupService(
+      storageService,
+      jobProvider.addJob,
+      jobProvider.updateJob,
+    );
+
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(
           height: 24,
         ),
+        const Divider(),
         Text(
-          'Select which playlist you want to use for Spotkin',
-          style: Theme.of(context).textTheme.titleLarge,
-          textAlign: TextAlign.center,
+          'Select which playlist to update with this Spotkin',
+          style: Theme.of(context).textTheme.titleMedium,
         ),
         const SizedBox(height: 24),
+
         Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 250),
@@ -41,13 +69,16 @@ class TargetPlaylistSelectionOptions extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 16),
-        Text(
-          'or',
-          style: Theme.of(context).textTheme.titleMedium,
-          textAlign: TextAlign.center,
+        // const SizedBox(height: 16),
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text(
+            'or',
+            style: Theme.of(context).textTheme.titleMedium,
+            textAlign: TextAlign.center,
+          ),
         ),
-        const SizedBox(height: 16),
+        // const SizedBox(height: 16),
         Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 250),
@@ -56,29 +87,62 @@ class TargetPlaylistSelectionOptions extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(200, 50),
               ),
-              child: const Text('Select Existing Playlist'),
+              child: const Text('Select One of Your Playlists'),
             ),
           ),
         ),
-        const SizedBox(height: 16),
+
+        const SizedBox(height: 24),
+        const Divider(),
         Text(
-          'or',
+          'Backup and Restore',
           style: Theme.of(context).textTheme.titleMedium,
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 16),
-        Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 250),
-            child: ElevatedButton(
+        Row(
+          children: [
+            const Text('Import Backup'),
+            const Spacer(),
+            ElevatedButton(
+              onPressed: () => _importBackup(context),
+              style: ElevatedButton.styleFrom(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              ),
+              child: const Icon(Icons.restore),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            const Text('Create Backup'),
+            const Spacer(),
+            ElevatedButton(
+              onPressed: () => _createBackup(context),
+              style: ElevatedButton.styleFrom(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              ),
+              child: const Icon(Icons.backup),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        Row(
+          children: [
+            const Text('Delete this Spotkin'),
+            const Spacer(),
+            ElevatedButton(
               onPressed: () => deleteJob(),
               style: ElevatedButton.styleFrom(
-                minimumSize: const Size(200, 50),
+                minimumSize: const Size(50, 50),
                 backgroundColor: Colors.red,
               ),
-              child: const Text('Delete this Spotkin'),
+              child: const Icon(Icons.delete),
             ),
-          ),
+          ],
         ),
         const SizedBox(height: 24),
       ],

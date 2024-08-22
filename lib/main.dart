@@ -1,7 +1,4 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:provider/provider.dart';
 import 'package:spotkin_flutter/app_core.dart';
@@ -32,21 +29,6 @@ void main() async {
     ),
   );
 }
-
-// void main() async {
-//   WidgetsFlutterBinding.ensureInitialized();
-
-//   setUrlStrategy(PathUrlStrategy());
-//   Map<String, dynamic> config = await loadConfig();
-//   setupServiceLocator(config: config);
-
-//   runApp(
-//     ChangeNotifierProvider(
-//       create: (context) => JobProvider(),
-//       child: MyApp(config),
-//     ),
-//   );
-// }
 
 class MyApp extends StatelessWidget {
   final Map<String, dynamic> config;

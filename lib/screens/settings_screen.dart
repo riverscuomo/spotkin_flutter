@@ -12,22 +12,6 @@ class SettingsScreen extends StatelessWidget {
     required this.index,
   });
 
-  void _createBackup(BuildContext context) {
-    backupService.createBackup();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-          content: Text('Backup file created. Check your downloads.')),
-    );
-  }
-
-  Future<void> _importBackup(BuildContext context) async {
-    await backupService.importBackup();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Backup imported and jobs updated.')),
-    );
-    Provider.of<JobProvider>(context, listen: false).loadJobs();
-  }
-
   @override
   Widget build(BuildContext context) {
     final jobProvider = Provider.of<JobProvider>(context, listen: false);
@@ -55,30 +39,6 @@ class SettingsScreen extends StatelessWidget {
                 ),
               ],
             ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              ElevatedButton.icon(
-                icon: const Icon(Icons.backup),
-                label: const Text('Create Backup'),
-                onPressed: () => _createBackup(context),
-                style: ElevatedButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                ),
-              ),
-              ElevatedButton.icon(
-                icon: const Icon(Icons.restore),
-                label: const Text('Import Backup'),
-                onPressed: () => _importBackup(context),
-                style: ElevatedButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                ),
-              ),
-            ],
           ),
           const SizedBox(height: 16),
         ],

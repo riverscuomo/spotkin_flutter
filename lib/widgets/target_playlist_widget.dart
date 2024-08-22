@@ -100,7 +100,7 @@ class TargetPlaylistWidget extends StatelessWidget {
                   top: 0,
                   right: 0,
                   child: IconButton(
-                    icon: Icon(isExpanded ? Icons.edit_off : Icons.edit),
+                    icon: const Icon(Icons.settings),
                     onPressed: () {
                       onExpandChanged(!isExpanded);
                     },

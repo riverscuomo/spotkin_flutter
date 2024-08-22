@@ -209,7 +209,7 @@ class _RecipeWidgetState extends State<RecipeWidget> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
             IconButton(
               icon: const Icon(Icons.add),
