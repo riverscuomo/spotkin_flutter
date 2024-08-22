@@ -55,42 +55,40 @@ class TargetPlaylistSelectionOptions extends StatelessWidget {
           style: Theme.of(context).textTheme.titleMedium,
         ),
         const SizedBox(height: 24),
-
-        Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 250),
-            child: ElevatedButton(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Expanded(
+              child: Text('Create a New Playlist'),
+            ),
+            ElevatedButton(
               onPressed: () => _createNewPlaylist(context),
               style: ElevatedButton.styleFrom(
-                minimumSize: const Size(200, 50),
+                minimumSize: const Size(50, 50),
+                padding: EdgeInsets.zero,
               ),
-              child: const Text('Create a New Playlist'),
+              child: const Icon(Icons.add),
             ),
-          ),
+          ],
         ),
-        // const SizedBox(height: 16),
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(
-            'or',
-            style: Theme.of(context).textTheme.titleMedium,
-            textAlign: TextAlign.center,
-          ),
-        ),
-        // const SizedBox(height: 16),
-        Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 250),
-            child: ElevatedButton(
+        const SizedBox(
+            height: 16), // Add some vertical spacing between the rows
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Expanded(
+              child: Text('Select One of Your Playlists'),
+            ),
+            ElevatedButton(
               onPressed: () => _showPlaylistSearchBottomSheet(context),
               style: ElevatedButton.styleFrom(
-                minimumSize: const Size(200, 50),
+                minimumSize: const Size(50, 50),
+                padding: EdgeInsets.zero,
               ),
-              child: const Text('Select One of Your Playlists'),
+              child: const Icon(Icons.playlist_play),
             ),
-          ),
+          ],
         ),
-
         const SizedBox(height: 24),
         const Divider(),
         Text(
@@ -136,7 +134,8 @@ class TargetPlaylistSelectionOptions extends StatelessWidget {
             ElevatedButton(
               onPressed: () => deleteJob(),
               style: ElevatedButton.styleFrom(
-                minimumSize: const Size(50, 50),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 backgroundColor: Colors.red,
               ),
               child: const Icon(Icons.delete),
