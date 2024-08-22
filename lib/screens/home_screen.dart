@@ -24,13 +24,16 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late BackendService _backendService;
-  // late StorageService _storageService;
+
   final SpotifyService spotifyService = getIt<SpotifyService>();
-  TabController? _tabController;
-  bool _isExpanded = false;
-  bool _showAddJobButton = false;
+  late TabController? _tabController;
+
   List<Map<String, dynamic>?> jobResults = [];
   bool isProcessing = false;
+  bool _isExpanded = false;
+  bool _showAddJobButton = false;
+
+  final widgetPadding = 3.0;
 
   @override
   void initState() {
@@ -40,11 +43,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       accessToken: widget.accessToken,
       backendUrl: widget.backendUrl,
     );
-    // _storageService = StorageService();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadJobs();
-    });
+    _initTabController();
+  }
+
+  @override
+  void dispose() {
+    _tabController?.dispose();
+    super.dispose();
   }
 
   Future<void> _verifyToken() async {
@@ -57,29 +63,22 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }
   }
 
-  Future<void> _loadJobs() async {
-    final jobProvider = Provider.of<JobProvider>(context, listen: false);
-    await jobProvider.loadJobs();
-    _updateTabController();
-  }
-
-  void _updateTabController() {
+  void _initTabController() {
     final jobProvider = Provider.of<JobProvider>(context, listen: false);
     final jobs = jobProvider.jobs;
-    setState(() {
-      _showAddJobButton = jobs.length < maxJobs;
-      // _tabController?.dispose(); // Dispose the old controller
-      // _tabController = TabController(
-      //   length: jobs.length + (_showAddJobButton ? 1 : 0),
-      //   vsync: this,
-      // );
-    });
+    _showAddJobButton = jobs.isNotEmpty &&
+        !jobs.any((job) => job.isNull) &&
+        jobs.length < maxJobs;
+    _tabController = TabController(
+      length: (jobs.isEmpty ? 1 : jobs.length) + (_showAddJobButton ? 1 : 0),
+      vsync: this,
+    );
   }
 
   void _addNewJob(Job newJob) {
     final jobProvider = Provider.of<JobProvider>(context, listen: false);
     jobProvider.addJob(newJob);
-    _updateTabController();
+    _initTabController();
   }
 
   void _deleteJob(BuildContext context, int index) {
@@ -100,9 +99,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ElevatedButton(
               onPressed: () {
                 jobProvider.deleteJob(index);
-                _updateTabController();
-                Navigator.of(context).pop();
+                _initTabController();
                 _tabController?.animateTo(0);
+                Navigator.of(context).pop();
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
@@ -116,17 +115,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Future<void> _processJob(Job job, int index) async {
-    final jobProvider = Provider.of<JobProvider>(context, listen: false);
     setState(() {
       isProcessing = true;
-      jobResults = List.filled(jobProvider.jobs.length, null);
+      jobResults = List.filled(
+          Provider.of<JobProvider>(context, listen: false).jobs.length, null);
     });
 
-    final results =
-        await _backendService.processJobs(jobProvider.jobs, [index]);
+    final results = await _backendService.processJobs([job], [index]);
 
     if (results.isNotEmpty) {
       if (results[0].containsKey('status') && results[0]['status'] == 'Error') {
+        print(results[0]['result'].runtimeType);
         final result = results[0]['result'] as String;
         print('Error processing jobs: $result');
         if (result.startsWith("Status widgetPadding01")) {
@@ -142,9 +141,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }
   }
 
-  void _updateJob(int index, Job updatedJob) {
+  void _replaceJob(Job newJob, int index) {
     final jobProvider = Provider.of<JobProvider>(context, listen: false);
-    jobProvider.updateJob(index, updatedJob);
+    jobProvider.updateJob(index, newJob);
+    setState(() {
+      _isExpanded = false; // Collapse after changing the target playlist
+    });
+    _initTabController();
   }
 
   Widget _buildRecipeCard(Job job, int index) {
@@ -161,9 +164,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             RecipeWidget(
               job: job,
               jobIndex: index,
-              onJobsReloaded: _loadJobs,
-              updateJob: _updateJob,
-              addJob: _addNewJob,
               jobResults: jobResults,
             ),
           ],
@@ -179,21 +179,25 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       deleteJob: () => _deleteJob(context, index),
       onPlaylistSelected: (PlaylistSimple selectedPlaylist) {
         if (jobProvider.jobs.isEmpty) {
-          final newJob = Job(targetPlaylist: selectedPlaylist);
+          final newJob = Job(
+            targetPlaylist: selectedPlaylist,
+          );
           _addNewJob(newJob);
         } else {
           if (jobProvider.jobs
               .any((job) => job.targetPlaylist.id == selectedPlaylist.id)) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                  content: Text('Playlist already selected for another job.')),
+                content: Text('Playlist already selected for another job.'),
+              ),
             );
             return;
           }
-          final updatedJob = jobProvider.jobs[index]
+          final updateJob = jobProvider.jobs[index]
               .copyWith(targetPlaylist: selectedPlaylist);
-          _updateJob(index, updatedJob);
+          _replaceJob(updateJob, index);
         }
+        // Auto-collapse after selection
         setState(() {
           _isExpanded = false;
         });
@@ -206,13 +210,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Consumer<JobProvider>(
       builder: (context, jobProvider, child) {
         final jobs = jobProvider.jobs;
-
-        if (jobProvider.isLoading) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
-
+        final jobsIterable =
+            jobs.isNotEmpty ? jobs.asMap().entries : [MapEntry(0, Job.empty())];
         return Scaffold(
           backgroundColor: Colors.black,
           appBar: AppBar(
@@ -224,7 +223,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ],
           ),
           body: DefaultTabController(
-            length: jobs.length + (_showAddJobButton ? 1 : 0),
+            length: jobsIterable.length + (_showAddJobButton ? 1 : 0),
             child: NestedScrollView(
               headerSliverBuilder:
                   (BuildContext context, bool innerBoxIsScrolled) {
@@ -239,17 +238,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       labelStyle: Theme.of(context).textTheme.labelMedium,
                       controller: _tabController,
                       onTap: (index) {
-                        if (index == jobs.length && _showAddJobButton) {
-                          _tabController?.animateTo(jobs.length);
-                          jobProvider.addJob(Job.empty());
-                          _updateTabController(); // Update the controller after adding a job
+                        if (index == jobsIterable.length && _showAddJobButton) {
+                          _tabController?.animateTo(jobsIterable.length);
+                          _addNewJob(Job.empty());
                         }
                       },
                       tabs: [
-                        ...jobs.map((job) {
+                        ...jobsIterable.map((entry) {
                           return Tab(
                             child: Text(
-                              job.targetPlaylist.name ?? 'New job',
+                              entry.value.targetPlaylist.name ?? 'New job',
                               style: Theme.of(context).textTheme.labelMedium,
                             ),
                           );
@@ -263,16 +261,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               body: TabBarView(
                 controller: _tabController,
                 children: [
-                  ...jobs.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final job = entry.value;
+                  ...jobsIterable.map((jobEntry) {
+                    final job = jobEntry.value;
+
                     return SingleChildScrollView(
                       child: Column(
                         children: [
                           TargetPlaylistWidget(
                             targetPlaylist: job.targetPlaylist,
                             job: job,
-                            index: index,
+                            index: jobEntry.key,
                             isProcessing: isProcessing,
                             processJob: _processJob,
                             buildTargetPlaylistSelectionOptions:
@@ -284,8 +282,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               });
                             },
                           ),
-                          const SizedBox(height: 3.0),
-                          if (!job.isNull) _buildRecipeCard(job, index),
+                          SizedBox(height: widgetPadding),
+                          if (!job.isNull) _buildRecipeCard(job, jobEntry.key),
                         ],
                       ),
                     );
@@ -297,9 +295,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           const SizedBox(height: 15),
                           ElevatedButton(
                             onPressed: () {
-                              _tabController?.animateTo(jobs.length);
-                              jobProvider.addJob(Job.empty());
-                              _updateTabController(); // Update the controller after adding a job
+                              _tabController?.animateTo(jobsIterable.length);
+                              _addNewJob(Job.empty());
                             },
                             child: const Text('Add new job'),
                           ),
@@ -313,11 +310,5 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         );
       },
     );
-  }
-
-  @override
-  void dispose() {
-    _tabController?.dispose();
-    super.dispose();
   }
 }
