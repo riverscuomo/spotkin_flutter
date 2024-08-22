@@ -59,24 +59,6 @@ class TargetPlaylistSelectionOptions extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Expanded(
-              child: Text('Create a New Playlist'),
-            ),
-            ElevatedButton(
-              onPressed: () => _createNewPlaylist(context),
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(50, 50),
-                padding: EdgeInsets.zero,
-              ),
-              child: const Icon(Icons.add),
-            ),
-          ],
-        ),
-        const SizedBox(
-            height: 16), // Add some vertical spacing between the rows
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Expanded(
               child: Text('Select One of Your Playlists'),
             ),
             ElevatedButton(
@@ -86,6 +68,25 @@ class TargetPlaylistSelectionOptions extends StatelessWidget {
                 padding: EdgeInsets.zero,
               ),
               child: const Icon(Icons.playlist_play),
+            ),
+          ],
+        ),
+
+        const SizedBox(
+            height: 16), // Add some vertical spacing between the rows
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Expanded(
+              child: Text('Create a New Playlist'),
+            ),
+            ElevatedButton(
+              onPressed: () => _createNewPlaylist(context),
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(50, 50),
+                padding: EdgeInsets.zero,
+              ),
+              child: const Icon(Icons.add),
             ),
           ],
         ),
