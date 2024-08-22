@@ -209,29 +209,8 @@ class _RecipeWidgetState extends State<RecipeWidget> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: () async {
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  builder: (BuildContext context) {
-                    return SearchBottomSheet(
-                      onItemSelected: (dynamic item) {
-                        if (item is PlaylistSimple) {
-                          _addNewRow(item);
-                        }
-                      },
-                      searchTypes: const [SearchType.playlist],
-                      title: 'Add a playlist',
-                    );
-                  },
-                );
-              },
-            ),
-            const SizedBox(width: 10),
             if (jobResult != null)
               Text(
                 jobResult['result'],
@@ -251,17 +230,42 @@ class _RecipeWidgetState extends State<RecipeWidget> {
                     ? Colors.green
                     : Colors.red,
               ),
-            if (_ingredientRows.isNotEmpty)
-              SettingsButton(
-                index: widget.jobIndex,
-                job: widget.job,
-                updateJob: jobProvider.updateJob,
-                addJob: jobProvider.addJob,
-                onJobsImported: () {
-                  // Implement this if needed, or pass an empty function
-                  // This could be used to refresh the UI after importing jobs
-                },
-              ),
+            Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.add),
+                  onPressed: () async {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      builder: (BuildContext context) {
+                        return SearchBottomSheet(
+                          onItemSelected: (dynamic item) {
+                            if (item is PlaylistSimple) {
+                              _addNewRow(item);
+                            }
+                          },
+                          searchTypes: const [SearchType.playlist],
+                          title: 'Add a playlist',
+                        );
+                      },
+                    );
+                  },
+                ),
+                const SizedBox(width: 10),
+                if (_ingredientRows.isNotEmpty)
+                  SettingsButton(
+                    index: widget.jobIndex,
+                    job: widget.job,
+                    updateJob: jobProvider.updateJob,
+                    addJob: jobProvider.addJob,
+                    onJobsImported: () {
+                      // Implement this if needed, or pass an empty function
+                      // This could be used to refresh the UI after importing jobs
+                    },
+                  ),
+              ],
+            ),
           ],
         ),
         if (_ingredientRows.isEmpty)
