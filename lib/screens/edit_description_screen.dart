@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:spotkin_flutter/app_core.dart';
 
 class EditDescriptionScreen extends StatefulWidget {
-  final Job job;
   final int jobIndex;
-  final Function(int, Job) updateJob;
 
   const EditDescriptionScreen({
     Key? key,
-    required this.job,
     required this.jobIndex,
-    required this.updateJob,
   }) : super(key: key);
 
   @override
@@ -23,8 +20,9 @@ class _EditDescriptionScreenState extends State<EditDescriptionScreen> {
   @override
   void initState() {
     super.initState();
-    _descriptionController =
-        TextEditingController(text: widget.job.description);
+    final jobProvider = Provider.of<JobProvider>(context, listen: false);
+    final job = jobProvider.jobs[widget.jobIndex];
+    _descriptionController = TextEditingController(text: job.description);
   }
 
   @override
@@ -34,9 +32,10 @@ class _EditDescriptionScreenState extends State<EditDescriptionScreen> {
   }
 
   void _saveDescription() {
-    final updatedJob =
-        widget.job.copyWith(description: _descriptionController.text);
-    widget.updateJob(widget.jobIndex, updatedJob);
+    final jobProvider = Provider.of<JobProvider>(context, listen: false);
+    final job = jobProvider.jobs[widget.jobIndex];
+    final updatedJob = job.copyWith(description: _descriptionController.text);
+    jobProvider.updateJob(widget.jobIndex, updatedJob);
     Navigator.pop(context);
   }
 

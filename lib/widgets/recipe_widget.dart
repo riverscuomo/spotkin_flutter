@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:spotify/spotify.dart';
 import 'package:spotkin_flutter/app_core.dart';
 
@@ -7,19 +8,13 @@ import 'ingredient_row.dart';
 class RecipeWidget extends StatefulWidget {
   final Job job;
   final int jobIndex;
-  final Function(int, Job) updateJob;
-  final Function(Job) addJob;
   final List<Map<String, dynamic>?> jobResults;
-  final Function() onJobsReloaded; // Add this new callback
 
   const RecipeWidget({
     Key? key,
     required this.jobIndex,
     required this.job,
-    required this.updateJob,
-    required this.addJob,
     required this.jobResults,
-    required this.onJobsReloaded, // Add this to the constructor
   }) : super(key: key);
 
   @override
@@ -43,19 +38,6 @@ class _RecipeWidgetState extends State<RecipeWidget> {
       row.quantityController.dispose();
     }
     super.dispose();
-  }
-
-  void loadJobs() async {
-    // // Reload jobs from storage
-    // List<Job> updatedJobs = await storageService.getJobs();
-
-    // Call the callback to update jobs in the parent widget
-    widget.onJobsReloaded();
-
-    // Optionally, you can update the local state if needed
-    setState(() {
-      // If you need to use the updated jobs locally
-    });
   }
 
   void _initIngredientRows() {
@@ -87,8 +69,10 @@ class _RecipeWidgetState extends State<RecipeWidget> {
     }
   }
 
-  void _addNewRow(PlaylistSimple playlist, Job job) {
-    if (job.recipe.any((ingredient) => ingredient.playlist.id == playlist.id)) {
+  void _addNewRow(PlaylistSimple playlist) {
+    final jobProvider = Provider.of<JobProvider>(context, listen: false);
+    if (widget.job.recipe
+        .any((ingredient) => ingredient.playlist.id == playlist.id)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('This playlist is already in the recipe')),
       );
@@ -108,21 +92,22 @@ class _RecipeWidgetState extends State<RecipeWidget> {
       _sortIngredientRows();
     });
 
-    final updatedJob = job.copyWith(recipe: [...job.recipe, newIngredient]);
-    widget.updateJob(widget.jobIndex, updatedJob);
+    final updatedJob =
+        widget.job.copyWith(recipe: [...widget.job.recipe, newIngredient]);
+    jobProvider.updateJob(widget.jobIndex, updatedJob);
   }
 
   void _updateJobInStorage(String playlistId, int newQuantity) {
-    final job = widget.job;
-    final updatedRecipe = job.recipe.map((ingredient) {
+    final jobProvider = Provider.of<JobProvider>(context, listen: false);
+    final updatedRecipe = widget.job.recipe.map((ingredient) {
       if (ingredient.playlist.id == playlistId) {
         return ingredient.copyWith(quantity: newQuantity);
       }
       return ingredient;
     }).toList();
 
-    final updatedJob = job.copyWith(recipe: updatedRecipe);
-    storageService.updateJob(updatedJob);
+    final updatedJob = widget.job.copyWith(recipe: updatedRecipe);
+    jobProvider.updateJob(widget.jobIndex, updatedJob);
 
     setState(() {
       for (var row in _ingredientRows) {
@@ -133,35 +118,6 @@ class _RecipeWidgetState extends State<RecipeWidget> {
       }
       _sortIngredientRows();
     });
-
-    widget.updateJob(widget.jobIndex, updatedJob);
-  }
-
-  Widget buildQuantityDropdown(IngredientRow row) {
-    return SizedBox(
-      width: 65,
-      child: DropdownButtonFormField<int>(
-        style: Theme.of(context).textTheme.labelLarge,
-        value: int.tryParse(row.quantityController.text) ?? 5,
-        items: List.generate(21, (index) {
-          return DropdownMenuItem<int>(
-            value: index,
-            child: Text(index.toString()),
-          );
-        }),
-        onChanged: (value) {
-          if (value != null && row.playlist != null) {
-            _updateJobInStorage(row.playlist!.id!, value);
-          }
-        },
-        validator: (value) {
-          if (value == null) {
-            return 'Please select a quantity';
-          }
-          return null;
-        },
-      ),
-    );
   }
 
   Future<bool> _handleDismiss(
@@ -203,8 +159,8 @@ class _RecipeWidgetState extends State<RecipeWidget> {
   }
 
   void _removeIngredient(String playlistId) {
-    final job = widget.job;
-    final updatedRecipe = job.recipe
+    final jobProvider = Provider.of<JobProvider>(context, listen: false);
+    final updatedRecipe = widget.job.recipe
         .where((ingredient) => ingredient.playlist.id != playlistId)
         .toList();
 
@@ -213,14 +169,42 @@ class _RecipeWidgetState extends State<RecipeWidget> {
       _sortIngredientRows();
     });
 
-    final updatedJob = job.copyWith(recipe: updatedRecipe);
-    widget.updateJob(widget.jobIndex, updatedJob);
+    final updatedJob = widget.job.copyWith(recipe: updatedRecipe);
+    jobProvider.updateJob(widget.jobIndex, updatedJob);
+  }
+
+  Widget buildQuantityDropdown(IngredientRow row) {
+    return SizedBox(
+      width: 65,
+      child: DropdownButtonFormField<int>(
+        style: Theme.of(context).textTheme.labelLarge,
+        value: int.tryParse(row.quantityController.text) ?? 5,
+        items: List.generate(21, (index) {
+          return DropdownMenuItem<int>(
+            value: index,
+            child: Text(index.toString()),
+          );
+        }),
+        onChanged: (value) {
+          if (value != null && row.playlist != null) {
+            _updateJobInStorage(row.playlist!.id!, value);
+          }
+        },
+        validator: (value) {
+          if (value == null) {
+            return 'Please select a quantity';
+          }
+          return null;
+        },
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final Map<String, dynamic>? jobResult =
         widget.jobResults.isEmpty ? null : widget.jobResults[widget.jobIndex];
+    final jobProvider = Provider.of<JobProvider>(context, listen: false);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -237,7 +221,7 @@ class _RecipeWidgetState extends State<RecipeWidget> {
                     return SearchBottomSheet(
                       onItemSelected: (dynamic item) {
                         if (item is PlaylistSimple) {
-                          _addNewRow(item, widget.job);
+                          _addNewRow(item);
                         }
                       },
                       searchTypes: const [SearchType.playlist],
@@ -271,21 +255,16 @@ class _RecipeWidgetState extends State<RecipeWidget> {
               SettingsButton(
                 index: widget.jobIndex,
                 job: widget.job,
-                updateJob: widget.updateJob,
-                addJob: widget.addJob,
-                onJobsImported: loadJobs,
+                updateJob: jobProvider.updateJob,
+                addJob: jobProvider.addJob,
+                onJobsImported: () {
+                  // Implement this if needed, or pass an empty function
+                  // This could be used to refresh the UI after importing jobs
+                },
               ),
           ],
         ),
         if (_ingredientRows.isEmpty)
-          // Padding(
-          //   padding: const EdgeInsets.all(16.0),
-          //   child: Text(
-          //     "Let's start building your Spotkin",
-          //     style: Theme.of(context).textTheme.bodyMedium,
-          //     textAlign: TextAlign.center,
-          //   ),
-          // )
           const SizedBox.shrink()
         else
           ..._ingredientRows.map((row) {

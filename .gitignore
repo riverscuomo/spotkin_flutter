@@ -4,6 +4,7 @@ assets/config_prod.json
 assets/config_dev.json
 
 test.json
+codebase_dump.txt
 
 .firebase/
 
