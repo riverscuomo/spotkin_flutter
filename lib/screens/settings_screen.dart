@@ -4,8 +4,6 @@ import 'package:spotkin_flutter/app_core.dart';
 
 class SettingsScreen extends StatelessWidget {
   final int index;
-  final StorageService storageService = StorageService();
-  late final BackupService backupService;
 
   SettingsScreen({
     super.key,
@@ -14,15 +12,6 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final jobProvider = Provider.of<JobProvider>(context, listen: false);
-
-    // Initialize backupService here to have access to the context
-    backupService = BackupService(
-      storageService,
-      jobProvider.addJob,
-      jobProvider.updateJob,
-    );
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
