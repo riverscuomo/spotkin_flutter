@@ -16,12 +16,25 @@ class BackendService {
     List<Map<String, dynamic>> results = [];
     final spotifyService = GetIt.instance<SpotifyService>();
 
+    print('Processing jobs: ${jobs.length}, Indexes: $indexes');
+
     for (final index in indexes) {
       try {
-        final url = '$backendUrl/process_job';
+        print('Processing job at index: $index');
+
+        if (index >= jobs.length) {
+          throw RangeError(
+              'Index $index is out of range for jobs list of length ${jobs.length}');
+        }
+
         final job = jobs[index];
+        final url = '$backendUrl/process_job';
+
+        print(
+            'Job details: ${job.targetPlaylist.name}, ${job.targetPlaylist.id}');
 
         // Use SpotifyService to get the tokens
+        print('Retrieving Spotify credentials...');
         final credentials = await spotifyService.retrieveCredentials();
 
         if (credentials == null ||
@@ -30,62 +43,74 @@ class BackendService {
           throw Exception('Spotify credentials are missing or incomplete');
         }
 
+        print('Credentials retrieved successfully');
+
         var jobJson = job.toJsonForPostRequest();
         jobJson['index'] = index;
-        final response = await http
-            .post(
-              Uri.parse(url),
-              headers: {
-                'Authorization': 'Bearer ${credentials.accessToken}',
-                'Refresh-Token': credentials.refreshToken!,
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-              },
-              body: json.encode(jobJson),
-            )
-            .timeout(const Duration(seconds: 60));
 
-        if (response.statusCode == 200) {
-          final responseData = json.decode(response.body);
+        print('Preparing to send request to $url');
+        print('Request body: ${json.encode(jobJson)}');
 
-          // Check if a new access token was returned
-          if (responseData['new_access_token'] != null) {
-            // Update the credentials with the new access token
-            final newCredentials = SpotifyApiCredentials(
-              credentials.clientId,
-              credentials.clientSecret,
-              accessToken: responseData['new_access_token'],
-              refreshToken: credentials.refreshToken,
-              expiration: DateTime.now()
-                  .add(const Duration(hours: 1)), // Assuming 1 hour validity
-              scopes: credentials.scopes,
-            );
-            await spotifyService.saveCredentials(newCredentials);
+        try {
+          print('Sending request...');
+          final response = await http
+              .post(
+                Uri.parse(url),
+                headers: {
+                  'Authorization': 'Bearer ${credentials.accessToken}',
+                  'Refresh-Token': credentials.refreshToken!,
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json',
+                },
+                body: json.encode(jobJson),
+              )
+              .timeout(const Duration(seconds: 60));
+
+          print('Response received. Status: ${response.statusCode}');
+          print('Response body: ${response.body}');
+
+          if (response.statusCode == 200) {
+            final responseData = json.decode(response.body);
+
+            if (responseData['new_access_token'] != null) {
+              // Handle token refresh...
+            }
+
+            results.add({
+              'name': job.targetPlaylist.name,
+              'status': 'Success',
+              'result': responseData['message'],
+            });
+          } else {
+            results.add({
+              'name': job.targetPlaylist.name,
+              'status': 'Error',
+              'result': 'Status ${response.statusCode}: ${response.body}',
+            });
           }
-
-          results.add({
-            'name': job.targetPlaylist.name,
-            'status': 'Success',
-            'result': responseData['message'],
-          });
-        } else {
+        } catch (e) {
+          print('Error sending request: $e');
           results.add({
             'name': job.targetPlaylist.name,
             'status': 'Error',
-            'result': 'Status ${response.statusCode}: ${response.body}',
+            'result': 'Request error: ${e.toString()}',
           });
         }
-      } catch (e) {
+      } catch (e, stackTrace) {
+        print('Error processing job: $e');
+        print('Stack trace: $stackTrace');
+
         results.add({
-          'name': jobs[index].isNull
-              ? 'Unknown job'
-              : jobs[index].targetPlaylist.name,
+          'name': index < jobs.length
+              ? jobs[index].targetPlaylist.name
+              : 'Unknown job',
           'status': 'Error',
           'result': e.toString(),
         });
       }
     }
 
+    print('Processed jobs results: $results');
     return results;
   }
 }

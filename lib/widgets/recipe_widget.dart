@@ -8,13 +8,13 @@ import 'ingredient_row.dart';
 class RecipeWidget extends StatefulWidget {
   final Job job;
   final int jobIndex;
-  final List<Map<String, dynamic>?> jobResults;
+  // final List<Map<String, dynamic>?> jobResults;
 
   const RecipeWidget({
     Key? key,
     required this.jobIndex,
     required this.job,
-    required this.jobResults,
+    // required this.jobResults,
   }) : super(key: key);
 
   @override
@@ -202,8 +202,8 @@ class _RecipeWidgetState extends State<RecipeWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final Map<String, dynamic>? jobResult =
-        widget.jobResults.isEmpty ? null : widget.jobResults[widget.jobIndex];
+    // final Map<String, dynamic>? jobResult =
+    //     widget.jobResults.isEmpty ? null : widget.jobResults[widget.jobIndex];
     final jobProvider = Provider.of<JobProvider>(context, listen: false);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -211,25 +211,6 @@ class _RecipeWidgetState extends State<RecipeWidget> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            if (jobResult != null)
-              Text(
-                jobResult['result'],
-                style: Theme.of(context)
-                    .textTheme
-                    .labelMedium!
-                    .copyWith(fontStyle: FontStyle.italic),
-              ),
-            const SizedBox(width: 10),
-            if (jobResult != null)
-              Icon(
-                size: 14,
-                jobResult['status'] == 'Success'
-                    ? Icons.check_circle
-                    : Icons.error,
-                color: jobResult['status'] == 'Success'
-                    ? Colors.green
-                    : Colors.red,
-              ),
             Row(
               children: [
                 IconButton(

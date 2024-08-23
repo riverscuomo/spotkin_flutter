@@ -115,30 +115,99 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Future<void> _processJob(Job job, int index) async {
+    print('Processing job: ${job.targetPlaylist.name}, index: $index');
+
     setState(() {
       isProcessing = true;
-      jobResults = List.filled(
-          Provider.of<JobProvider>(context, listen: false).jobs.length, null);
     });
 
-    final results = await _backendService.processJobs([job], [index]);
+    try {
+      final allJobs = Provider.of<JobProvider>(context, listen: false).jobs;
+      print('Total jobs: ${allJobs.length}');
 
-    if (results.isNotEmpty) {
-      if (results[0].containsKey('status') && results[0]['status'] == 'Error') {
-        print(results[0]['result'].runtimeType);
-        final result = results[0]['result'] as String;
-        print('Error processing jobs: $result');
-        if (result.startsWith("Status widgetPadding01")) {
-          print('Token expired, authenticate again...');
-          spotifyService.initiateSpotifyLogin();
-          return;
-        }
-      }
+      final results = await _backendService.processJobs(allJobs, [index]);
+
+      print('Received results: $results');
+
       setState(() {
-        jobResults[index] = results[0];
         isProcessing = false;
       });
+
+      if (results.isNotEmpty) {
+        _showResultSnackBar(results[0]);
+      } else {
+        _showResultSnackBar({
+          'name': job.targetPlaylist.name,
+          'status': 'Error',
+          'result': 'No results returned from backend service',
+        });
+      }
+    } catch (e, stackTrace) {
+      print('Error in _processJob: $e');
+      print('Stack trace: $stackTrace');
+
+      setState(() {
+        isProcessing = false;
+      });
+
+      _showResultSnackBar({
+        'name': job.targetPlaylist.name,
+        'status': 'Error',
+        'result': 'Error: ${e.toString()}',
+      });
     }
+  }
+
+  void _showResultSnackBar(Map<String, dynamic> result) {
+    final snackBar = SnackBar(
+      content: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: result['status'] == 'Success' ? Colors.green : Colors.red,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    result['name'],
+                    style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    result['result'],
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                          color: Colors.white,
+                          fontStyle: FontStyle.italic,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 16),
+            Icon(
+              result['status'] == 'Success' ? Icons.check_circle : Icons.error,
+              color: Colors.white,
+              size: 24,
+            ),
+          ],
+        ),
+      ),
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      duration: const Duration(seconds: 5),
+      behavior: SnackBarBehavior.floating,
+      margin: const EdgeInsets.all(16),
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   void _replaceJob(Job newJob, int index) {
@@ -164,7 +233,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             RecipeWidget(
               job: job,
               jobIndex: index,
-              jobResults: jobResults,
+              // jobResults: jobResults,
             ),
           ],
         ),
