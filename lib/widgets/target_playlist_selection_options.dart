@@ -127,22 +127,7 @@ class TargetPlaylistSelectionOptions extends StatelessWidget {
         const SizedBox(height: 16),
         Row(
           children: [
-            const Text('Backup This Job'),
-            const Spacer(),
-            ElevatedButton(
-              onPressed: () => _createBackup(context),
-              style: ElevatedButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              ),
-              child: const Icon(Icons.backup),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            const Text('Import Job'),
+            const Text('Import a Spotkin'),
             const Spacer(),
             ElevatedButton(
               onPressed: () => _importBackup(context),
@@ -151,6 +136,21 @@ class TargetPlaylistSelectionOptions extends StatelessWidget {
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
               child: const Icon(Icons.restore),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            const Text('Export this Spotkin'),
+            const Spacer(),
+            ElevatedButton(
+              onPressed: () => _createBackup(context),
+              style: ElevatedButton.styleFrom(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              ),
+              child: const Icon(Icons.backup),
             ),
           ],
         ),

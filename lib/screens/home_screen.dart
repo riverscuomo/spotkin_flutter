@@ -183,7 +183,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    result['result'],
+                    'Processed successfully',
                     style: Theme.of(context).textTheme.bodySmall!.copyWith(
                           color: Colors.white,
                           fontStyle: FontStyle.italic,

@@ -99,11 +99,15 @@ class TargetPlaylistWidget extends StatelessWidget {
                 Positioned(
                   top: 0,
                   right: 0,
-                  child: IconButton(
-                    icon: const Icon(Icons.settings),
-                    onPressed: () {
-                      onExpandChanged(!isExpanded);
-                    },
+                  child: AnimatedRotation(
+                    turns: isExpanded ? 0.5 : 0,
+                    duration: const Duration(milliseconds: 200),
+                    child: IconButton(
+                      icon: const Icon(Icons.expand_more),
+                      onPressed: () {
+                        onExpandChanged(!isExpanded);
+                      },
+                    ),
                   ),
                 ),
               ],
