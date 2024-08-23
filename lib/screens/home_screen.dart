@@ -24,9 +24,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late BackendService _backendService;
-
   final SpotifyService spotifyService = getIt<SpotifyService>();
-  late TabController? _tabController;
+  late TabController _tabController;
 
   List<Map<String, dynamic>?> jobResults = [];
   bool isProcessing = false;
@@ -69,6 +68,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _showAddJobButton = jobs.isNotEmpty &&
         !jobs.any((job) => job.isNull) &&
         jobs.length < maxJobs;
+
     _tabController = TabController(
       length: (jobs.isEmpty ? 1 : jobs.length) + (_showAddJobButton ? 1 : 0),
       vsync: this,
@@ -78,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void _addNewJob(Job newJob) {
     final jobProvider = Provider.of<JobProvider>(context, listen: false);
     jobProvider.addJob(newJob);
-    _initTabController();
+    _updateTabController();
   }
 
   void _deleteJob(BuildContext context, int index) {
@@ -112,6 +112,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         );
       },
     );
+    _updateTabController();
   }
 
   Future<void> _processJob(Job job, int index) async {
@@ -216,7 +217,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     setState(() {
       _isExpanded = false; // Collapse after changing the target playlist
     });
-    _initTabController();
+    _updateTabController();
   }
 
   Widget _buildRecipeCard(Job job, int index) {
@@ -244,7 +245,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget buildTargetPlaylistSelectionOptions(int index) {
     final jobProvider = Provider.of<JobProvider>(context, listen: false);
     return TargetPlaylistSelectionOptions(
-      playlist: jobProvider.jobs[index].targetPlaylist,
+      job: jobProvider.jobs[index],
       deleteJob: () => _deleteJob(context, index),
       onPlaylistSelected: (PlaylistSimple selectedPlaylist) {
         if (jobProvider.jobs.isEmpty) {
@@ -274,6 +275,28 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
+  void _updateTabController() {
+    final jobProvider = Provider.of<JobProvider>(context, listen: false);
+    final jobs = jobProvider.jobs;
+    _showAddJobButton = jobs.isNotEmpty &&
+        !jobs.any((job) => job.isNull) &&
+        jobs.length < maxJobs;
+
+    int newLength =
+        (jobs.isEmpty ? 1 : jobs.length) + (_showAddJobButton ? 1 : 0);
+
+    if (_tabController.length != newLength) {
+      int oldIndex = _tabController.index;
+      _tabController.dispose();
+      _tabController = TabController(
+        length: newLength,
+        vsync: this,
+        initialIndex: oldIndex < newLength ? oldIndex : newLength - 1,
+      );
+      setState(() {}); // Trigger a rebuild
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<JobProvider>(
@@ -281,6 +304,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         final jobs = jobProvider.jobs;
         final jobsIterable =
             jobs.isNotEmpty ? jobs.asMap().entries : [MapEntry(0, Job.empty())];
+        // Ensure tab controller is up to date
+        _updateTabController();
         return Scaffold(
           backgroundColor: Colors.black,
           appBar: AppBar(
@@ -308,7 +333,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       controller: _tabController,
                       onTap: (index) {
                         if (index == jobsIterable.length && _showAddJobButton) {
-                          _tabController?.animateTo(jobsIterable.length);
+                          _tabController.animateTo(jobsIterable.length);
                           _addNewJob(Job.empty());
                         }
                       },

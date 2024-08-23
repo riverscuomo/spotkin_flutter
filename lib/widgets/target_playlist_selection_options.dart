@@ -5,31 +5,59 @@ import 'package:spotkin_flutter/app_core.dart';
 
 class TargetPlaylistSelectionOptions extends StatelessWidget {
   final Function(PlaylistSimple) onPlaylistSelected;
-  final PlaylistSimple playlist;
+  final Job job;
   final Function() deleteJob;
   final StorageService storageService = StorageService();
   late final BackupService backupService;
 
   TargetPlaylistSelectionOptions({
-    super.key,
+    Key? key,
     required this.onPlaylistSelected,
-    required this.playlist,
+    required this.job,
     required this.deleteJob,
-  });
+  }) : super(key: key);
 
   void _createBackup(BuildContext context) {
-    String message = backupService.createBackup();
+    String message = backupService.createBackup(job);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message)),
     );
   }
 
   Future<void> _importBackup(BuildContext context) async {
-    String message = await backupService.importBackup();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
-    Provider.of<JobProvider>(context, listen: false).loadJobs();
+    final result = await backupService.importBackup();
+
+    if (result['maxJobsReached'] == true) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Maximum Jobs Reached'),
+            content: Text(result['message']),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result['message']),
+          backgroundColor: result['success'] ? Colors.green : Colors.red,
+        ),
+      );
+    }
+
+    if (result['success']) {
+      // Refresh the job list
+      Provider.of<JobProvider>(context, listen: false).loadJobs();
+    }
   }
 
   @override
@@ -40,15 +68,16 @@ class TargetPlaylistSelectionOptions extends StatelessWidget {
     backupService = BackupService(
       storageService,
       jobProvider.addJob,
-      jobProvider.updateJob,
+      (_, updatedJob) => jobProvider.updateJob(
+          jobProvider.jobs.indexWhere(
+              (j) => j.targetPlaylist.id == updatedJob.targetPlaylist.id),
+          updatedJob),
     );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(
-          height: 24,
-        ),
+        const SizedBox(height: 24),
         const Divider(),
         Text(
           'Select which playlist to update with this Spotkin',
@@ -71,9 +100,7 @@ class TargetPlaylistSelectionOptions extends StatelessWidget {
             ),
           ],
         ),
-
-        const SizedBox(
-            height: 16), // Add some vertical spacing between the rows
+        const SizedBox(height: 16),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -100,22 +127,7 @@ class TargetPlaylistSelectionOptions extends StatelessWidget {
         const SizedBox(height: 16),
         Row(
           children: [
-            const Text('Import Backup'),
-            const Spacer(),
-            ElevatedButton(
-              onPressed: () => _importBackup(context),
-              style: ElevatedButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              ),
-              child: const Icon(Icons.restore),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            const Text('Create Backup'),
+            const Text('Backup This Job'),
             const Spacer(),
             ElevatedButton(
               onPressed: () => _createBackup(context),
@@ -124,6 +136,21 @@ class TargetPlaylistSelectionOptions extends StatelessWidget {
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
               child: const Icon(Icons.backup),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            const Text('Import Job'),
+            const Spacer(),
+            ElevatedButton(
+              onPressed: () => _importBackup(context),
+              style: ElevatedButton.styleFrom(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              ),
+              child: const Icon(Icons.restore),
             ),
           ],
         ),
