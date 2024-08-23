@@ -27,7 +27,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final SpotifyService spotifyService = getIt<SpotifyService>();
   late TabController _tabController;
 
-  List<Map<String, dynamic>?> jobResults = [];
   bool isProcessing = false;
   bool _isExpanded = false;
   bool _showAddJobButton = false;
@@ -160,6 +159,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void _showResultSnackBar(Map<String, dynamic> result) {
+    if (result['status'] == 'Success') {
+      // do nothing
+    } else {
+      // play unhappy sound
+    }
     final snackBar = SnackBar(
       content: Container(
         padding: const EdgeInsets.all(16),
@@ -234,7 +238,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             RecipeWidget(
               job: job,
               jobIndex: index,
-              // jobResults: jobResults,
             ),
           ],
         ),

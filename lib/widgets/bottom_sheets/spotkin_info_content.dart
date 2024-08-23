@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:spotkin_flutter/helpers/utils.dart';
 
 const gap = SizedBox(
-  height: 5,
+  height: 2,
 );
 
 Future<void> _onOpen(String url) async {
@@ -35,7 +35,7 @@ List<Widget> buildInfoSheetContent(BuildContext context) {
     ),
     gap,
     Text(
-      'I can run automatically... or you can activate me by clicking the "Update Spotkin On Spotify" button. ✨',
+      'I can run automatically... or you can activate me by clicking the "Update" button. ✨',
       style: theme.textTheme.bodyMedium,
     ),
     gap,
@@ -94,6 +94,17 @@ List<Widget> buildInfoSheetContent(BuildContext context) {
     gap,
     Text(
       'Experience a constantly evolving, personalized music journey without the limitations of standard algorithms. Ready to discover your new favorite songs? Let\'s go! 🚀🎵',
+      style: theme.textTheme.bodyMedium,
+    ),
+  ];
+}
+
+List<Widget> buildSettingsInfoSheetContent(BuildContext context) {
+  final theme = Theme.of(context);
+
+  return [
+    Text(
+      'You have precise control over your music experience: you can include or exclude specific artists, tracks, genres, and even set energy levels. This increases the odds you only get music you\'ll love!',
       style: theme.textTheme.bodyMedium,
     ),
   ];

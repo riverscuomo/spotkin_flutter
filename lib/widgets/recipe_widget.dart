@@ -8,13 +8,11 @@ import 'ingredient_row.dart';
 class RecipeWidget extends StatefulWidget {
   final Job job;
   final int jobIndex;
-  // final List<Map<String, dynamic>?> jobResults;
 
   const RecipeWidget({
     Key? key,
     required this.jobIndex,
     required this.job,
-    // required this.jobResults,
   }) : super(key: key);
 
   @override
@@ -202,51 +200,45 @@ class _RecipeWidgetState extends State<RecipeWidget> {
 
   @override
   Widget build(BuildContext context) {
-    // final Map<String, dynamic>? jobResult =
-    //     widget.jobResults.isEmpty ? null : widget.jobResults[widget.jobIndex];
     final jobProvider = Provider.of<JobProvider>(context, listen: false);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.add),
-                  onPressed: () async {
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      builder: (BuildContext context) {
-                        return SearchBottomSheet(
-                          onItemSelected: (dynamic item) {
-                            if (item is PlaylistSimple) {
-                              _addNewRow(item);
-                            }
-                          },
-                          searchTypes: const [SearchType.playlist],
-                          title: 'Add a playlist',
-                        );
+            IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: () async {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  builder: (BuildContext context) {
+                    return SearchBottomSheet(
+                      onItemSelected: (dynamic item) {
+                        if (item is PlaylistSimple) {
+                          _addNewRow(item);
+                        }
                       },
+                      searchTypes: const [SearchType.playlist],
+                      title: 'Add a playlist',
                     );
                   },
-                ),
-                const SizedBox(width: 10),
-                if (_ingredientRows.isNotEmpty)
-                  SettingsButton(
-                    index: widget.jobIndex,
-                    job: widget.job,
-                    updateJob: jobProvider.updateJob,
-                    addJob: jobProvider.addJob,
-                    onJobsImported: () {
-                      // Implement this if needed, or pass an empty function
-                      // This could be used to refresh the UI after importing jobs
-                    },
-                  ),
-              ],
+                );
+              },
             ),
+            const SizedBox(width: 10),
+            if (_ingredientRows.isNotEmpty)
+              SettingsButton(
+                index: widget.jobIndex,
+                job: widget.job,
+                updateJob: jobProvider.updateJob,
+                addJob: jobProvider.addJob,
+                onJobsImported: () {
+                  // Implement this if needed, or pass an empty function
+                  // This could be used to refresh the UI after importing jobs
+                },
+              ),
           ],
         ),
         if (_ingredientRows.isEmpty)

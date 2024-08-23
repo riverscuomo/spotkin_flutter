@@ -15,7 +15,7 @@ class SettingsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
-        actions: const [InfoButton()],
+        actions: const [SettingsInfoButton()],
       ),
       body: Column(
         children: [

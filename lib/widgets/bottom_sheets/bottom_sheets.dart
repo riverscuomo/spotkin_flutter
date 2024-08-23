@@ -115,3 +115,12 @@ void showInfoBottomSheet(BuildContext context) {
     showImage: true,
   );
 }
+
+void showSettingsInfoBottomSheet(BuildContext context) {
+  CustomBottomSheet.show(
+    context: context,
+    title: const Text('About Spotkin Settings'),
+    content: buildSettingsInfoSheetContent(context),
+    showImage: true,
+  );
+}
