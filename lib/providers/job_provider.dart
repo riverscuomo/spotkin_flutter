@@ -20,8 +20,12 @@ class JobProvider extends ChangeNotifier {
 
     try {
       _jobs = await _backendService.getJobs();
+      if (_jobs.isEmpty) {
+        _jobs.add(Job.empty()); // Add an empty job if there are no jobs
+      }
     } catch (e) {
       print('Error loading jobs: $e');
+      _jobs = [Job.empty()]; // Ensure there's always at least one job
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -72,5 +76,12 @@ class JobProvider extends ChangeNotifier {
       (job) => job.targetPlaylist.id == playlistId,
       orElse: () => null as Job,
     );
+  }
+
+  Job getJob(int index) {
+    if (index >= 0 && index < _jobs.length) {
+      return _jobs[index];
+    }
+    return Job.empty(); // Return an empty job if index is out of range
   }
 }

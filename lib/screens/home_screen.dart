@@ -79,6 +79,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final jobProvider = Provider.of<JobProvider>(context, listen: false);
     jobProvider.addJob(newJob);
     _updateTabController();
+    setState(() {
+      _isExpanded = false; // Collapse the expanded view after adding a new job
+    });
   }
 
   void _deleteJob(BuildContext context, int index) {
@@ -114,6 +117,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
     _updateTabController();
   }
+
+//   void _updateJob(Job updatedJob, int index) {
+//   final jobProvider = Provider.of<JobProvider>(context, listen: false);
+//   jobProvider.updateJob(index, updatedJob);
+//   setState(() {
+//     _isExpanded = false; // Collapse the expanded view after updating a job
+//   });
+// }
 
   Future<void> _processJob(Job job, int index) async {
     print('Processing job: ${job.targetPlaylist.name}, index: $index');
@@ -216,14 +227,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  void _replaceJob(Job newJob, int index) {
-    final jobProvider = Provider.of<JobProvider>(context, listen: false);
-    jobProvider.updateJob(index, newJob);
-    setState(() {
-      _isExpanded = false; // Collapse after changing the target playlist
-    });
-    _updateTabController();
-  }
+  // void _replaceJob(Job newJob, int index) {
+  //   final jobProvider = Provider.of<JobProvider>(context, listen: false);
+  //   jobProvider.updateJob(index, newJob);
+  //   setState(() {
+  //     _isExpanded = false; // Collapse after changing the target playlist
+  //   });
+  //   _updateTabController();
+  // }
 
   Widget _buildRecipeCard(Job job, int index) {
     return Container(
@@ -247,34 +258,37 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget buildTargetPlaylistSelectionOptions(int index) {
-    final jobProvider = Provider.of<JobProvider>(context, listen: false);
-    return TargetPlaylistSelectionOptions(
-      job: jobProvider.jobs[index],
-      deleteJob: () => _deleteJob(context, index),
-      onPlaylistSelected: (PlaylistSimple selectedPlaylist) {
-        if (jobProvider.jobs.isEmpty) {
-          final newJob = Job(
-            targetPlaylist: selectedPlaylist,
-          );
-          _addNewJob(newJob);
-        } else {
-          if (jobProvider.jobs
-              .any((job) => job.targetPlaylist.id == selectedPlaylist.id)) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Playlist already selected for another job.'),
-              ),
-            );
-            return;
-          }
-          final updateJob = jobProvider.jobs[index]
-              .copyWith(targetPlaylist: selectedPlaylist);
-          _replaceJob(updateJob, index);
-        }
-        // Auto-collapse after selection
-        setState(() {
-          _isExpanded = false;
-        });
+    return Consumer<JobProvider>(
+      builder: (context, jobProvider, child) {
+        return TargetPlaylistSelectionOptions(
+          job: jobProvider.jobs[index],
+          deleteJob: () => _deleteJob(context, index),
+          onPlaylistSelected: (PlaylistSimple selectedPlaylist) {
+            if (jobProvider.jobs.isEmpty) {
+              final newJob = Job(
+                targetPlaylist: selectedPlaylist,
+              );
+              _addNewJob(newJob);
+            } else {
+              if (jobProvider.jobs
+                  .any((job) => job.targetPlaylist.id == selectedPlaylist.id)) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Playlist already selected for another job.'),
+                  ),
+                );
+                return;
+              }
+              final updatedJob = jobProvider.jobs[index]
+                  .copyWith(targetPlaylist: selectedPlaylist);
+              jobProvider.updateJob(index, updatedJob);
+            }
+            // Auto-collapse after selection
+            setState(() {
+              _isExpanded = false;
+            });
+          },
+        );
       },
     );
   }
@@ -366,8 +380,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       child: Column(
                         children: [
                           TargetPlaylistWidget(
-                            // targetPlaylist: job.targetPlaylist,
-                            // job: job,
                             index: jobEntry.key,
                             isProcessing: isProcessing,
                             processJob: _processJob,

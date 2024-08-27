@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
+import 'package:spotify/spotify.dart';
 import 'package:spotkin_flutter/app_core.dart';
 
 class BackendService {
@@ -15,10 +17,20 @@ class BackendService {
   }
 
   Future<List<Job>> getJobs() async {
+    final spotifyService = GetIt.instance<SpotifyService>();
+    final credentials = await spotifyService.retrieveCredentials();
+
+    if (credentials == null ||
+        credentials.accessToken == null ||
+        credentials.refreshToken == null) {
+      throw Exception('Spotify credentials are missing or incomplete');
+    }
+
     final response = await http.get(
       Uri.parse('$backendUrl/process_job'),
       headers: {
-        'Authorization': 'Bearer $_accessToken',
+        'Authorization': 'Bearer ${credentials.accessToken}',
+        'Refresh-Token': credentials.refreshToken!,
         'Content-Type': 'application/json',
       },
     );
@@ -40,11 +52,19 @@ class BackendService {
   Future<List<Map<String, dynamic>>> processJobs(
       List<Job> jobs, List<int> indexes) async {
     List<Map<String, dynamic>> results = [];
+    final spotifyService = GetIt.instance<SpotifyService>();
 
     for (final index in indexes) {
       try {
         final job = jobs[index];
         final url = '$backendUrl/process_job';
+
+        final credentials = await spotifyService.retrieveCredentials();
+        if (credentials == null ||
+            credentials.accessToken == null ||
+            credentials.refreshToken == null) {
+          throw Exception('Spotify credentials are missing or incomplete');
+        }
 
         var jobJson = job.toJsonForPostRequest();
         jobJson['index'] = index;
@@ -53,7 +73,8 @@ class BackendService {
             .post(
               Uri.parse(url),
               headers: {
-                'Authorization': 'Bearer $_accessToken',
+                'Authorization': 'Bearer ${credentials.accessToken}',
+                'Refresh-Token': credentials.refreshToken!,
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
               },
@@ -63,6 +84,9 @@ class BackendService {
 
         if (response.statusCode == 200) {
           final responseData = json.decode(response.body);
+          if (responseData['new_access_token'] != null) {
+            updateAccessToken(responseData['new_access_token']);
+          }
           results.add({
             'name': job.targetPlaylist.name,
             'status': 'Success',
@@ -88,10 +112,14 @@ class BackendService {
   }
 
   Future<void> updateJob(Job job) async {
+    final spotifyService = GetIt.instance<SpotifyService>();
+    final credentials = await spotifyService.retrieveCredentials();
+
     final response = await http.post(
       Uri.parse('$backendUrl/process_job'),
       headers: {
-        'Authorization': 'Bearer $_accessToken',
+        'Authorization': 'Bearer ${credentials!.accessToken}',
+        'Refresh-Token': credentials.refreshToken!,
         'Content-Type': 'application/json',
       },
       body: json.encode([job.toJsonForPostRequest()]),
@@ -103,10 +131,14 @@ class BackendService {
   }
 
   Future<void> createJob(Job job) async {
+    final spotifyService = GetIt.instance<SpotifyService>();
+    final credentials = await spotifyService.retrieveCredentials();
+
     final response = await http.post(
       Uri.parse('$backendUrl/process_job'),
       headers: {
-        'Authorization': 'Bearer $_accessToken',
+        'Authorization': 'Bearer ${credentials!.accessToken}',
+        'Refresh-Token': credentials.refreshToken!,
         'Content-Type': 'application/json',
       },
       body: json.encode([job.toJsonForPostRequest()]),
@@ -118,10 +150,14 @@ class BackendService {
   }
 
   Future<void> deleteJob(String playlistId) async {
+    final spotifyService = GetIt.instance<SpotifyService>();
+    final credentials = await spotifyService.retrieveCredentials();
+
     final response = await http.delete(
       Uri.parse('$backendUrl/process_job/$playlistId'),
       headers: {
-        'Authorization': 'Bearer $_accessToken',
+        'Authorization': 'Bearer ${credentials!.accessToken}',
+        'Refresh-Token': credentials.refreshToken!,
         'Content-Type': 'application/json',
       },
     );
