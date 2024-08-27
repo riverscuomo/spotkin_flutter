@@ -12,5 +12,5 @@ void setupServiceLocator({required Map<String, dynamic> config}) {
         scope: config['SPOTIFY_SCOPE']!,
       ));
 
-  getIt.registerLazySingleton<StorageService>(() => StorageService());
+  // getIt.registerLazySingleton<StorageService>(() => StorageService());
 }

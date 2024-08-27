@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-// import 'package:spotify/spotify.dart' hide Image;
 import 'package:spotkin_flutter/app_core.dart';
 import 'package:spotkin_flutter/widgets/update_button.dart';
 
@@ -26,6 +25,10 @@ class TargetPlaylistWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<JobProvider>(
       builder: (context, jobProvider, child) {
+        if (jobProvider.jobs.isEmpty) {
+          return _buildEmptyState(context);
+        }
+
         final job = jobProvider.jobs[index];
         final targetPlaylist = job.targetPlaylist;
 
@@ -99,15 +102,11 @@ class TargetPlaylistWidget extends StatelessWidget {
                 Positioned(
                   top: 0,
                   right: 0,
-                  child: AnimatedRotation(
-                    turns: isExpanded ? 0.5 : 0,
-                    duration: const Duration(milliseconds: 200),
-                    child: IconButton(
-                      icon: const Icon(Icons.expand_more),
-                      onPressed: () {
-                        onExpandChanged(!isExpanded);
-                      },
-                    ),
+                  child: IconButton(
+                    icon: const Icon(Icons.settings),
+                    onPressed: () {
+                      onExpandChanged(!isExpanded);
+                    },
                   ),
                 ),
               ],
@@ -115,6 +114,37 @@ class TargetPlaylistWidget extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).expansionTileTheme.backgroundColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Icon(
+              Icons.playlist_add,
+              size: 160,
+              color: Theme.of(context).iconTheme.color?.withOpacity(0.5),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No playlists yet',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => buildTargetPlaylistSelectionOptions(0),
+              child: const Text('Add a playlist'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -13,16 +13,19 @@ void main() async {
   Map<String, dynamic> config = await loadConfig();
   setupServiceLocator(config: config);
 
+  final backendService = BackendService(
+    backendUrl: config['BACKEND_URL'],
+    accessToken: '', // Initialize with an empty string
+  );
+
   runApp(
     MultiProvider(
       providers: [
-        Provider<StorageService>(
-          create: (_) => StorageService(),
-        ),
-        ChangeNotifierProxyProvider<StorageService, JobProvider>(
-          create: (context) => JobProvider(context.read<StorageService>()),
-          update: (context, storage, previous) =>
-              previous ?? JobProvider(storage),
+        Provider<BackendService>.value(value: backendService),
+        ChangeNotifierProxyProvider<BackendService, JobProvider>(
+          create: (context) => JobProvider(backendService),
+          update: (context, backendService, previous) =>
+              previous ?? JobProvider(backendService),
         ),
       ],
       child: MyApp(config),

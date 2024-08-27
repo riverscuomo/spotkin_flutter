@@ -7,8 +7,6 @@ class TargetPlaylistSelectionOptions extends StatelessWidget {
   final Function(PlaylistSimple) onPlaylistSelected;
   final Job job;
   final Function() deleteJob;
-  final StorageService storageService = StorageService();
-  late final BackupService backupService;
 
   TargetPlaylistSelectionOptions({
     Key? key,
@@ -17,63 +15,8 @@ class TargetPlaylistSelectionOptions extends StatelessWidget {
     required this.deleteJob,
   }) : super(key: key);
 
-  void _createBackup(BuildContext context) {
-    String message = backupService.createBackup(job);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
-  }
-
-  Future<void> _importBackup(BuildContext context) async {
-    final result = await backupService.importBackup();
-
-    if (result['maxJobsReached'] == true) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Maximum Jobs Reached'),
-            content: Text(result['message']),
-            actions: <Widget>[
-              TextButton(
-                child: const Text('OK'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(result['message']),
-          backgroundColor: result['success'] ? Colors.green : Colors.red,
-        ),
-      );
-    }
-
-    if (result['success']) {
-      // Refresh the job list
-      Provider.of<JobProvider>(context, listen: false).loadJobs();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final jobProvider = Provider.of<JobProvider>(context, listen: false);
-
-    // Initialize backupService here to have access to the context
-    backupService = BackupService(
-      storageService,
-      jobProvider.addJob,
-      (_, updatedJob) => jobProvider.updateJob(
-          jobProvider.jobs.indexWhere(
-              (j) => j.targetPlaylist.id == updatedJob.targetPlaylist.id),
-          updatedJob),
-    );
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -119,42 +62,6 @@ class TargetPlaylistSelectionOptions extends StatelessWidget {
         ),
         const SizedBox(height: 24),
         const Divider(),
-        Text(
-          'Backup and Restore',
-          style: Theme.of(context).textTheme.titleMedium,
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            const Text('Import a Spotkin'),
-            const Spacer(),
-            ElevatedButton(
-              onPressed: () => _importBackup(context),
-              style: ElevatedButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              ),
-              child: const Icon(Icons.restore),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            const Text('Export this Spotkin'),
-            const Spacer(),
-            ElevatedButton(
-              onPressed: () => _createBackup(context),
-              style: ElevatedButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              ),
-              child: const Icon(Icons.backup),
-            ),
-          ],
-        ),
-        const SizedBox(height: 24),
         Row(
           children: [
             const Text('Delete this Spotkin'),

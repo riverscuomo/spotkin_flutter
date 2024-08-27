@@ -1,116 +1,133 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
-import 'package:spotify/spotify.dart';
 import 'package:spotkin_flutter/app_core.dart';
 
 class BackendService {
-  final String accessToken;
+  String _accessToken;
   final String backendUrl;
 
-  BackendService({required this.accessToken, required this.backendUrl});
+  BackendService({required String accessToken, required this.backendUrl})
+      : _accessToken = accessToken;
+
+  void updateAccessToken(String newToken) {
+    _accessToken = newToken;
+  }
+
+  Future<List<Job>> getJobs() async {
+    final response = await http.get(
+      Uri.parse('$backendUrl/process_job'),
+      headers: {
+        'Authorization': 'Bearer $_accessToken',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      Map<String, dynamic> jsonData = json.decode(response.body);
+      List<Job> jobs = [];
+      jsonData.forEach((key, value) {
+        if (value['job'] != null) {
+          jobs.add(Job.fromJson(value['job']));
+        }
+      });
+      return jobs;
+    } else {
+      throw Exception('Failed to load jobs');
+    }
+  }
 
   Future<List<Map<String, dynamic>>> processJobs(
       List<Job> jobs, List<int> indexes) async {
     List<Map<String, dynamic>> results = [];
-    final spotifyService = GetIt.instance<SpotifyService>();
-
-    print('Processing jobs: ${jobs.length}, Indexes: $indexes');
 
     for (final index in indexes) {
       try {
-        print('Processing job at index: $index');
-
-        if (index >= jobs.length) {
-          throw RangeError(
-              'Index $index is out of range for jobs list of length ${jobs.length}');
-        }
-
         final job = jobs[index];
         final url = '$backendUrl/process_job';
-
-        print(
-            'Job details: ${job.targetPlaylist.name}, ${job.targetPlaylist.id}');
-
-        // Use SpotifyService to get the tokens
-        print('Retrieving Spotify credentials...');
-        final credentials = await spotifyService.retrieveCredentials();
-
-        if (credentials == null ||
-            credentials.accessToken == null ||
-            credentials.refreshToken == null) {
-          throw Exception('Spotify credentials are missing or incomplete');
-        }
-
-        print('Credentials retrieved successfully');
 
         var jobJson = job.toJsonForPostRequest();
         jobJson['index'] = index;
 
-        print('Preparing to send request to $url');
-        print('Request body: ${json.encode(jobJson)}');
+        final response = await http
+            .post(
+              Uri.parse(url),
+              headers: {
+                'Authorization': 'Bearer $_accessToken',
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+              },
+              body: json.encode(jobJson),
+            )
+            .timeout(const Duration(seconds: 60));
 
-        try {
-          print('Sending request...');
-          final response = await http
-              .post(
-                Uri.parse(url),
-                headers: {
-                  'Authorization': 'Bearer ${credentials.accessToken}',
-                  'Refresh-Token': credentials.refreshToken!,
-                  'Content-Type': 'application/json',
-                  'Accept': 'application/json',
-                },
-                body: json.encode(jobJson),
-              )
-              .timeout(const Duration(seconds: 60));
-
-          print('Response received. Status: ${response.statusCode}');
-          print('Response body: ${response.body}');
-
-          if (response.statusCode == 200) {
-            final responseData = json.decode(response.body);
-
-            if (responseData['new_access_token'] != null) {
-              // Handle token refresh...
-            }
-
-            results.add({
-              'name': job.targetPlaylist.name,
-              'status': 'Success',
-              'result': responseData['message'],
-            });
-          } else {
-            results.add({
-              'name': job.targetPlaylist.name,
-              'status': 'Error',
-              'result': 'Status ${response.statusCode}: ${response.body}',
-            });
-          }
-        } catch (e) {
-          print('Error sending request: $e');
+        if (response.statusCode == 200) {
+          final responseData = json.decode(response.body);
+          results.add({
+            'name': job.targetPlaylist.name,
+            'status': 'Success',
+            'result': responseData['message'],
+          });
+        } else {
           results.add({
             'name': job.targetPlaylist.name,
             'status': 'Error',
-            'result': 'Request error: ${e.toString()}',
+            'result': 'Status ${response.statusCode}: ${response.body}',
           });
         }
-      } catch (e, stackTrace) {
-        print('Error processing job: $e');
-        print('Stack trace: $stackTrace');
-
+      } catch (e) {
         results.add({
-          'name': index < jobs.length
-              ? jobs[index].targetPlaylist.name
-              : 'Unknown job',
+          'name': jobs[index].targetPlaylist.name,
           'status': 'Error',
           'result': e.toString(),
         });
       }
     }
 
-    print('Processed jobs results: $results');
     return results;
+  }
+
+  Future<void> updateJob(Job job) async {
+    final response = await http.post(
+      Uri.parse('$backendUrl/process_job'),
+      headers: {
+        'Authorization': 'Bearer $_accessToken',
+        'Content-Type': 'application/json',
+      },
+      body: json.encode([job.toJsonForPostRequest()]),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update job');
+    }
+  }
+
+  Future<void> createJob(Job job) async {
+    final response = await http.post(
+      Uri.parse('$backendUrl/process_job'),
+      headers: {
+        'Authorization': 'Bearer $_accessToken',
+        'Content-Type': 'application/json',
+      },
+      body: json.encode([job.toJsonForPostRequest()]),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to create job');
+    }
+  }
+
+  Future<void> deleteJob(String playlistId) async {
+    final response = await http.delete(
+      Uri.parse('$backendUrl/process_job/$playlistId'),
+      headers: {
+        'Authorization': 'Bearer $_accessToken',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to delete job');
+    }
   }
 }

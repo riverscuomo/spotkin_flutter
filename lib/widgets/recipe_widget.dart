@@ -22,7 +22,7 @@ class RecipeWidget extends StatefulWidget {
 class _RecipeWidgetState extends State<RecipeWidget> {
   late List<IngredientRow> _ingredientRows;
   final SpotifyService spotifyService = getIt<SpotifyService>();
-  final StorageService storageService = getIt<StorageService>();
+  // final StorageService storageService = getIt<StorageService>();
 
   @override
   void initState() {

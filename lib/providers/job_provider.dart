@@ -1,15 +1,16 @@
 import 'package:flutter/foundation.dart';
-import 'package:spotkin_flutter/app_core.dart';
+import 'package:spotkin_flutter/services/backend_service.dart';
+import 'package:spotkin_flutter/models/job.dart';
 
 class JobProvider extends ChangeNotifier {
   List<Job> _jobs = [];
   bool _isLoading = false;
-  final StorageService _storageService;
+  final BackendService _backendService;
 
   List<Job> get jobs => _jobs;
   bool get isLoading => _isLoading;
 
-  JobProvider(this._storageService) {
+  JobProvider(this._backendService) {
     loadJobs();
   }
 
@@ -17,30 +18,59 @@ class JobProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    _jobs = _storageService.getJobs();
-    _isLoading = false;
-    notifyListeners();
+    try {
+      _jobs = await _backendService.getJobs();
+    } catch (e) {
+      print('Error loading jobs: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
-  void addJob(Job job) {
-    _jobs.add(job);
-    _storageService.saveJobs(_jobs);
-    notifyListeners();
+  Future<List<Map<String, dynamic>>> processJobs(List<int> indexes) async {
+    try {
+      final results = await _backendService.processJobs(_jobs, indexes);
+      await loadJobs(); // Reload jobs after processing
+      return results;
+    } catch (e) {
+      print('Error processing jobs: $e');
+      return [];
+    }
   }
 
-  void updateJob(int index, Job updatedJob) {
-    if (index >= 0 && index < _jobs.length) {
+  Future<void> updateJob(int index, Job updatedJob) async {
+    try {
+      await _backendService.updateJob(updatedJob);
       _jobs[index] = updatedJob;
-      _storageService.saveJobs(_jobs);
       notifyListeners();
+    } catch (e) {
+      print('Error updating job: $e');
     }
   }
 
-  void deleteJob(int index) {
-    if (index >= 0 && index < _jobs.length) {
-      _jobs.removeAt(index);
-      _storageService.saveJobs(_jobs);
-      notifyListeners();
+  Future<void> addJob(Job job) async {
+    try {
+      await _backendService.createJob(job);
+      await loadJobs(); // Reload jobs to get the newly created job
+    } catch (e) {
+      print('Error adding job: $e');
     }
+  }
+
+  Future<void> deleteJob(int index) async {
+    try {
+      await _backendService.deleteJob(_jobs[index].targetPlaylist.id!);
+      await loadJobs(); // Reload jobs to reflect the deletion
+    } catch (e) {
+      print('Error deleting job: $e');
+    }
+  }
+
+  Job? getJobByPlaylistId(String playlistId) {
+    return _jobs.firstWhere(
+      (job) => job.targetPlaylist.id == playlistId,
+      orElse: () => null as Job,
+    );
   }
 }

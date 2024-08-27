@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:spotkin_flutter/app_core.dart';
 import 'dart:html' as html;
 
@@ -36,20 +37,22 @@ class _AuthScreenState extends State<AuthScreen> {
     setState(() => _isLoading = true);
     try {
       print('AUTHSCREEN: Checking existing authentication...');
-      final accessToken = await spotifyService.retrieveAccessToken();
-      if (accessToken != null) {
+      final credentials = await spotifyService.retrieveCredentials();
+      if (credentials != null && credentials.accessToken != null) {
         print('AUTHSCREEN: Existing token found, verifying...');
-        if (await spotifyService.verifyToken(accessToken)) {
+        if (await spotifyService.verifyToken(credentials.accessToken!)) {
           print('AUTHSCREEN: Existing token is valid');
-          _navigateToHomeScreen();
+          _updateServicesAndNavigate(credentials.accessToken!);
           return;
         } else {
           print('AUTHSCREEN: Existing token is invalid, refreshing...');
           if (await spotifyService.refreshAccessToken()) {
             print('AUTHSCREEN: Token refreshed successfully');
-
-            _navigateToHomeScreen();
-            return;
+            final newCredentials = await spotifyService.retrieveCredentials();
+            if (newCredentials != null && newCredentials.accessToken != null) {
+              _updateServicesAndNavigate(newCredentials.accessToken!);
+              return;
+            }
           }
         }
       }
@@ -81,87 +84,53 @@ class _AuthScreenState extends State<AuthScreen> {
           'AUTHSCREEN: Exchanging auth code for token (Attempt $_authAttempts)...');
       await spotifyService.exchangeCodeForToken(code);
       print('AUTHSCREEN: Token exchange successful');
-      _navigateToHomeScreen();
+      final credentials = await spotifyService.retrieveCredentials();
+      if (credentials != null && credentials.accessToken != null) {
+        _updateServicesAndNavigate(credentials.accessToken!);
+      } else {
+        throw Exception('Failed to retrieve access token after exchange');
+      }
     } catch (e) {
       print('AUTHSCREEN: Error exchanging code for token: $e');
       _showErrorSnackBar('Failed to authenticate with Spotify');
     }
   }
 
-  Future<void> _navigateToHomeScreen() async {
-    print('AuthScreen: Navigating to Home Screen...');
-    try {
-      final credentials = await spotifyService.retrieveCredentials();
-      if (credentials == null || credentials.accessToken == null) {
-        throw Exception('No valid credentials available');
-      }
+  void _updateServicesAndNavigate(String accessToken) {
+    final backendService = Provider.of<BackendService>(context, listen: false);
+    backendService.updateAccessToken(accessToken);
 
-      final accessToken = credentials.accessToken!;
-      print(
-          'Navigating to Home Screen with access token: ${accessToken.substring(0, 10)}...');
+    final jobProvider = Provider.of<JobProvider>(context, listen: false);
+    jobProvider.loadJobs();
 
-      // Clear the URL parameters and remove trailing '?'
-      final uri = Uri.parse(html.window.location.href);
-      if (uri.hasQuery) {
-        var newUri = uri.removeFragment().replace(query: '');
-        var cleanUrl = newUri.toString();
-        if (cleanUrl.endsWith('?')) {
-          cleanUrl = cleanUrl.substring(0, cleanUrl.length - 1);
-        }
-        html.window.history.pushState(null, '', cleanUrl);
-      }
-
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => HomeScreen(
-            config: widget.config,
-            accessToken: accessToken,
-            backendUrl: widget.config['BACKEND_URL']!,
-          ),
-        ),
-      );
-    } catch (e) {
-      print('AuthScreen: Failed to navigate: $e');
-      _showErrorSnackBar('Authentication failed');
-      // Optionally, you might want to trigger a new login here
-      // _initiateSpotifyLogin();
-    }
+    _navigateToHomeScreen(accessToken);
   }
 
-  // void _navigateToHomeScreen() async {
-  //   print('authscreen: Navigating to Home Screen...');
-  //   final accessToken = await spotifyService
-  //       .retrieveCredentials()
-  //       .then((creds) => creds!.accessToken);
-  //   if (accessToken != null) {
-  //     print(
-  //         'Navigating to Home Screen with access token: ${accessToken.substring(0, 10)}...');
+  void _navigateToHomeScreen(String accessToken) {
+    print(
+        'Navigating to Home Screen with access token: ${accessToken.substring(0, 10)}...');
 
-  //     // Clear the URL parameters and remove trailing '?'
-  //     final uri = Uri.parse(html.window.location.href);
-  //     if (uri.hasQuery) {
-  //       var newUri = uri.removeFragment().replace(query: '');
-  //       var cleanUrl = newUri.toString();
-  //       if (cleanUrl.endsWith('?')) {
-  //         cleanUrl = cleanUrl.substring(0, cleanUrl.length - 1);
-  //       }
-  //       html.window.history.pushState(null, '', cleanUrl);
-  //     }
+    // Clear the URL parameters
+    final uri = Uri.parse(html.window.location.href);
+    if (uri.hasQuery) {
+      var newUri = uri.removeFragment().replace(query: '');
+      var cleanUrl = newUri.toString();
+      if (cleanUrl.endsWith('?')) {
+        cleanUrl = cleanUrl.substring(0, cleanUrl.length - 1);
+      }
+      html.window.history.pushState(null, '', cleanUrl);
+    }
 
-  //     Navigator.of(context).pushReplacement(
-  //       MaterialPageRoute(
-  //         builder: (context) => HomeScreen(
-  //           config: widget.config,
-  //           accessToken: accessToken,
-  //           backendUrl: widget.config['BACKEND_URL']!,
-  //         ),
-  //       ),
-  //     );
-  //   } else {
-  //     print('AUTHSCREEN: Failed to navigate: No access token available');
-  //     _showErrorSnackBar('Authentication failed');
-  //   }
-  // }
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => HomeScreen(
+          config: widget.config,
+          accessToken: accessToken,
+          backendUrl: widget.config['BACKEND_URL']!,
+        ),
+      ),
+    );
+  }
 
   void _initiateSpotifyLogin() {
     if (_authAttempts >= MAX_AUTH_ATTEMPTS) {
