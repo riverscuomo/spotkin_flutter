@@ -25,9 +25,9 @@ class TargetPlaylistWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<JobProvider>(
       builder: (context, jobProvider, child) {
-        if (jobProvider.jobs.isEmpty) {
-          return _buildEmptyState(context);
-        }
+        // if (jobProvider.jobs.isEmpty) {
+        //   return _buildEmptyState(context);
+        // }
 
         final job = jobProvider.jobs[index];
         final targetPlaylist = job.targetPlaylist;

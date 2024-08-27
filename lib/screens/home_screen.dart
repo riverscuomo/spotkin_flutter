@@ -64,6 +64,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void _initTabController() {
     final jobProvider = Provider.of<JobProvider>(context, listen: false);
     final jobs = jobProvider.jobs;
+    _isExpanded = jobs.isEmpty || jobs.any((job) => job.isNull);
     _showAddJobButton = jobs.isNotEmpty &&
         !jobs.any((job) => job.isNull) &&
         jobs.length < maxJobs;
