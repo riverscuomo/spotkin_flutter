@@ -1,8 +1,10 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'dart:html' as html;
+// import 'dart:html' as html;
 import 'package:spotify/spotify.dart';
+import 'package:spotkin_flutter/services/storage_service.dart';
 
 class SpotifyService {
   static const FlutterSecureStorage _secureStorage = FlutterSecureStorage();
@@ -157,6 +159,7 @@ class SpotifyService {
   }
 
   void initiateSpotifyLogin() {
+    final storageService = GetIt.I<StorageService>();
     final spotifyAuthUrl = Uri.https('accounts.spotify.com', '/authorize', {
       'client_id': clientId,
       'response_type': 'code',
@@ -170,7 +173,8 @@ class SpotifyService {
     print('Redirect URI: $redirectUri');
     print('Requested Scopes: $scope');
 
-    html.window.location.href = spotifyAuthUrl.toString();
+    // html.window.location.href = spotifyAuthUrl.toString();
+    storageService.storeAuthUrl(spotifyAuthUrl.toString());
   }
 
   // retrieve access token from secure storage

@@ -1,5 +1,6 @@
+// import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_web_plugins/flutter_web_plugins.dart';
+// import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:provider/provider.dart';
 import 'package:spotkin_flutter/app_core.dart';
 
@@ -9,7 +10,7 @@ import 'spotify_theme_data.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  setUrlStrategy(PathUrlStrategy());
+  // kIsWeb ? setUrlStrategy(PathUrlStrategy()) : null;
   Map<String, dynamic> config = await loadConfig();
 
   // Add checks for required config values
@@ -39,9 +40,7 @@ void main() async {
             scope: config['SPOTIFY_SCOPE']!,
           ),
         ),
-        Provider<StorageService>(
-          create: (_) => StorageService(),
-        ),
+
         Provider<BackendService>(
           create: (context) => BackendService(
             backendUrl: config['BACKEND_URL']!,
@@ -52,16 +51,6 @@ void main() async {
           create: (context) => JobProvider(
             context.read<BackendService>(),
           ),
-        ),
-        ChangeNotifierProxyProvider<StorageService, JobProvider>(
-          create: (context) => JobProvider(
-            context.read<BackendService>(),
-          ),
-          update: (context, storage, previous) =>
-              previous ??
-              JobProvider(
-                context.read<BackendService>(),
-              ),
         ),
       ],
       child: MyApp(config),

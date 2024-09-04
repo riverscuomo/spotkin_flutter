@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:spotkin_flutter/app_core.dart';
-import 'dart:html' as html;
+// import 'dart:html' as html;
 
 class AuthScreen extends StatefulWidget {
   final Map<String, dynamic> config;
@@ -91,6 +92,7 @@ class _AuthScreenState extends State<AuthScreen> {
   Future<void> _navigateToHomeScreen() async {
     print('AuthScreen: Navigating to Home Screen...');
     try {
+      final storageService = GetIt.I<StorageService>();
       final credentials = await spotifyService.retrieveCredentials();
       if (credentials == null || credentials.accessToken == null) {
         throw Exception('No valid credentials available');
@@ -100,16 +102,17 @@ class _AuthScreenState extends State<AuthScreen> {
       print(
           'Navigating to Home Screen with access token: ${accessToken.substring(0, 10)}...');
 
-      // Clear the URL parameters and remove trailing '?'
-      final uri = Uri.parse(html.window.location.href);
-      if (uri.hasQuery) {
-        var newUri = uri.removeFragment().replace(query: '');
-        var cleanUrl = newUri.toString();
-        if (cleanUrl.endsWith('?')) {
-          cleanUrl = cleanUrl.substring(0, cleanUrl.length - 1);
-        }
-        html.window.history.pushState(null, '', cleanUrl);
-      }
+      // // Clear the URL parameters and remove trailing '?'
+      // // final uri = Uri.parse(html.window.location.href);
+      // final uri = Uri.parse(storageService.retrieveAuthToken());
+      // if (uri.hasQuery) {
+      //   var newUri = uri.removeFragment().replace(query: '');
+      //   var cleanUrl = newUri.toString();
+      //   if (cleanUrl.endsWith('?')) {
+      //     cleanUrl = cleanUrl.substring(0, cleanUrl.length - 1);
+      //   }
+      //   html.window.history.pushState(null, '', cleanUrl);
+      // }
 
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
