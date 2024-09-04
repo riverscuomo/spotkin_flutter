@@ -12,7 +12,8 @@ class BackendService {
   BackendService({required this.backendUrl, required this.spotifyService});
 
   Future<List<Job>> getJobs() async {
-    final url = '$backendUrl/jobs/${await spotifyService.getUserId()}';
+    final userId = await spotifyService.getUserId();
+    final url = '$backendUrl/jobs/$userId';
     final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
@@ -35,6 +36,38 @@ class BackendService {
       return Job.fromJson(json.decode(response.body));
     } else {
       throw Exception('Failed to add job: ${response.statusCode}');
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> processJobs(
+      List<Job> jobs, List<int> indexes) async {
+    final userId = await spotifyService.getUserId();
+    final url = '$backendUrl/process_jobs/$userId';
+
+    final jobsToProcess = indexes.map((index) => jobs[index].id).toList();
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization':
+              'Bearer ${await spotifyService.retrieveAccessToken()}',
+        },
+        body: json.encode({
+          'job_ids': jobsToProcess,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> responseData = json.decode(response.body);
+        return responseData.cast<Map<String, dynamic>>();
+      } else {
+        throw Exception('Failed to process jobs: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error processing jobs: $e');
+      rethrow;
     }
   }
 

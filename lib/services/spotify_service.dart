@@ -15,6 +15,28 @@ class SpotifyService {
   final String redirectUri;
   final String scope;
 
+  String? _cachedUserId;
+  DateTime? _userIdCacheTime;
+  static const _userIdCacheDuration = Duration(hours: 1); // Cache for 1 hour
+
+  Future<String> getUserId() async {
+    if (_cachedUserId != null && _userIdCacheTime != null) {
+      if (DateTime.now().difference(_userIdCacheTime!) < _userIdCacheDuration) {
+        return _cachedUserId!;
+      }
+    }
+
+    try {
+      final me = await _spotify.me.get();
+      _cachedUserId = me.id;
+      _userIdCacheTime = DateTime.now();
+      return _cachedUserId ?? '';
+    } catch (e) {
+      print('Error getting user ID: $e');
+      rethrow;
+    }
+  }
+
   SpotifyService({
     required this.clientId,
     required this.clientSecret,

@@ -39,7 +39,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     super.initState();
     _verifyToken();
     _backendService = BackendService(
-      // accessToken: widget.accessToken,
       spotifyService: spotifyService,
       backendUrl: widget.backendUrl,
     );
@@ -49,7 +48,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    _tabController?.dispose();
+    _tabController.dispose();
     super.dispose();
   }
 
@@ -101,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               onPressed: () {
                 jobProvider.deleteJob(index);
                 _initTabController();
-                _tabController?.animateTo(0);
+                _tabController.animateTo(0);
                 Navigator.of(context).pop();
               },
               style: ElevatedButton.styleFrom(

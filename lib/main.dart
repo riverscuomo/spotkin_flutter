@@ -11,30 +11,56 @@ void main() async {
 
   setUrlStrategy(PathUrlStrategy());
   Map<String, dynamic> config = await loadConfig();
+
+  // Add checks for required config values
+  assert(config.containsKey('SPOTIFY_CLIENT_ID'),
+      'SPOTIFY_CLIENT_ID is missing from config');
+  assert(config.containsKey('SPOTIFY_CLIENT_SECRET'),
+      'SPOTIFY_CLIENT_SECRET is missing from config');
+  assert(config.containsKey('SPOTIFY_REDIRECT_URI'),
+      'SPOTIFY_REDIRECT_URI is missing from config');
+  assert(config.containsKey('SPOTIFY_SCOPE'),
+      'SPOTIFY_SCOPE is missing from config');
+  assert(
+      config.containsKey('BACKEND_URL'), 'BACKEND_URL is missing from config');
+
   setupServiceLocator(config: config);
 
   runApp(
     MultiProvider(
       providers: [
+        /// The order of providers is important, as some depend on others. You can't use a provider before it's created.
+        /// You can't put these in alphabetical order, for example, because `BackendService` depends on `SpotifyService`.
+        Provider<SpotifyService>(
+          create: (context) => SpotifyService(
+            clientId: config['SPOTIFY_CLIENT_ID']!,
+            clientSecret: config['SPOTIFY_CLIENT_SECRET']!,
+            redirectUri: config['SPOTIFY_REDIRECT_URI']!,
+            scope: config['SPOTIFY_SCOPE']!,
+          ),
+        ),
         Provider<StorageService>(
           create: (_) => StorageService(),
         ),
         Provider<BackendService>(
           create: (context) => BackendService(
-            backendUrl: config['backendUrl'],
+            backendUrl: config['BACKEND_URL']!,
             spotifyService: context.read<SpotifyService>(),
+          ),
+        ),
+        Provider<JobProvider>(
+          create: (context) => JobProvider(
+            context.read<BackendService>(),
           ),
         ),
         ChangeNotifierProxyProvider<StorageService, JobProvider>(
           create: (context) => JobProvider(
             context.read<BackendService>(),
-            context.read<StorageService>(),
           ),
           update: (context, storage, previous) =>
               previous ??
               JobProvider(
                 context.read<BackendService>(),
-                context.read<StorageService>(),
               ),
         ),
       ],
