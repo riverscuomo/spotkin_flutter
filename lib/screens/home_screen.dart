@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:spotify/spotify.dart';
 import 'package:spotkin_flutter/app_core.dart';
 import '../widgets/target_playlist_widget.dart';
+import 'package:uuid/uuid.dart ';
 
 const maxJobs = 2;
 
@@ -38,7 +39,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     super.initState();
     _verifyToken();
     _backendService = BackendService(
-      accessToken: widget.accessToken,
+      // accessToken: widget.accessToken,
+      spotifyService: spotifyService,
       backendUrl: widget.backendUrl,
     );
 
@@ -254,6 +256,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         if (jobProvider.jobs.isEmpty) {
           final newJob = Job(
             targetPlaylist: selectedPlaylist,
+            id: const Uuid().v4(),
           );
           _addNewJob(newJob);
         } else {

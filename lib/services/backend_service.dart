@@ -1,9 +1,69 @@
-// import 'dart:async';
-// import 'dart:convert';
-// import 'package:get_it/get_it.dart';
-// import 'package:http/http.dart' as http;
-// import 'package:spotify/spotify.dart';
-// import 'package:spotkin_flutter/app_core.dart';
+import 'dart:async';
+import 'dart:convert';
+import 'package:get_it/get_it.dart';
+import 'package:http/http.dart' as http;
+import 'package:spotify/spotify.dart';
+import 'package:spotkin_flutter/app_core.dart';
+
+class BackendService {
+  final String backendUrl;
+  final SpotifyService spotifyService;
+
+  BackendService({required this.backendUrl, required this.spotifyService});
+
+  Future<List<Job>> getJobs() async {
+    final url = '$backendUrl/jobs/${await spotifyService.getUserId()}';
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> responseData = json.decode(response.body);
+      return responseData.map((data) => Job.fromJson(data)).toList();
+    } else {
+      throw Exception('Failed to load jobs: ${response.statusCode}');
+    }
+  }
+
+  Future<Job> addJob(Job job) async {
+    final url = '$backendUrl/jobs';
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(job.toJson()),
+    );
+
+    if (response.statusCode == 201) {
+      return Job.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to add job: ${response.statusCode}');
+    }
+  }
+
+  Future<Job> updateJob(Job job) async {
+    final url = '$backendUrl/jobs/${job.id}';
+    final response = await http.put(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(job.toJson()),
+    );
+
+    if (response.statusCode == 200) {
+      return Job.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to update job: ${response.statusCode}');
+    }
+  }
+
+  Future<void> deleteJob(String jobId) async {
+    final url = '$backendUrl/jobs/$jobId';
+    final response = await http.delete(Uri.parse(url));
+
+    if (response.statusCode != 204) {
+      throw Exception('Failed to delete job: ${response.statusCode}');
+    }
+  }
+}
+
+
 
 // class BackendService {
 //   final String accessToken;
@@ -115,73 +175,85 @@
 //   }
 // }
 
-import 'dart:async';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:spotkin_flutter/app_core.dart';
+// import 'dart:async';
+// import 'dart:convert';
+// import 'package:http/http.dart' as http;
+// import 'package:spotkin_flutter/app_core.dart';
 
-class BackendService {
-  final String backendUrl;
-  final SpotifyService spotifyService;
+// class BackendService {
+//   final String backendUrl;
+//   final SpotifyService spotifyService;
 
-  BackendService({required this.backendUrl, required this.spotifyService});
+//   BackendService({required this.backendUrl, required this.spotifyService});
 
-  Future<List<Map<String, dynamic>>> processJobs(
-      List<Job> jobs, List<int> indexes) async {
-    List<Map<String, dynamic>> results = [];
+//   Future<List<Job>> getJobs() async {
+//     final url = '$backendUrl/jobs/$userId';
+//     final response = await http.get(Uri.parse(url));
 
-    for (final index in indexes) {
-      try {
-        if (index >= jobs.length) {
-          throw RangeError(
-              'Index $index is out of range for jobs list of length ${jobs.length}');
-        }
+//     if (response.statusCode == 200) {
+//       final List<dynamic> responseData = json.decode(response.body);
+//       return responseData.map((data) => Job.fromJson(data)).toList();
+//     } else {
+//       throw Exception('Failed to load jobs: ${response.statusCode}');
+//     }
+//   }
 
-        final job = jobs[index];
-        final url = '$backendUrl/process_job/${job.id}';
+//   Future<List<Map<String, dynamic>>> processJobs(
+//       List<Job> jobs, List<int> indexes) async {
+//     List<Map<String, dynamic>> results = [];
 
-        final credentials = await spotifyService.retrieveCredentials();
-        if (credentials == null ||
-            credentials.accessToken == null ||
-            credentials.refreshToken == null) {
-          throw Exception('Spotify credentials are missing or incomplete');
-        }
+//     for (final index in indexes) {
+//       try {
+//         if (index >= jobs.length) {
+//           throw RangeError(
+//               'Index $index is out of range for jobs list of length ${jobs.length}');
+//         }
 
-        final response = await http.post(
-          Uri.parse(url),
-          headers: {
-            'Authorization': 'Bearer ${credentials.accessToken}',
-            'Refresh-Token': credentials.refreshToken!,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-        ).timeout(const Duration(minutes: 5));
+//         final job = jobs[index];
+//         final url = '$backendUrl/process_job/${job.id}';
 
-        if (response.statusCode == 200) {
-          final responseData = json.decode(response.body);
-          results.add({
-            'name': job.targetPlaylist.name,
-            'status': 'Success',
-            'result': responseData['message'],
-          });
-        } else {
-          results.add({
-            'name': job.targetPlaylist.name,
-            'status': 'Error',
-            'result': 'Status ${response.statusCode}: ${response.body}',
-          });
-        }
-      } catch (e) {
-        results.add({
-          'name': index < jobs.length
-              ? jobs[index].targetPlaylist.name
-              : 'Unknown job',
-          'status': 'Error',
-          'result': e.toString(),
-        });
-      }
-    }
+//         final credentials = await spotifyService.retrieveCredentials();
+//         if (credentials == null ||
+//             credentials.accessToken == null ||
+//             credentials.refreshToken == null) {
+//           throw Exception('Spotify credentials are missing or incomplete');
+//         }
 
-    return results;
-  }
-}
+//         final response = await http.post(
+//           Uri.parse(url),
+//           headers: {
+//             'Authorization': 'Bearer ${credentials.accessToken}',
+//             'Refresh-Token': credentials.refreshToken!,
+//             'Content-Type': 'application/json',
+//             'Accept': 'application/json',
+//           },
+//         ).timeout(const Duration(minutes: 5));
+
+//         if (response.statusCode == 200) {
+//           final responseData = json.decode(response.body);
+//           results.add({
+//             'name': job.targetPlaylist.name,
+//             'status': 'Success',
+//             'result': responseData['message'],
+//           });
+//         } else {
+//           results.add({
+//             'name': job.targetPlaylist.name,
+//             'status': 'Error',
+//             'result': 'Status ${response.statusCode}: ${response.body}',
+//           });
+//         }
+//       } catch (e) {
+//         results.add({
+//           'name': index < jobs.length
+//               ? jobs[index].targetPlaylist.name
+//               : 'Unknown job',
+//           'status': 'Error',
+//           'result': e.toString(),
+//         });
+//       }
+//     }
+
+//     return results;
+//   }
+// }

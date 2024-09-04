@@ -19,10 +19,23 @@ void main() async {
         Provider<StorageService>(
           create: (_) => StorageService(),
         ),
+        Provider<BackendService>(
+          create: (context) => BackendService(
+            backendUrl: config['backendUrl'],
+            spotifyService: context.read<SpotifyService>(),
+          ),
+        ),
         ChangeNotifierProxyProvider<StorageService, JobProvider>(
-          create: (context) => JobProvider(context.read<StorageService>()),
+          create: (context) => JobProvider(
+            context.read<BackendService>(),
+            context.read<StorageService>(),
+          ),
           update: (context, storage, previous) =>
-              previous ?? JobProvider(storage),
+              previous ??
+              JobProvider(
+                context.read<BackendService>(),
+                context.read<StorageService>(),
+              ),
         ),
       ],
       child: MyApp(config),
