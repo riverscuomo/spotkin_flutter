@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:spotify/spotify.dart';
 import 'package:spotkin_flutter/app_core.dart';
 import '../widgets/target_playlist_widget.dart';
-import 'package:uuid/uuid.dart ';
+import 'package:uuid/uuid.dart';
 
 const maxJobs = 2;
 
