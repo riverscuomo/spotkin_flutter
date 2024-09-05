@@ -105,15 +105,10 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
   void _initiateSpotifyLogin() {
-    if (_authAttempts >= MAX_AUTH_ATTEMPTS) {
-      _showErrorSnackBar(
-          'Too many authentication attempts. Please try again later.');
-      return;
-    }
+    final backendUrl = widget.config['BACKEND_URL']!;
+    final loginUrl = '$backendUrl/spotify-login';
 
-    print(
-        'AUTHSCREEN: Initiating Spotify login (Attempt ${_authAttempts + 1})...');
-    spotifyService.initiateSpotifyLogin();
+    Utils.myLaunch(loginUrl);
   }
 
   void _showErrorSnackBar(String message) {
@@ -136,7 +131,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     child: Column(
                       children: [
                         const Text('Login with Spotify'),
-                        Text(widget.config['SPOTIFY_REDIRECT_URI']!),
+                        Text(widget.config['BACKEND_URL']!),
                       ],
                     ),
                   ),
