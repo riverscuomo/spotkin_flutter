@@ -1,5 +1,6 @@
+// import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_web_plugins/flutter_web_plugins.dart';
+// import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:provider/provider.dart';
 import 'package:spotkin_flutter/app_core.dart';
 
@@ -9,20 +10,47 @@ import 'spotify_theme_data.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  setUrlStrategy(PathUrlStrategy());
+  // kIsWeb ? setUrlStrategy(PathUrlStrategy()) : null;
   Map<String, dynamic> config = await loadConfig();
+
+  // Add checks for required config values
+  assert(config.containsKey('SPOTIFY_CLIENT_ID'),
+      'SPOTIFY_CLIENT_ID is missing from config');
+  assert(config.containsKey('SPOTIFY_CLIENT_SECRET'),
+      'SPOTIFY_CLIENT_SECRET is missing from config');
+  assert(config.containsKey('SPOTIFY_REDIRECT_URI'),
+      'SPOTIFY_REDIRECT_URI is missing from config');
+  assert(config.containsKey('SPOTIFY_SCOPE'),
+      'SPOTIFY_SCOPE is missing from config');
+  assert(
+      config.containsKey('BACKEND_URL'), 'BACKEND_URL is missing from config');
+
   setupServiceLocator(config: config);
 
   runApp(
     MultiProvider(
       providers: [
-        Provider<StorageService>(
-          create: (_) => StorageService(),
+        /// The order of providers is important, as some depend on others. You can't use a provider before it's created.
+        /// You can't put these in alphabetical order, for example, because `BackendService` depends on `SpotifyService`.
+        Provider<SpotifyService>(
+          create: (context) => SpotifyService(
+            clientId: config['SPOTIFY_CLIENT_ID']!,
+            clientSecret: config['SPOTIFY_CLIENT_SECRET']!,
+            redirectUri: config['SPOTIFY_REDIRECT_URI']!,
+            scope: config['SPOTIFY_SCOPE']!,
+          ),
         ),
-        ChangeNotifierProxyProvider<StorageService, JobProvider>(
-          create: (context) => JobProvider(context.read<StorageService>()),
-          update: (context, storage, previous) =>
-              previous ?? JobProvider(storage),
+
+        Provider<BackendService>(
+          create: (context) => BackendService(
+            backendUrl: config['BACKEND_URL']!,
+            spotifyService: context.read<SpotifyService>(),
+          ),
+        ),
+        Provider<JobProvider>(
+          create: (context) => JobProvider(
+            context.read<BackendService>(),
+          ),
         ),
       ],
       child: MyApp(config),

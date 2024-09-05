@@ -4,6 +4,7 @@ import 'package:spotkin_flutter/models/ingredient.dart';
 import 'package:spotify/spotify.dart';
 
 class Job {
+  final String id;
   final PlaylistSimple targetPlaylist;
   final String description;
   final bool banSkits;
@@ -28,6 +29,7 @@ class Job {
   final int? maxAcousticness;
 
   Job({
+    required this.id,
     required this.targetPlaylist,
     this.description = '',
     this.banSkits = false,
@@ -60,6 +62,7 @@ class Job {
 
   factory Job.fromJson(Map<String, dynamic> json) {
     return Job(
+      id: json['id'],
       targetPlaylist: PlaylistSimple.fromJson(
           json['target_playlist'] as Map<String, dynamic>),
       description: json['description'] ?? '',
@@ -96,6 +99,7 @@ class Job {
 
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'target_playlist': targetPlaylist.toJson(),
       'description': description,
       'scheduled_time': scheduledTime,
@@ -169,9 +173,10 @@ class Job {
     return json;
   }
 
-  Job.empty() : this(targetPlaylist: PlaylistSimple());
+  Job.empty() : this(targetPlaylist: PlaylistSimple(), id: '');
 
   Job copyWith({
+    String? id,
     PlaylistSimple? targetPlaylist,
     String? description,
     int? scheduledTime,
@@ -194,6 +199,7 @@ class Job {
     int? maxAcousticness,
   }) {
     return Job(
+      id: id ?? this.id,
       targetPlaylist: targetPlaylist ?? this.targetPlaylist,
       description: description ?? this.description,
       scheduledTime: scheduledTime ?? this.scheduledTime,
