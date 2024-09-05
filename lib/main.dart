@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:spotkin_flutter/app_core.dart';
-
 import 'helpers/load_config.dart';
 import 'spotify_theme_data.dart';
 
@@ -27,25 +26,9 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        Provider<SpotifyService>(
-          create: (context) => SpotifyService(
-            clientId: config['SPOTIFY_CLIENT_ID']!,
-            clientSecret: config['SPOTIFY_CLIENT_SECRET']!,
-            redirectUri: config['SPOTIFY_REDIRECT_URI']!,
-            scope: config['SPOTIFY_SCOPE']!,
-          ),
-        ),
-        Provider<BackendService>(
-          create: (context) => BackendService(
-            backendUrl: config['BACKEND_URL']!,
-            spotifyService: context.read<SpotifyService>(),
-          ),
-        ),
-        Provider<JobProvider>(
-          create: (context) => JobProvider(
-            context.read<BackendService>(),
-          ),
-        ),
+        ChangeNotifierProvider(
+            create: (_) =>
+                JobProvider()), // Ensure this is ChangeNotifierProvider
       ],
       child: MyApp(config),
     ),
@@ -68,32 +51,18 @@ class MyApp extends StatelessWidget {
           color: Colors.black,
           child: Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 800),
+              constraints: const BoxConstraints(maxWidth: 1000),
               child: child!,
             ),
           ),
         );
       },
+      // Initial route should just navigate to the auth screen without URL parsing
       initialRoute: '/',
       onGenerateRoute: (settings) {
-        final uri = Uri.parse(settings.name ?? '/');
-        if (uri.path == '/') {
-          if (uri.queryParameters.containsKey('access_token') ||
-              uri.queryParameters.containsKey('error')) {
-            // This is a callback from Spotify
-            return MaterialPageRoute(
-              builder: (context) => AuthScreen(config: config),
-              settings: settings,
-            );
-          } else {
-            // Normal root route
-            return MaterialPageRoute(
-              builder: (context) => AuthScreen(config: config),
-            );
-          }
-        }
-        // Handle other routes here if needed
-        return null;
+        return MaterialPageRoute(
+          builder: (context) => AuthScreen(config: config),
+        );
       },
     );
   }

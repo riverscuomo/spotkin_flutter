@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 import 'package:spotify/spotify.dart';
 import 'package:spotkin_flutter/app_core.dart';
@@ -10,12 +11,9 @@ const maxJobs = 2;
 class HomeScreen extends StatefulWidget {
   final Map<String, dynamic> config;
 
-  final String backendUrl;
-
   const HomeScreen({
     Key? key,
     required this.config,
-    required this.backendUrl,
   }) : super(key: key);
 
   @override
@@ -23,7 +21,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
-  late BackendService _backendService;
+  final BackendService _backendService = getIt<BackendService>();
   final SpotifyService spotifyService = getIt<SpotifyService>();
   late TabController _tabController;
 
@@ -36,13 +34,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _verifyToken();
-    _backendService = BackendService(
-      spotifyService: spotifyService,
-      backendUrl: widget.backendUrl,
-    );
+    _verifyToken(); // You can keep the token verification in initState
+  }
 
-    _initTabController();
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _initTabController();
+    });
   }
 
   @override
@@ -63,6 +63,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   void _initTabController() {
     final jobProvider = Provider.of<JobProvider>(context, listen: false);
+    if (jobProvider == null) {
+      print("JobProvider is null");
+      return;
+    }
     final jobs = jobProvider.jobs;
     _showAddJobButton = jobs.isNotEmpty &&
         !jobs.any((job) => job.isNull) &&
@@ -305,16 +309,23 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Consumer<JobProvider>(
       builder: (context, jobProvider, child) {
+        if (jobProvider.isLoading) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
         final jobs = jobProvider.jobs;
         final jobsIterable =
             jobs.isNotEmpty ? jobs.asMap().entries : [MapEntry(0, Job.empty())];
+
         // Ensure tab controller is up to date
         _updateTabController();
+
         return Scaffold(
           backgroundColor: Colors.black,
           appBar: AppBar(
             title: const Text('Spotkin'),
-            titleTextStyle: Theme.of(context).textTheme.titleLarge,
             automaticallyImplyLeading: false,
             actions: const [
               InfoButton(),
@@ -329,25 +340,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   SliverAppBar(
                     pinned: true,
                     floating: true,
-                    expandedHeight: 0,
                     bottom: TabBar(
                       isScrollable: true,
-                      tabAlignment: TabAlignment.start,
-                      labelStyle: Theme.of(context).textTheme.labelMedium,
                       controller: _tabController,
-                      onTap: (index) {
-                        if (index == jobsIterable.length && _showAddJobButton) {
-                          _tabController.animateTo(jobsIterable.length);
-                          _addNewJob(Job.empty());
-                        }
-                      },
                       tabs: [
                         ...jobsIterable.map((entry) {
                           return Tab(
                             child: Text(
-                              entry.value.targetPlaylist.name ?? 'New job',
-                              style: Theme.of(context).textTheme.labelMedium,
-                            ),
+                                entry.value.targetPlaylist.name ?? 'New job'),
                           );
                         }),
                         if (_showAddJobButton) const Tab(icon: Icon(Icons.add))
@@ -366,8 +366,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       child: Column(
                         children: [
                           TargetPlaylistWidget(
-                            // targetPlaylist: job.targetPlaylist,
-                            // job: job,
                             index: jobEntry.key,
                             isProcessing: isProcessing,
                             processJob: _processJob,
@@ -393,14 +391,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           const SizedBox(height: 15),
                           ElevatedButton(
                             onPressed: () {
-                              _tabController?.animateTo(jobsIterable.length);
                               _addNewJob(Job.empty());
                             },
                             child: const Text('Add new job'),
                           ),
                         ],
                       ),
-                    )
+                    ),
                 ],
               ),
             ),

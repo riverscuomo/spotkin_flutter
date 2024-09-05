@@ -4,12 +4,12 @@ import 'package:spotkin_flutter/app_core.dart';
 class JobProvider extends ChangeNotifier {
   List<Job> _jobs = [];
   bool _isLoading = false;
-  final BackendService _backendService;
+  final _backendService = getIt<BackendService>();
 
   List<Job> get jobs => _jobs;
   bool get isLoading => _isLoading;
 
-  JobProvider(this._backendService) {
+  JobProvider() {
     loadJobs();
   }
 

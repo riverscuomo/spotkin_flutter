@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-// import 'package:spotify/spotify.dart' hide Image;
 import 'package:spotkin_flutter/app_core.dart';
 import 'package:spotkin_flutter/widgets/update_button.dart';
 
@@ -22,34 +21,34 @@ class TargetPlaylistWidget extends StatelessWidget {
     required this.onExpandChanged,
   }) : super(key: key);
 
-  Widget _buildEmptyState(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.playlist_add, size: 64, color: Colors.grey),
-            const SizedBox(height: 16),
-            Text(
-              'No jobs created yet',
-              style: Theme.of(context).textTheme.headline6,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Create your first job to get started',
-              style: Theme.of(context).textTheme.subtitle1,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => buildTargetPlaylistSelectionOptions(0),
-              child: const Text('Create First Job'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  // Widget _buildEmptyState(BuildContext context) {
+  //   return Container(
+  //     padding: const EdgeInsets.all(16),
+  //     child: Center(
+  //       child: Column(
+  //         mainAxisAlignment: MainAxisAlignment.center,
+  //         children: [
+  //           const Icon(Icons.playlist_add, size: 64, color: Colors.grey),
+  //           const SizedBox(height: 16),
+  //           Text(
+  //             'No jobs created yet',
+  //             style: Theme.of(context).textTheme.headline6,
+  //           ),
+  //           const SizedBox(height: 8),
+  //           Text(
+  //             'Create your first job to get started',
+  //             style: Theme.of(context).textTheme.subtitle1,
+  //           ),
+  //           const SizedBox(height: 16),
+  //           ElevatedButton(
+  //             onPressed: () => buildTargetPlaylistSelectionOptions(0),
+  //             child: const Text('Create First Job'),
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget _buildErrorState(BuildContext context) {
     return Container(
@@ -67,9 +66,9 @@ class TargetPlaylistWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<JobProvider>(
       builder: (context, jobProvider, child) {
-        if (jobProvider.jobs.isEmpty) {
-          return _buildEmptyState(context);
-        }
+        // if (jobProvider.jobs.isEmpty) {
+        //   return _buildEmptyState(context);
+        // }
 
         if (index >= jobProvider.jobs.length) {
           return _buildErrorState(context);
