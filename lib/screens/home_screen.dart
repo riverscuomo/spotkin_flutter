@@ -9,13 +9,12 @@ const maxJobs = 2;
 
 class HomeScreen extends StatefulWidget {
   final Map<String, dynamic> config;
-  final String accessToken;
+
   final String backendUrl;
 
   const HomeScreen({
     Key? key,
     required this.config,
-    required this.accessToken,
     required this.backendUrl,
   }) : super(key: key);
 

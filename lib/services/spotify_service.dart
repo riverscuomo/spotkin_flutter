@@ -37,6 +37,17 @@ class SpotifyService {
     }
   }
 
+  Future<void> setAccessToken(String accessToken) async {
+    await _secureStorage.write(key: _accessTokenKey, value: accessToken);
+    final credentials = SpotifyApiCredentials(
+      clientId,
+      clientSecret,
+      accessToken: accessToken,
+      scopes: scope.split(' '),
+    );
+    _updateSpotifyInstance(credentials);
+  }
+
   void _updateSpotifyInstance(SpotifyApiCredentials credentials) {
     _spotify = SpotifyApi(credentials);
   }

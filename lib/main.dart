@@ -1,6 +1,4 @@
-// import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-// import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:provider/provider.dart';
 import 'package:spotkin_flutter/app_core.dart';
 
@@ -10,7 +8,6 @@ import 'spotify_theme_data.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // kIsWeb ? setUrlStrategy(PathUrlStrategy()) : null;
   Map<String, dynamic> config = await loadConfig();
 
   // Add checks for required config values
@@ -30,8 +27,6 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        /// The order of providers is important, as some depend on others. You can't use a provider before it's created.
-        /// You can't put these in alphabetical order, for example, because `BackendService` depends on `SpotifyService`.
         Provider<SpotifyService>(
           create: (context) => SpotifyService(
             clientId: config['SPOTIFY_CLIENT_ID']!,
@@ -40,7 +35,6 @@ void main() async {
             scope: config['SPOTIFY_SCOPE']!,
           ),
         ),
-
         Provider<BackendService>(
           create: (context) => BackendService(
             backendUrl: config['BACKEND_URL']!,
@@ -80,36 +74,25 @@ class MyApp extends StatelessWidget {
           ),
         );
       },
+      initialRoute: '/',
       onGenerateRoute: (settings) {
-        if (settings.name == '/') {
-          return MaterialPageRoute(
-            builder: (context) => AuthScreen(config: config),
-          );
-        }
-        // Handle Spotify callback
-        if (settings.name!.startsWith('/?')) {
-          final uri = Uri.parse(settings.name!);
-          final code = uri.queryParameters['code'];
-          final error = uri.queryParameters['error'];
-
-          if (code != null) {
-            print('Received Spotify callback with authorization code: $code');
+        final uri = Uri.parse(settings.name ?? '/');
+        if (uri.path == '/') {
+          if (uri.queryParameters.containsKey('access_token') ||
+              uri.queryParameters.containsKey('error')) {
+            // This is a callback from Spotify
             return MaterialPageRoute(
-              builder: (context) => AuthScreen(
-                config: config,
-                initialAuthCode: code,
-              ),
+              builder: (context) => AuthScreen(config: config),
+              settings: settings,
             );
-          } else if (error != null) {
-            print('Received Spotify callback with error: $error');
+          } else {
+            // Normal root route
             return MaterialPageRoute(
-              builder: (context) => AuthScreen(
-                config: config,
-                initialError: error,
-              ),
+              builder: (context) => AuthScreen(config: config),
             );
           }
         }
+        // Handle other routes here if needed
         return null;
       },
     );
