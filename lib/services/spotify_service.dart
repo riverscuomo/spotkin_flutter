@@ -118,16 +118,16 @@ class SpotifyService {
     _updateSpotifyInstance(credentials);
   }
 
-  void initiateSpotifyLogin() {
-    final storageService = GetIt.I<StorageService>();
-    final spotifyAuthUrl = Uri.https('accounts.spotify.com', '/authorize', {
-      'client_id': clientId,
-      'response_type': 'code',
-      'redirect_uri': redirectUri,
-      'scope': scope,
-    });
-    storageService.storeAuthUrl(spotifyAuthUrl.toString());
-  }
+  // void initiateSpotifyLogin() {
+  //   final storageService = GetIt.I<StorageService>();
+  //   final spotifyAuthUrl = Uri.https('accounts.spotify.com', '/authorize', {
+  //     'client_id': clientId,
+  //     'response_type': 'code',
+  //     'redirect_uri': redirectUri,
+  //     'scope': scope,
+  //   });
+  //   storageService.storeAuthUrl(spotifyAuthUrl.toString());
+  // }
 
   Future<SpotifyApiCredentials?> retrieveCredentials() async {
     final accessToken = await _secureStorage.read(key: _accessTokenKey);
@@ -289,33 +289,3 @@ class SpotifyService {
     }
   }
 }
-
-
-  //   int attempts = 0;
-  //   while (true) {
-  //     try {
-  //       await _ensureAuthenticated();
-  //       return await operation();
-  //     } on SpotifyException catch (e) {
-  //       print('Spotify API error: ${e.message}, Status code: ${e.status}');
-  //       if (e.status == 401 && attempts < maxRetries) {
-  //         print(
-  //             'SPOTIFY SERVICE: Token might be expired. Attempting to refresh... (Attempt ${attempts + 1})');
-  //         try {
-  //           await refreshAccessToken();
-  //           attempts++;
-  //         } catch (refreshError) {
-  //           print('Error refreshing token: $refreshError');
-  //           print('Attempting full re-authentication...');
-  //           initiateSpotifyLogin();
-  //           throw Exception('Re-authentication required');
-  //         }
-  //       } else {
-  //         rethrow;
-  //       }
-  //     } catch (e) {
-  //       print('Error in operation: $e');
-  //       rethrow;
-  //     }
-  //   }
-  // }

@@ -5,11 +5,11 @@ import 'package:spotkin_flutter/app_core.dart';
 
 class BackendService {
   final String backendUrl;
-  final SpotifyService spotifyService;
 
-  BackendService({required this.backendUrl, required this.spotifyService});
+  BackendService({required this.backendUrl});
 
   Future<List<Job>> getJobs() async {
+    final spotifyService = getIt<SpotifyService>();
     final userId = await spotifyService.getUserId();
     final url = '$backendUrl/jobs/$userId';
     final response = await http.get(
@@ -26,7 +26,10 @@ class BackendService {
   }
 
   Future<Job> addJob(Job job) async {
-    final url = '$backendUrl/jobs';
+    final spotifyService = getIt<SpotifyService>();
+    final userId = await spotifyService.getUserId();
+    final url = '$backendUrl/jobs/$userId'; // Add the userId to the URL
+
     final response = await http.post(
       Uri.parse(url),
       headers: await _getAuthHeaders(),
@@ -42,6 +45,7 @@ class BackendService {
 
   Future<List<Map<String, dynamic>>> processJobs(
       List<Job> jobs, List<int> indexes) async {
+    final spotifyService = getIt<SpotifyService>();
     final userId = await spotifyService.getUserId();
     final url = '$backendUrl/process_jobs/$userId';
 
@@ -96,6 +100,7 @@ class BackendService {
   }
 
   Future<Map<String, String>> _getAuthHeaders() async {
+    final spotifyService = getIt<SpotifyService>();
     final accessToken = await spotifyService.retrieveAccessToken();
     return {
       'Authorization': 'Bearer $accessToken',

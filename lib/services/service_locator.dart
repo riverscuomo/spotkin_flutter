@@ -13,4 +13,8 @@ void setupServiceLocator({required Map<String, dynamic> config}) {
       ));
 
   getIt.registerLazySingleton<StorageService>(() => StorageService());
+
+  getIt.registerLazySingleton<BackendService>(() => BackendService(
+        backendUrl: config['BACKEND_URL']!,
+      ));
 }

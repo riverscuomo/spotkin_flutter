@@ -1,6 +1,5 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
+import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:spotkin_flutter/app_core.dart';
 
 class AuthScreen extends StatefulWidget {
@@ -13,87 +12,64 @@ class AuthScreen extends StatefulWidget {
 }
 
 class _AuthScreenState extends State<AuthScreen> {
-  late final SpotifyService spotifyService;
-  bool _isLoading = true;
-  int _authAttempts = 0;
-  static const int MAX_AUTH_ATTEMPTS = 3;
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    spotifyService = SpotifyService(
-      clientId: widget.config['SPOTIFY_CLIENT_ID']!,
-      clientSecret: widget.config['SPOTIFY_CLIENT_SECRET']!,
-      redirectUri: widget.config['SPOTIFY_REDIRECT_URI']!,
-      scope: widget.config['SPOTIFY_SCOPE']!,
-    );
-
-    _checkExistingAuth();
+    // Automatically initiate login flow on screen load
+    _initiateSpotifyLogin();
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _handleIncomingLink();
-  }
-
-  Future<void> _checkExistingAuth() async {
+  Future<void> _initiateSpotifyLogin() async {
     setState(() => _isLoading = true);
+
+    // 1. Build the Spotify OAuth URL
+    final authUrl = Uri.https('accounts.spotify.com', '/authorize', {
+      'client_id': widget.config['SPOTIFY_CLIENT_ID'],
+      'response_type': 'token', // Use 'code' if using authorization code flow
+      'redirect_uri':
+          'http://localhost:8888/auth.html', // Your registered redirect URI
+      'scope': widget.config['SPOTIFY_SCOPE'],
+    });
+
     try {
-      print('AUTHSCREEN: Checking existing authentication...');
-      if (await spotifyService.checkAuthentication()) {
-        print('AUTHSCREEN: Existing authentication is valid');
-        _navigateToHomeScreen();
-        return;
+      // 2. Start the OAuth process using flutter_web_auth_2
+      final result = await FlutterWebAuth2.authenticate(
+        url: authUrl.toString(),
+        callbackUrlScheme: 'http', // The scheme used in your redirect URI
+      );
+
+      // 3. Extract the access token from the result
+      final fragment = Uri.parse(result).fragment;
+      final accessToken = Uri.splitQueryString(fragment)['access_token'];
+
+      if (accessToken != null) {
+        print('Access token: $accessToken');
+        _handleAccessToken(accessToken); // Handle the access token
+      } else {
+        print('Failed to extract access token');
       }
     } catch (e) {
-      print('AUTHSCREEN: Error checking existing auth: $e');
-    }
-    setState(() => _isLoading = false);
-  }
-
-  void _handleIncomingLink() {
-    final uri = Uri.parse(ModalRoute.of(context)!.settings.name ?? '');
-    if (uri.queryParameters.containsKey('access_token')) {
-      final accessToken = uri.queryParameters['access_token']!;
-      _handleAccessToken(accessToken);
-    } else if (uri.queryParameters.containsKey('error')) {
-      _showErrorSnackBar(
-          'Authentication failed: ${uri.queryParameters['error']}');
+      print('Error during Spotify login: $e');
+      _showErrorSnackBar('Failed to login with Spotify');
+    } finally {
+      setState(() => _isLoading = false);
     }
   }
 
   Future<void> _handleAccessToken(String accessToken) async {
-    try {
-      await spotifyService.setAccessToken(accessToken);
-      _navigateToHomeScreen();
-    } catch (e) {
-      print('Error handling access token: $e');
-      _showErrorSnackBar('Failed to set access token');
-    }
-  }
-
-  Future<void> _navigateToHomeScreen() async {
+    // Handle storing the access token and navigate to the home screen
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => HomeScreen(
-          config: widget.config,
-          backendUrl: widget.config['BACKEND_URL']!,
-        ),
+        builder: (context) => HomeScreen(config: widget.config),
       ),
     );
   }
 
-  void _initiateSpotifyLogin() {
-    final backendUrl = widget.config['BACKEND_URL']!;
-    final loginUrl = '$backendUrl/spotify-login';
-    Utils.myLaunch(loginUrl);
-  }
-
   void _showErrorSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -102,17 +78,9 @@ class _AuthScreenState extends State<AuthScreen> {
       body: Center(
         child: _isLoading
             ? CircularProgressIndicator()
-            : Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: _initiateSpotifyLogin,
-                    child: Text('Login with Spotify'),
-                  ),
-                  if (_authAttempts > 0)
-                    Text(
-                        'Authentication attempts: $_authAttempts/${MAX_AUTH_ATTEMPTS}'),
-                ],
+            : ElevatedButton(
+                onPressed: _initiateSpotifyLogin,
+                child: const Text('Login with Spotify'),
               ),
       ),
     );
