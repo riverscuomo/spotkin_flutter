@@ -21,7 +21,7 @@ class BackendService {
 
     if (response.statusCode == 200) {
       final List<dynamic> responseData = json.decode(response.body);
-      print('responseData: $responseData');
+      print('responseData: ${responseData.length}');
       if (responseData.isEmpty) {
         return [Job.empty()];
       }
