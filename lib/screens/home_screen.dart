@@ -69,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }
     final jobs = jobProvider.jobs;
     _showAddJobButton = jobs.isNotEmpty &&
-        !jobs.any((job) => job.isNull) &&
+        !jobs.any((job) => job.targetPlaylist == null) &&
         jobs.length < maxJobs;
 
     _tabController = TabController(
@@ -86,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   void _deleteJob(BuildContext context, int index) {
     final jobProvider = Provider.of<JobProvider>(context, listen: false);
-    final playlist = jobProvider.jobs[index].targetPlaylist;
+    final playlist = jobProvider.jobs[index].targetPlaylist!;
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -119,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Future<void> _processJob(Job job, int index) async {
-    print('Processing job: ${job.targetPlaylist.name}, index: $index');
+    print('Processing job: ${job.targetPlaylist!.name}, index: $index');
 
     setState(() {
       isProcessing = true;
@@ -141,7 +141,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         _showResultSnackBar(results[0]);
       } else {
         _showResultSnackBar({
-          'name': job.targetPlaylist.name,
+          'name': job.targetPlaylist!.name,
           'status': 'Error',
           'result': 'No results returned from backend service',
         });
@@ -155,7 +155,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       });
 
       _showResultSnackBar({
-        'name': job.targetPlaylist.name,
+        'name': job.targetPlaylist!.name,
         'status': 'Error',
         'result': 'Error: ${e.toString()}',
       });
@@ -219,7 +219,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  void _replaceJob(Job newJob, int index) {
+  void _updateJob(Job newJob, int index) {
     final jobProvider = Provider.of<JobProvider>(context, listen: false);
     jobProvider.updateJob(index, newJob);
     setState(() {
@@ -263,7 +263,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           _addNewJob(newJob);
         } else {
           if (jobProvider.jobs
-              .any((job) => job.targetPlaylist.id == selectedPlaylist.id)) {
+              .any((job) => job.targetPlaylist!.id == selectedPlaylist.id)) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Playlist already selected for another job.'),
@@ -273,7 +273,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           }
           final updateJob = jobProvider.jobs[index]
               .copyWith(targetPlaylist: selectedPlaylist);
-          _replaceJob(updateJob, index);
+          _updateJob(updateJob, index);
         }
         // Auto-collapse after selection
         setState(() {
@@ -346,8 +346,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       tabs: [
                         ...jobsIterable.map((entry) {
                           return Tab(
-                            child: Text(
-                                entry.value.targetPlaylist.name ?? 'New job'),
+                            child: Text(entry.value.targetPlaylist!.name ??
+                                'New Spotkin'),
                           );
                         }),
                         if (_showAddJobButton) const Tab(icon: Icon(Icons.add))
@@ -379,7 +379,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             },
                           ),
                           SizedBox(height: widgetPadding),
-                          if (!job.isNull) _buildRecipeCard(job, jobEntry.key),
+                          if (job.isNull) _buildRecipeCard(job, jobEntry.key),
                         ],
                       ),
                     );

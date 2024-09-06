@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:spotkin_flutter/app_core.dart';
 import 'package:spotkin_flutter/models/ingredient.dart';
 import 'package:spotify/spotify.dart';
+import 'package:uuid/uuid.dart';
 
 class Job {
   final String id;
@@ -123,7 +124,7 @@ class Job {
     };
   }
 
-  Map<String, dynamic> toJsonForPostRequest() {
+  Map<String, dynamic> toJsonForApiRequest() {
     Map<String, dynamic> json = {
       'playlist_id': targetPlaylist.id,
     };
@@ -173,7 +174,8 @@ class Job {
     return json;
   }
 
-  Job.empty() : this(targetPlaylist: PlaylistSimple(), id: '');
+  // Empty constructor with a generated ID
+  Job.empty() : this(id: const Uuid().v4(), targetPlaylist: PlaylistSimple());
 
   Job copyWith({
     String? id,
@@ -298,7 +300,7 @@ List<Job> parseJobs(String jsonString) {
 //     };
 //   }
 
-//   Map<String, dynamic> toJsonForPostRequest() {
+//   Map<String, dynamic> toJsonForApiRequest() {
 //     return {
 //       'name': targetPlaylist.name,
 //       'playlist_id': targetPlaylist.id,

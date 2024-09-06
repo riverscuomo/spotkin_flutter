@@ -14,11 +14,18 @@ class JobProvider extends ChangeNotifier {
   }
 
   Future<void> loadJobs() async {
+    print('Loading jobs...');
     _isLoading = true;
     notifyListeners();
 
     try {
       _jobs = await _backendService.getJobs();
+
+      print('Jobs loaded: ${_jobs.length}');
+      // if (_jobs.isEmpty) {
+      //   print('Adding empty job');
+      //   _jobs.add(Job.empty());
+      // }
     } catch (e) {
       print('Error loading jobs: $e');
     } finally {

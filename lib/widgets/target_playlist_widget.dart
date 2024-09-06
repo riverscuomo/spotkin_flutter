@@ -21,58 +21,22 @@ class TargetPlaylistWidget extends StatelessWidget {
     required this.onExpandChanged,
   }) : super(key: key);
 
-  // Widget _buildEmptyState(BuildContext context) {
-  //   return Container(
-  //     padding: const EdgeInsets.all(16),
-  //     child: Center(
-  //       child: Column(
-  //         mainAxisAlignment: MainAxisAlignment.center,
-  //         children: [
-  //           const Icon(Icons.playlist_add, size: 64, color: Colors.grey),
-  //           const SizedBox(height: 16),
-  //           Text(
-  //             'No jobs created yet',
-  //             style: Theme.of(context).textTheme.headline6,
-  //           ),
-  //           const SizedBox(height: 8),
-  //           Text(
-  //             'Create your first job to get started',
-  //             style: Theme.of(context).textTheme.subtitle1,
-  //           ),
-  //           const SizedBox(height: 16),
-  //           ElevatedButton(
-  //             onPressed: () => buildTargetPlaylistSelectionOptions(0),
-  //             child: const Text('Create First Job'),
-  //           ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
-
-  Widget _buildErrorState(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Center(
-        child: Text(
-          'An error occurred. Please try again.',
-          style: Theme.of(context).textTheme.subtitle1,
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Consumer<JobProvider>(
       builder: (context, jobProvider, child) {
-        // if (jobProvider.jobs.isEmpty) {
-        //   return _buildEmptyState(context);
-        // }
-
-        if (index >= jobProvider.jobs.length) {
-          return _buildErrorState(context);
+        // Check if jobs list is empty or index is out of bounds
+        if (jobProvider.jobs.isEmpty || index >= jobProvider.jobs.length) {
+          return Column(
+            children: [
+              Text(
+                'No jobs available. Please add a job.',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ],
+          );
         }
+
         final job = jobProvider.jobs[index];
         final targetPlaylist = job.targetPlaylist;
 
@@ -88,7 +52,7 @@ class TargetPlaylistWidget extends StatelessWidget {
                 Column(
                   children: [
                     PlaylistImageIcon(
-                      playlist: targetPlaylist,
+                      playlist: targetPlaylist!,
                       size: 160,
                     ),
                     const SizedBox(height: 16),
@@ -137,7 +101,7 @@ class TargetPlaylistWidget extends StatelessWidget {
                           ),
                         ],
                       ),
-                    if (isExpanded && !job.isNull) ...[
+                    if (isExpanded && job.targetPlaylist != null) ...[
                       const SizedBox(height: 16),
                       buildTargetPlaylistSelectionOptions(index),
                     ],
