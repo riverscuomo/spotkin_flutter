@@ -46,8 +46,8 @@ class JobProvider extends ChangeNotifier {
 
   Future<void> updateJob(int index, Job updatedJob) async {
     try {
-      final job = await _backendService.updateJob(updatedJob);
-      _jobs[index] = job;
+      await _backendService.updateJob(updatedJob);
+      _jobs[index] = updatedJob;
       notifyListeners();
     } catch (e) {
       print('Error updating job: $e');

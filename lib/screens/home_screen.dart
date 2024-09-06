@@ -301,7 +301,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         vsync: this,
         initialIndex: oldIndex < newLength ? oldIndex : newLength - 1,
       );
-      setState(() {}); // Trigger a rebuild
+      // setState(() {}); // Trigger a rebuild
     }
   }
 

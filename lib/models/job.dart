@@ -62,6 +62,7 @@ class Job {
   bool get isNull => targetPlaylist.id == null;
 
   factory Job.fromJson(Map<String, dynamic> json) {
+    print('Job.fromJson: ${json['target_playlist']['name']}');
     return Job(
       id: json['id'],
       targetPlaylist: PlaylistSimple.fromJson(
@@ -125,8 +126,12 @@ class Job {
   }
 
   Map<String, dynamic> toJsonForApiRequest() {
+    // Map<String, dynamic> json = {
+    //   'playlist_id': targetPlaylist.id,
+    // };
+
     Map<String, dynamic> json = {
-      'playlist_id': targetPlaylist.id,
+      'target_playlist': targetPlaylist.toJson(),
     };
 
     void addIfNotEmpty(String key, dynamic value) {
