@@ -60,12 +60,6 @@ class TargetPlaylistSelectionOptions extends StatelessWidget {
         ),
         const SizedBox(height: 24),
         const Divider(),
-        // Text(
-        //   'Backup and Restore',
-        //   style: Theme.of(context).textTheme.titleMedium,
-        //   textAlign: TextAlign.center,
-        // ),
-        // const SizedBox(height: 24),
         Row(
           children: [
             const Text('Delete this Spotkin'),

@@ -80,10 +80,11 @@ class BackendService {
 
   Future<Job> updateJob(Job job) async {
     final url = '$backendUrl/jobs/${job.id}';
+    print('updateJob: $url');
     final response = await http.put(
       Uri.parse(url),
       headers: await _getAuthHeaders(),
-      body: json.encode(job.toJson()),
+      body: json.encode(job.toJsonForApiRequest()),
     );
 
     if (response.statusCode == 200) {
@@ -107,9 +108,15 @@ class BackendService {
 
   Future<Map<String, String>> _getAuthHeaders() async {
     final spotifyService = getIt<SpotifyService>();
-    final accessToken = await spotifyService.retrieveAccessToken();
+
+    final credentials = await spotifyService
+        .retrieveCredentials(); // This method already handles refreshing the token
+    if (credentials == null) {
+      throw Exception("Failed to retrieve Spotify credentials");
+    }
+
     return {
-      'Authorization': 'Bearer $accessToken',
+      'Authorization': 'Bearer ${credentials.accessToken}',
       'Content-Type': 'application/json',
     };
   }

@@ -124,7 +124,7 @@ class Job {
     };
   }
 
-  Map<String, dynamic> toJsonForPostRequest() {
+  Map<String, dynamic> toJsonForApiRequest() {
     Map<String, dynamic> json = {
       'playlist_id': targetPlaylist.id,
     };
@@ -300,7 +300,7 @@ List<Job> parseJobs(String jsonString) {
 //     };
 //   }
 
-//   Map<String, dynamic> toJsonForPostRequest() {
+//   Map<String, dynamic> toJsonForApiRequest() {
 //     return {
 //       'name': targetPlaylist.name,
 //       'playlist_id': targetPlaylist.id,

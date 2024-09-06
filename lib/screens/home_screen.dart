@@ -219,7 +219,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  void _replaceJob(Job newJob, int index) {
+  void _updateJob(Job newJob, int index) {
     final jobProvider = Provider.of<JobProvider>(context, listen: false);
     jobProvider.updateJob(index, newJob);
     setState(() {
@@ -273,7 +273,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           }
           final updateJob = jobProvider.jobs[index]
               .copyWith(targetPlaylist: selectedPlaylist);
-          _replaceJob(updateJob, index);
+          _updateJob(updateJob, index);
         }
         // Auto-collapse after selection
         setState(() {
