@@ -9,9 +9,11 @@ class BackendService {
   BackendService({required this.backendUrl});
 
   Future<List<Job>> getJobs() async {
+    print('backendService.getJobs');
     final spotifyService = getIt<SpotifyService>();
     final userId = await spotifyService.getUserId();
     final url = '$backendUrl/jobs/$userId';
+    print('url: $url');
     final response = await http.get(
       Uri.parse(url),
       headers: await _getAuthHeaders(),
@@ -19,6 +21,10 @@ class BackendService {
 
     if (response.statusCode == 200) {
       final List<dynamic> responseData = json.decode(response.body);
+      print('responseData: $responseData');
+      if (responseData.isEmpty) {
+        return [Job.empty()];
+      }
       return responseData.map((data) => Job.fromJson(data)).toList();
     } else {
       throw Exception('Failed to load jobs: ${response.statusCode}');

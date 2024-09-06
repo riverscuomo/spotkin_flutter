@@ -118,18 +118,8 @@ class SpotifyService {
     _updateSpotifyInstance(credentials);
   }
 
-  // void initiateSpotifyLogin() {
-  //   final storageService = GetIt.I<StorageService>();
-  //   final spotifyAuthUrl = Uri.https('accounts.spotify.com', '/authorize', {
-  //     'client_id': clientId,
-  //     'response_type': 'code',
-  //     'redirect_uri': redirectUri,
-  //     'scope': scope,
-  //   });
-  //   storageService.storeAuthUrl(spotifyAuthUrl.toString());
-  // }
-
   Future<SpotifyApiCredentials?> retrieveCredentials() async {
+    print('retrieveCredentials');
     final accessToken = await _secureStorage.read(key: _accessTokenKey);
     final refreshToken = await _secureStorage.read(key: _refreshTokenKey);
     final expirationString = await _secureStorage.read(key: _expirationKey);

@@ -43,7 +43,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Spotify Web Auth',
+      title: 'Spotkin',
       theme: spotifyThemeData,
       debugShowCheckedModeBanner: false,
       builder: (context, child) {

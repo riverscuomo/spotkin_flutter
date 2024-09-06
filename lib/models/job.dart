@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:spotkin_flutter/app_core.dart';
 import 'package:spotkin_flutter/models/ingredient.dart';
 import 'package:spotify/spotify.dart';
+import 'package:uuid/uuid.dart';
 
 class Job {
   final String id;
@@ -173,7 +174,8 @@ class Job {
     return json;
   }
 
-  Job.empty() : this(targetPlaylist: PlaylistSimple(), id: '');
+  // Empty constructor with a generated ID
+  Job.empty() : this(id: const Uuid().v4(), targetPlaylist: PlaylistSimple());
 
   Job copyWith({
     String? id,

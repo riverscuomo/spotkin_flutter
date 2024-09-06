@@ -61,7 +61,7 @@ class _BannedGenresBottomSheetState extends State<BannedGenresBottomSheet> {
     final jobProvider = Provider.of<JobProvider>(context, listen: false);
     final job = jobProvider.jobs[widget.jobIndex];
     final spotifyService = getIt<SpotifyService>();
-    final targetPlaylistId = job.targetPlaylist.id;
+    final targetPlaylistId = job.targetPlaylist!.id;
 
     if (targetPlaylistId == null) {
       setState(() {
