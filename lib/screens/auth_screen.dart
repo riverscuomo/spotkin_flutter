@@ -59,7 +59,8 @@ class _AuthScreenState extends State<AuthScreen> {
       _isInitiatingLogin = true;
     });
 
-    print(widget.config['SPOTIFY_REDIRECT_URI']);
+    print(
+        "widget.config['SPOTIFY_REDIRECT_URI']: ${widget.config['SPOTIFY_REDIRECT_URI']}");
 
     final authUrl = Uri.https('accounts.spotify.com', '/authorize', {
       'client_id': widget.config['SPOTIFY_CLIENT_ID'],

@@ -36,7 +36,7 @@ jobs:
         {
         "SPOTIFY_CLIENT_SECRET": "${{ secrets.SPOTIFY_CLIENT_SECRET }}",
         "SPOTIFY_CLIENT_ID": "${{ secrets.SPOTIFY_CLIENT_ID  }}",        
-        "SPOTIFY_REDIRECT_URI": "https://spotkin.web.app/",
+        "SPOTIFY_REDIRECT_URI": "https://spotkin.web.app/auth.html",
         "SPOTIFY_SCOPE": "${{ secrets.SPOTIFY_SCOPE }}",
         "BACKEND_URL": "${{ secrets.BACKEND_URL }}"
         }
