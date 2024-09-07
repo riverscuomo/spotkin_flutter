@@ -90,8 +90,8 @@
         ],
         "recipe": [
             {
-                "source_playlist_name": "albumsImCheckingOut",
-                "source_playlist_id": "0wtAMAn6DGm6DkLfhVY8bb",
+                "playlist_name": "albumsImCheckingOut",
+                "playlist_id": "0wtAMAn6DGm6DkLfhVY8bb",
                 "quantity": 10
             }
         ]

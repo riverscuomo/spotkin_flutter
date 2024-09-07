@@ -25,8 +25,8 @@ class Ingredient {
 
   Map<String, dynamic> toJsonForPost() {
     return {
-      'source_playlist_name': playlist.name,
-      'source_playlist_id': playlist.id,
+      'playlist_name': playlist.name,
+      'playlist_id': playlist.id,
       'quantity': quantity,
     };
   }
