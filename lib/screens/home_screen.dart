@@ -119,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Future<void> _processJob(Job job, int index) async {
-    print('Processing job: ${job.targetPlaylist!.name}, index: $index');
+    print('Processing job: ${job.targetPlaylist.name}, index: $index');
 
     setState(() {
       isProcessing = true;
@@ -141,7 +141,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         _showResultSnackBar(results[0]);
       } else {
         _showResultSnackBar({
-          'name': job.targetPlaylist!.name,
+          'name': job.targetPlaylist.name,
           'status': 'Error',
           'result': 'No results returned from backend service',
         });
@@ -155,7 +155,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       });
 
       _showResultSnackBar({
-        'name': job.targetPlaylist!.name,
+        'name': job.targetPlaylist.name,
         'status': 'Error',
         'result': 'Error: ${e.toString()}',
       });
@@ -263,7 +263,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           _addNewJob(newJob);
         } else {
           if (jobProvider.jobs
-              .any((job) => job.targetPlaylist!.id == selectedPlaylist.id)) {
+              .any((job) => job.targetPlaylist.id == selectedPlaylist.id)) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Playlist already selected for another job.'),
@@ -379,7 +379,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             },
                           ),
                           SizedBox(height: widgetPadding),
-                          if (job.isNull) _buildRecipeCard(job, jobEntry.key),
+                          if (!job.isNull) _buildRecipeCard(job, jobEntry.key),
                         ],
                       ),
                     );
