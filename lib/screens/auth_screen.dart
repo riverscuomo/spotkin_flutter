@@ -14,6 +14,7 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> {
   bool _isLoading = false;
+  bool _isInitiatingLogin = false; // Flag to debounce login
   late SpotifyService _spotifyService;
 
   @override
@@ -50,7 +51,15 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
   Future<void> _initiateSpotifyLogin() async {
-    setState(() => _isLoading = true);
+    // Prevent multiple login attempts if one is already in progress
+    if (_isInitiatingLogin) return;
+
+    setState(() {
+      _isLoading = true;
+      _isInitiatingLogin = true;
+    });
+
+    print(widget.config['SPOTIFY_REDIRECT_URI']);
 
     final authUrl = Uri.https('accounts.spotify.com', '/authorize', {
       'client_id': widget.config['SPOTIFY_CLIENT_ID'],
@@ -82,7 +91,10 @@ class _AuthScreenState extends State<AuthScreen> {
       print('Error during Spotify login: $e');
       _showErrorSnackBar('Failed to login with Spotify');
     } finally {
-      setState(() => _isLoading = false);
+      setState(() {
+        _isLoading = false;
+        _isInitiatingLogin = false; // Reset flag after login attempt finishes
+      });
     }
   }
 
