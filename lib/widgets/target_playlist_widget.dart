@@ -6,7 +6,7 @@ import 'package:spotkin_flutter/widgets/update_button.dart';
 class TargetPlaylistWidget extends StatelessWidget {
   final int index;
   final bool isProcessing;
-  final void Function(Job, int) processJob;
+  final void Function(Job) processJob;
   final Widget Function(int) buildTargetPlaylistSelectionOptions;
   final bool isExpanded;
   final Function(bool) onExpandChanged;
@@ -95,13 +95,13 @@ class TargetPlaylistWidget extends StatelessWidget {
                                   ? const SizedBox()
                                   : UpdateButton(
                                       isProcessing: isProcessing,
-                                      onPressed: () => processJob(job, index),
+                                      onPressed: () => processJob(job),
                                     ),
                             ],
                           ),
                         ],
                       ),
-                    if (isExpanded && job.targetPlaylist != null) ...[
+                    if (isExpanded) ...[
                       const SizedBox(height: 16),
                       buildTargetPlaylistSelectionOptions(index),
                     ],

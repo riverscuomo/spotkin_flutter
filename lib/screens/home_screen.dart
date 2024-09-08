@@ -118,8 +118,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _updateTabController();
   }
 
-  Future<void> _processJob(Job job, int index) async {
-    print('Processing job: ${job.targetPlaylist.name}, index: $index');
+  Future<void> _processJob(Job job) async {
+    print('Processing job: ${job.targetPlaylist.name}, id: ${job.id}');
 
     setState(() {
       isProcessing = true;
@@ -129,7 +129,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       final allJobs = Provider.of<JobProvider>(context, listen: false).jobs;
       print('Total jobs: ${allJobs.length}');
 
-      final results = await _backendService.processJobs(allJobs, [index]);
+      final results = await _backendService.processJob(job.id);
 
       print('Received results: $results');
 
@@ -138,12 +138,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       });
 
       if (results.isNotEmpty) {
-        _showResultSnackBar(results[0]);
+        _showResultSnackBar({
+          'name': job.targetPlaylist.name,
+          'status': 'success',
+          'message': results['message'],
+        });
       } else {
         _showResultSnackBar({
           'name': job.targetPlaylist.name,
           'status': 'Error',
-          'result': 'No results returned from backend service',
+          'message': 'No results returned from backend service',
         });
       }
     } catch (e, stackTrace) {
@@ -157,13 +161,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       _showResultSnackBar({
         'name': job.targetPlaylist.name,
         'status': 'Error',
-        'result': 'Error: ${e.toString()}',
+        'message': 'Error: ${e.toString()}',
       });
     }
   }
 
   void _showResultSnackBar(Map<String, dynamic> result) {
-    if (result['status'] == 'Success') {
+    if (result['status'] == 'success') {
       // do nothing
     } else {
       // play unhappy sound
@@ -172,7 +176,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       content: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: result['status'] == 'Success' ? Colors.green : Colors.red,
+          color: result['status'] == 'success' ? Colors.green : Colors.red,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -191,7 +195,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Processed successfully',
+                    result['message'],
                     style: Theme.of(context).textTheme.bodySmall!.copyWith(
                           color: Colors.white,
                           fontStyle: FontStyle.italic,
@@ -202,7 +206,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
             const SizedBox(width: 16),
             Icon(
-              result['status'] == 'Success' ? Icons.check_circle : Icons.error,
+              result['status'] == 'success' ? Icons.check_circle : Icons.error,
               color: Colors.white,
               size: 24,
             ),

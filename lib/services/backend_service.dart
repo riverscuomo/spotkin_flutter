@@ -49,26 +49,19 @@ class BackendService {
     }
   }
 
-  Future<List<Map<String, dynamic>>> processJobs(
-      List<Job> jobs, List<int> indexes) async {
-    final spotifyService = getIt<SpotifyService>();
-    final userId = await spotifyService.getUserId();
-    final url = '$backendUrl/process_jobs/$userId';
-
-    final jobsToProcess = indexes.map((index) => jobs[index].id).toList();
-
+  Future<Map<String, dynamic>> processJob(String jobId) async {
+    final url = '$backendUrl/process_job/$jobId';
     try {
       final response = await http
           .post(
             Uri.parse(url),
             headers: await _getAuthHeaders(),
-            body: json.encode({'job_ids': jobsToProcess}),
           )
           .timeout(const Duration(minutes: 5));
 
       if (response.statusCode == 200) {
-        final List<dynamic> responseData = json.decode(response.body);
-        return responseData.cast<Map<String, dynamic>>();
+        final Map responseData = json.decode(response.body);
+        return responseData as Map<String, dynamic>;
       } else {
         throw Exception('Failed to process jobs: ${response.statusCode}');
       }
