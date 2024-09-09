@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:spotify/spotify.dart';
@@ -6,7 +7,7 @@ import '../screens/edit_description_screen.dart';
 import '../screens/setting_management_screen.dart';
 import 'settings_row_title.dart';
 
-class SettingsCard extends StatelessWidget {
+class SettingsCard extends StatefulWidget {
   final int index;
 
   const SettingsCard({
@@ -15,10 +16,128 @@ class SettingsCard extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  _SettingsCardState createState() => _SettingsCardState();
+}
+
+class _SettingsCardState extends State<SettingsCard> {
+  Timer? _debounce;
+  late RangeValues _energyValues;
+  late RangeValues _danceabilityValues;
+  late RangeValues _acousticnessValues;
+  late RangeValues _durationValues;
+  late RangeValues _popularityValues;
+
+  @override
+  void initState() {
+    super.initState();
+    final job =
+        Provider.of<JobProvider>(context, listen: false).jobs[widget.index];
+    _energyValues = RangeValues(
+      (job.minEnergy ?? 0).toDouble(),
+      (job.maxEnergy ?? 100).toDouble(),
+    );
+    _danceabilityValues = RangeValues(
+      (job.minDanceability ?? 0).toDouble(),
+      (job.maxDanceability ?? 100).toDouble(),
+    );
+    _acousticnessValues = RangeValues(
+      (job.minAcousticness ?? 0).toDouble(),
+      (job.maxAcousticness ?? 100).toDouble(),
+    );
+    _durationValues = RangeValues(
+      (job.minDuration ?? 0) / 60000,
+      (job.maxDuration ?? 600000) / 60000,
+    );
+    _popularityValues = RangeValues(
+      (job.minPopularity?.toDouble() ?? 0),
+      (job.maxPopularity?.toDouble() ?? 100),
+    );
+  }
+
+  void _onSliderChangeDebounced(
+      Function(RangeValues) updateJobCallback, RangeValues values) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      updateJobCallback(values);
+    });
+  }
+
+  String _formatDuration(double value) {
+    int minutes = value.floor();
+    int seconds = ((value - minutes) * 60).round();
+    return '${minutes}m ${seconds}s';
+  }
+
+  Widget _buildRangeSlider(
+    BuildContext context,
+    String title,
+    double min,
+    double max,
+    RangeValues values,
+    Function(RangeValues) onChanged, {
+    String Function(double)? valueFormatter,
+    required Function(RangeValues) updateState,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                fontSize: 16,
+              ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              valueFormatter?.call(values.start) ??
+                  values.start.toStringAsFixed(0),
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            Text(
+              valueFormatter?.call(values.end) ?? values.end.toStringAsFixed(0),
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        RangeSlider(
+          min: min,
+          max: max,
+          values: values,
+          onChanged: (newValues) {
+            setState(() {
+              updateState(newValues);
+            });
+            _onSliderChangeDebounced(onChanged, newValues);
+          },
+          divisions: 100,
+          labels: RangeLabels(
+            valueFormatter?.call(values.start) ??
+                values.start.toStringAsFixed(0),
+            valueFormatter?.call(values.end) ?? values.end.toStringAsFixed(0),
+          ),
+          activeColor: Colors.green,
+          inactiveColor: Colors.grey[800],
+        ),
+      ],
+    );
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Consumer<JobProvider>(
       builder: (context, jobProvider, child) {
-        final job = jobProvider.jobs[index];
+        final job = jobProvider.jobs[widget.index];
 
         return Card(
           child: Padding(
@@ -93,7 +212,8 @@ class SettingsCard extends StatelessWidget {
                           ?.copyWith(color: Colors.white)),
                   value: job.banSkits,
                   onChanged: (bool value) {
-                    jobProvider.updateJob(index, job.copyWith(banSkits: value));
+                    jobProvider.updateJob(
+                        widget.index, job.copyWith(banSkits: value));
                   },
                   inactiveThumbColor: Colors.grey[600],
                   inactiveTrackColor: Colors.grey[800],
@@ -106,7 +226,7 @@ class SettingsCard extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                         builder: (context) => EditDescriptionScreen(
-                          jobIndex: index,
+                          jobIndex: widget.index,
                         ),
                       ),
                     );
@@ -119,10 +239,8 @@ class SettingsCard extends StatelessWidget {
                     onChanged: (int? newValue) {
                       if (newValue != null) {
                         int utcHour = Utils.localToUtc(newValue);
-                        print(
-                            'Selected local time: $newValue, Converted to UTC: $utcHour');
                         jobProvider.updateJob(
-                            index, job.copyWith(scheduledTime: utcHour));
+                            widget.index, job.copyWith(scheduledTime: utcHour));
                       }
                     },
                     items: List.generate(24, (index) {
@@ -134,12 +252,12 @@ class SettingsCard extends StatelessWidget {
                     }),
                   ),
                 ),
+                const SizedBox(height: 10),
                 Container(
                   color: Theme.of(context).scaffoldBackgroundColor,
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     children: [
-                      const Divider(color: Colors.white10),
                       const SizedBox(height: 16),
                       Text('Audio Features',
                           style: Theme.of(context).textTheme.titleMedium),
@@ -147,74 +265,75 @@ class SettingsCard extends StatelessWidget {
                       _buildRangeSlider(
                         context,
                         'Energy',
-                        1,
+                        0,
                         100,
-                        RangeValues(
-                          (job.minEnergy ?? 1).toDouble(),
-                          (job.maxEnergy ?? 100).toDouble(),
-                        ),
+                        _energyValues,
                         (values) => jobProvider.updateJob(
-                          index,
+                          widget.index,
                           job.copyWith(
                             minEnergy: values.start.round(),
                             maxEnergy: values.end.round(),
                           ),
                         ),
+                        updateState: (newValues) {
+                          _energyValues = newValues;
+                        },
                       ),
                       const SizedBox(height: 16),
                       _buildRangeSlider(
                         context,
                         'Danceability',
-                        1,
+                        0,
                         100,
-                        RangeValues(
-                          (job.minDanceability ?? 1).toDouble(),
-                          (job.maxDanceability ?? 100).toDouble(),
-                        ),
+                        _danceabilityValues,
                         (values) => jobProvider.updateJob(
-                          index,
+                          widget.index,
                           job.copyWith(
                             minDanceability: values.start.round(),
                             maxDanceability: values.end.round(),
                           ),
                         ),
+                        updateState: (newValues) {
+                          _danceabilityValues = newValues;
+                        },
                       ),
                       const SizedBox(height: 16),
                       _buildRangeSlider(
                         context,
                         'Acousticness',
-                        1,
+                        0,
                         100,
-                        RangeValues(
-                          (job.minAcousticness ?? 1).toDouble(),
-                          (job.maxAcousticness ?? 100).toDouble(),
-                        ),
+                        _acousticnessValues,
                         (values) => jobProvider.updateJob(
-                          index,
+                          widget.index,
                           job.copyWith(
                             minAcousticness: values.start.round(),
                             maxAcousticness: values.end.round(),
                           ),
                         ),
+                        updateState: (newValues) {
+                          _acousticnessValues = newValues;
+                        },
                       ),
                       const SizedBox(height: 16),
                       _buildRangeSlider(
                         context,
-                        'Duration (minutes)',
+                        'Duration',
                         0,
                         10,
-                        RangeValues(
-                          (job.minDuration ?? 0) / 60000,
-                          (job.maxDuration ?? 600000) / 60000,
-                        ),
+                        _durationValues,
                         (values) => jobProvider.updateJob(
-                          index,
+                          widget.index,
                           job.copyWith(
                             minDuration: (values.start * 60000).round(),
                             maxDuration: (values.end * 60000).round(),
                           ),
                         ),
-                        valueFormatter: (value) => value.toStringAsFixed(1),
+                        valueFormatter:
+                            _formatDuration, // Format using minutes and seconds
+                        updateState: (newValues) {
+                          _durationValues = newValues;
+                        },
                       ),
                       const SizedBox(height: 16),
                       _buildRangeSlider(
@@ -222,17 +341,17 @@ class SettingsCard extends StatelessWidget {
                         'Popularity',
                         0,
                         100,
-                        RangeValues(
-                          job.minPopularity?.toDouble() ?? 0,
-                          job.maxPopularity?.toDouble() ?? 100,
-                        ),
+                        _popularityValues,
                         (values) => jobProvider.updateJob(
-                          index,
+                          widget.index,
                           job.copyWith(
                             minPopularity: values.start.round(),
                             maxPopularity: values.end.round(),
                           ),
                         ),
+                        updateState: (newValues) {
+                          _popularityValues = newValues;
+                        },
                       ),
                     ],
                   ),
@@ -257,49 +376,12 @@ class SettingsCard extends StatelessWidget {
       MaterialPageRoute(
         builder: (context) => SettingManagementScreen(
           title: title,
-          jobIndex: index,
+          jobIndex: widget.index,
           fieldName: fieldName,
           tooltip: tooltip,
           searchTypes: searchTypes,
         ),
       ),
-    );
-  }
-
-  Widget _buildRangeSlider(
-    BuildContext context,
-    String title,
-    double min,
-    double max,
-    RangeValues values,
-    Function(RangeValues) onChanged, {
-    String Function(double)? valueFormatter,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                fontSize: 16,
-              ),
-        ),
-        const SizedBox(height: 8),
-        RangeSlider(
-          min: min,
-          max: max,
-          values: values,
-          onChanged: onChanged,
-          divisions: 100,
-          labels: RangeLabels(
-            valueFormatter?.call(values.start) ??
-                values.start.toStringAsFixed(2),
-            valueFormatter?.call(values.end) ?? values.end.toStringAsFixed(2),
-          ),
-          activeColor: Colors.green,
-          inactiveColor: Colors.grey[800],
-        ),
-      ],
     );
   }
 }
