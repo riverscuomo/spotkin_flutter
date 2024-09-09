@@ -76,7 +76,7 @@ class Job {
           json['banned_artists']?.map((x) => Artist.fromJson(x)) ?? []),
       bannedTracks: List<Track>.from(
           json['banned_tracks']?.map((x) => Track.fromJson(x)) ?? []),
-      bannedGenres: List<String>.from(json['banned_genres'] ?? []),
+      bannedGenres: [json['banned_genres']],
       exceptionsToBannedGenres:
           List<Artist>.from(json['exceptions_to_banned_genres']?.map((x) {
                 return Artist.fromJson(x);
@@ -125,59 +125,62 @@ class Job {
     };
   }
 
-  Map<String, dynamic> toJsonForApiRequest() {
-    // Map<String, dynamic> json = {
-    //   'playlist_id': targetPlaylist.id,
-    // };
+  // Map<String, dynamic> toJsonForApiRequest() {
 
-    Map<String, dynamic> json = {
-      'target_playlist': targetPlaylist.toJson(),
-    };
+  //   Map<String, dynamic> json = {
+  //     'target_playlist': targetPlaylist.toJson(),
+  //   };
 
-    void addIfNotEmpty(String key, dynamic value) {
-      if (value != null) {
-        if (value is String && value.isNotEmpty) {
-          json[key] = value;
-        } else if (value is List && value.isNotEmpty) {
-          json[key] = value;
-        } else if (value is int || value is bool) {
-          json[key] = value;
-        }
-      }
-    }
+  //   void addIfNotEmpty(String key, dynamic value) {
+  //     if (value != null) {
+  //       if (value is String && value.isNotEmpty) {
+  //         json[key] = value;
+  //       } else if (value is List && value.isNotEmpty) {
+  //         json[key] = value;
+  //       } else if (value is int || value is bool) {
+  //         json[key] = value;
+  //       } else if (value is Track) {
+  //         json[key] = value.toJson();
+  //       } else if (value is Artist) {
+  //         json[key] = value.toJson();
+  //       }
+  //     }
+  //   }
 
-    void addIfNotDefault(String key, dynamic value, dynamic defaultValue) {
-      if (value != null && value != defaultValue) {
-        json[key] = value;
-      }
-    }
+  //   void addIfNotDefault(String key, dynamic value, dynamic defaultValue) {
+  //     if (value != null && value != defaultValue) {
+  //       json[key] = value;
+  //     }
+  //   }
 
-    addIfNotEmpty('name', targetPlaylist.name);
-    addIfNotDefault('scheduled_time', scheduledTime, 0);
-    addIfNotEmpty('description', description);
-    addIfNotDefault('ban_skits', banSkits, false);
+  //   addIfNotEmpty('name', targetPlaylist.name);
+  //   addIfNotDefault('scheduled_time', scheduledTime, 0);
+  //   addIfNotEmpty('description', description);
+  //   addIfNotDefault('ban_skits', banSkits, false);
 
-    addIfNotEmpty('last_track_ids', lastTracks.map((t) => t.id).toList());
-    addIfNotEmpty('banned_artists', bannedArtists.map((a) => a.id).toList());
-    addIfNotEmpty('banned_tracks', bannedTracks.map((t) => t.id).toList());
-    addIfNotEmpty('banned_genres', bannedGenres);
-    addIfNotEmpty('exceptions_to_banned_genres',
-        exceptionsToBannedGenres.map((a) => a.id).toList());
-    addIfNotEmpty('recipe', recipe.map((r) => r.toJsonForPost()).toList());
+  //   addIfNotEmpty('last_tracks', lastTracks);
+  //   addIfNotEmpty('banned_artists', bannedArtists);
+  //   addIfNotEmpty('banned_tracks', bannedTracks);
 
-    addIfNotDefault('min_popularity', minPopularity, null);
-    addIfNotDefault('max_popularity', maxPopularity, null);
-    addIfNotDefault('min_duration', minDuration, null);
-    addIfNotDefault('max_duration', maxDuration, null);
-    addIfNotDefault('min_danceability', minDanceability, null);
-    addIfNotDefault('max_danceability', maxDanceability, null);
-    addIfNotDefault('min_energy', minEnergy, null);
-    addIfNotDefault('max_energy', maxEnergy, null);
-    addIfNotDefault('min_acousticness', minAcousticness, null);
-    addIfNotDefault('max_acousticness', maxAcousticness, null);
+  //   addIfNotEmpty('recipe', recipe.map((r) => r.toJsonForPost()).toList());
 
-    return json;
-  }
+  //   addIfNotEmpty('banned_genres', bannedGenres);
+  //   addIfNotEmpty('exceptions_to_banned_genres',
+  //       exceptionsToBannedGenres.map((a) => a.id).toList());
+
+  //   addIfNotDefault('min_popularity', minPopularity, null);
+  //   addIfNotDefault('max_popularity', maxPopularity, null);
+  //   addIfNotDefault('min_duration', minDuration, null);
+  //   addIfNotDefault('max_duration', maxDuration, null);
+  //   addIfNotDefault('min_danceability', minDanceability, null);
+  //   addIfNotDefault('max_danceability', maxDanceability, null);
+  //   addIfNotDefault('min_energy', minEnergy, null);
+  //   addIfNotDefault('max_energy', maxEnergy, null);
+  //   addIfNotDefault('min_acousticness', minAcousticness, null);
+  //   addIfNotDefault('max_acousticness', maxAcousticness, null);
+
+  //   return json;
+  // }
 
   // Empty constructor with a generated ID
   Job.empty() : this(id: const Uuid().v4(), targetPlaylist: PlaylistSimple());

@@ -77,7 +77,7 @@ class BackendService {
     final response = await http.put(
       Uri.parse(url),
       headers: await _getAuthHeaders(),
-      body: json.encode(job.toJsonForApiRequest()),
+      body: json.encode(job.toJson()),
     );
 
     if (response.statusCode == 200) {
