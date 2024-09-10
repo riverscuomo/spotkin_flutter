@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:spotify/spotify.dart' hide Image;
 import 'package:url_launcher/url_launcher.dart' as url_launcher;
 
 class Utils {

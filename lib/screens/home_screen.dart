@@ -6,8 +6,6 @@ import 'package:spotkin_flutter/app_core.dart';
 import '../widgets/target_playlist_widget.dart';
 import 'package:uuid/uuid.dart';
 
-const maxJobs = 2;
-
 class HomeScreen extends StatefulWidget {
   final Map<String, dynamic> config;
 
@@ -328,56 +326,3 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 }
-
-
-  // @override
-  // void didChangeDependencies() {
-  //   super.didChangeDependencies();
-  //   SchedulerBinding.instance.addPostFrameCallback((_) {
-  //     _initTabController();
-  //   });
-  // }
-  // void _initTabController() {
-  //   final jobProvider = Provider.of<JobProvider>(context, listen: false);
-  //   if (jobProvider == null) {
-  //     print("JobProvider is null");
-  //     return;
-  //   }
-  //   final jobs = jobProvider.jobs;
-  //   _showAddJobButton = jobs.isNotEmpty &&
-  //       !jobs.any((job) => job.targetPlaylist == null) &&
-  //       jobs.length < maxJobs;
-
-  //   _tabController = TabController(
-  //     length: (jobs.isEmpty ? 1 : jobs.length) + (_showAddJobButton ? 1 : 0),
-  //     vsync: this,
-  //   );
-  // }
-  
-  // void _updateTabController() {
-  //   final jobProvider = Provider.of<JobProvider>(context, listen: false);
-  //   final jobs = jobProvider.jobs;
-  //   _showAddJobButton = jobs.isNotEmpty &&
-  //       !jobs.any((job) => job.isNull) &&
-  //       jobs.length < maxJobs;
-
-  //   int newLength =
-  //       (jobs.isEmpty ? 1 : jobs.length) + (_showAddJobButton ? 1 : 0);
-
-  //   if (_tabController.length != newLength) {
-  //     int oldIndex = _tabController.index;
-  //     _tabController.dispose();
-  //     _tabController = TabController(
-  //       length: newLength,
-  //       vsync: this,
-  //       initialIndex: oldIndex < newLength ? oldIndex : newLength - 1,
-  //     );
-  //     // setState(() {}); // Trigger a rebuild
-  //   }
-  // }
-
-  //   @override
-  // void dispose() {
-  //   _tabController.dispose();
-  //   super.dispose();
-  // }
