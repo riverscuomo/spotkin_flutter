@@ -279,7 +279,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         return Scaffold(
           backgroundColor: Colors.black,
           appBar: AppBar(
-            title: const Text('Spotkin'),
+            // title: const Text('Spotkin'),
             automaticallyImplyLeading: false,
             actions: const [
               InfoButton(),
