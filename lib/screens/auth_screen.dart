@@ -74,11 +74,13 @@ class _AuthScreenState extends State<AuthScreen> {
 
       // Start the OAuth process using your existing SpotifyService logic
       final result = await FlutterWebAuth2.authenticate(
-          url: authUrl.toString(),
-          callbackUrlScheme: callbackScheme,
-          options: const FlutterWebAuth2Options(
-            windowName: '_self',
-          ));
+        url: authUrl.toString(),
+        callbackUrlScheme: callbackScheme,
+        options: const FlutterWebAuth2Options(
+          // windowName: '_blank',
+          silentAuth: true,
+        ),
+      );
 
       // Extract the authorization code from the result
       final uri = Uri.parse(result);
