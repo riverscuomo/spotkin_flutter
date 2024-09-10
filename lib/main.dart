@@ -51,7 +51,7 @@ class MyApp extends StatelessWidget {
           color: Colors.black,
           child: Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1000),
+              constraints: const BoxConstraints(maxWidth: 850),
               child: child!,
             ),
           ),
