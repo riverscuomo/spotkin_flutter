@@ -76,9 +76,13 @@ class _AuthScreenState extends State<AuthScreen> {
       final result = await FlutterWebAuth2.authenticate(
         url: authUrl.toString(),
         callbackUrlScheme: callbackScheme,
+        // options: const FlutterWebAuth2Options(
+        //   // windowName: '_blank',
+        //   silentAuth: true,
+        // ),
+
         options: const FlutterWebAuth2Options(
-          // windowName: '_blank',
-          silentAuth: true,
+          windowName: '_blank',
         ),
       );
 
