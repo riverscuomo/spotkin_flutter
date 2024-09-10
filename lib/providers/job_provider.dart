@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart';
 import 'package:spotkin_flutter/app_core.dart';
 
 class JobProvider extends ChangeNotifier {
@@ -28,6 +29,9 @@ class JobProvider extends ChangeNotifier {
       // }
     } catch (e) {
       print('Error loading jobs: $e');
+      if (e.runtimeType == ClientException) {
+        print('Did you forget to run the backend server locally?');
+      }
     } finally {
       _isLoading = false;
       notifyListeners();

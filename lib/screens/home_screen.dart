@@ -23,11 +23,11 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final BackendService _backendService = getIt<BackendService>();
   final SpotifyService spotifyService = getIt<SpotifyService>();
-  late TabController _tabController;
+  // late TabController _tabController;
 
   bool isProcessing = false;
   bool _isExpanded = false;
-  bool _showAddJobButton = false;
+  // bool _showAddJobButton = false;
 
   final widgetPadding = 3.0;
 
@@ -35,20 +35,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _verifyToken(); // You can keep the token verification in initState
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      _initTabController();
-    });
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
   }
 
   Future<void> _verifyToken() async {
@@ -61,27 +47,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }
   }
 
-  void _initTabController() {
-    final jobProvider = Provider.of<JobProvider>(context, listen: false);
-    if (jobProvider == null) {
-      print("JobProvider is null");
-      return;
-    }
-    final jobs = jobProvider.jobs;
-    _showAddJobButton = jobs.isNotEmpty &&
-        !jobs.any((job) => job.targetPlaylist == null) &&
-        jobs.length < maxJobs;
-
-    _tabController = TabController(
-      length: (jobs.isEmpty ? 1 : jobs.length) + (_showAddJobButton ? 1 : 0),
-      vsync: this,
-    );
-  }
-
   void _addNewJob(Job newJob) {
     final jobProvider = Provider.of<JobProvider>(context, listen: false);
     jobProvider.addJob(newJob);
-    _updateTabController();
+    // _updateTabController();
   }
 
   void _deleteJob(BuildContext context, int index) {
@@ -102,8 +71,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ElevatedButton(
               onPressed: () {
                 jobProvider.deleteJob(index);
-                _initTabController();
-                _tabController.animateTo(0);
+                // _initTabController();
+                // _tabController.animateTo(0);
                 Navigator.of(context).pop();
               },
               style: ElevatedButton.styleFrom(
@@ -115,7 +84,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         );
       },
     );
-    _updateTabController();
+    // _updateTabController();
   }
 
   Future<void> _processJob(Job job) async {
@@ -229,7 +198,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     setState(() {
       _isExpanded = false; // Collapse after changing the target playlist
     });
-    _updateTabController();
+    // _updateTabController();
   }
 
   Widget _buildRecipeCard(Job job, int index) {
@@ -287,28 +256,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  void _updateTabController() {
-    final jobProvider = Provider.of<JobProvider>(context, listen: false);
-    final jobs = jobProvider.jobs;
-    _showAddJobButton = jobs.isNotEmpty &&
-        !jobs.any((job) => job.isNull) &&
-        jobs.length < maxJobs;
-
-    int newLength =
-        (jobs.isEmpty ? 1 : jobs.length) + (_showAddJobButton ? 1 : 0);
-
-    if (_tabController.length != newLength) {
-      int oldIndex = _tabController.index;
-      _tabController.dispose();
-      _tabController = TabController(
-        length: newLength,
-        vsync: this,
-        initialIndex: oldIndex < newLength ? oldIndex : newLength - 1,
-      );
-      // setState(() {}); // Trigger a rebuild
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Consumer<JobProvider>(
@@ -323,8 +270,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         final jobsIterable =
             jobs.isNotEmpty ? jobs.asMap().entries : [MapEntry(0, Job.empty())];
 
-        // Ensure tab controller is up to date
-        _updateTabController();
+        final jobEntry = jobsIterable.first;
+        final job = jobEntry.value;
+
+        // // Ensure tab controller is up to date
+        // _updateTabController();
 
         return Scaffold(
           backgroundColor: Colors.black,
@@ -335,79 +285,99 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               InfoButton(),
             ],
           ),
-          body: DefaultTabController(
-            length: jobsIterable.length + (_showAddJobButton ? 1 : 0),
-            child: NestedScrollView(
-              headerSliverBuilder:
-                  (BuildContext context, bool innerBoxIsScrolled) {
-                return <Widget>[
-                  SliverAppBar(
-                    pinned: true,
-                    floating: true,
-                    bottom: TabBar(
-                      isScrollable: true,
-                      controller: _tabController,
-                      tabs: [
-                        ...jobsIterable.map((entry) {
-                          return Tab(
-                            child: Text(entry.value.targetPlaylist!.name ??
-                                'New Spotkin'),
-                          );
-                        }),
-                        if (_showAddJobButton) const Tab(icon: Icon(Icons.add))
-                      ],
-                    ),
-                  ),
-                ];
-              },
-              body: TabBarView(
-                controller: _tabController,
-                children: [
-                  ...jobsIterable.map((jobEntry) {
-                    final job = jobEntry.value;
-
-                    return SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          TargetPlaylistWidget(
-                            index: jobEntry.key,
-                            isProcessing: isProcessing,
-                            processJob: _processJob,
-                            buildTargetPlaylistSelectionOptions:
-                                buildTargetPlaylistSelectionOptions,
-                            isExpanded: _isExpanded,
-                            onExpandChanged: (expanded) {
-                              setState(() {
-                                _isExpanded = expanded;
-                              });
-                            },
-                          ),
-                          SizedBox(height: widgetPadding),
-                          if (!job.isNull) _buildRecipeCard(job, jobEntry.key),
-                        ],
-                      ),
-                    );
-                  }),
-                  if (_showAddJobButton)
-                    SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 15),
-                          ElevatedButton(
-                            onPressed: () {
-                              _addNewJob(Job.empty());
-                            },
-                            child: const Text('Add new job'),
-                          ),
-                        ],
-                      ),
-                    ),
-                ],
-              ),
+          body: SingleChildScrollView(
+            child: Column(
+              children: [
+                TargetPlaylistWidget(
+                  index: jobEntry.key,
+                  isProcessing: isProcessing,
+                  processJob: _processJob,
+                  buildTargetPlaylistSelectionOptions:
+                      buildTargetPlaylistSelectionOptions,
+                  isExpanded: _isExpanded,
+                  onExpandChanged: (expanded) {
+                    setState(() {
+                      _isExpanded = expanded;
+                    });
+                  },
+                ),
+                SizedBox(height: widgetPadding),
+                if (!job.isNull) _buildRecipeCard(job, jobEntry.key),
+              ],
             ),
+
+            // if (_showAddJobButton)
+            //   SingleChildScrollView(
+            //     child: Column(
+            //       children: [
+            //         const SizedBox(height: 15),
+            //         ElevatedButton(
+            //           onPressed: () {
+            //             _addNewJob(Job.empty());
+            //           },
+            //           child: const Text('Add new job'),
+            //         ),
+            //       ],
+            //     ),
+            //   ),
+            // ],
           ),
+          // ),
         );
       },
     );
   }
 }
+
+
+  // @override
+  // void didChangeDependencies() {
+  //   super.didChangeDependencies();
+  //   SchedulerBinding.instance.addPostFrameCallback((_) {
+  //     _initTabController();
+  //   });
+  // }
+  // void _initTabController() {
+  //   final jobProvider = Provider.of<JobProvider>(context, listen: false);
+  //   if (jobProvider == null) {
+  //     print("JobProvider is null");
+  //     return;
+  //   }
+  //   final jobs = jobProvider.jobs;
+  //   _showAddJobButton = jobs.isNotEmpty &&
+  //       !jobs.any((job) => job.targetPlaylist == null) &&
+  //       jobs.length < maxJobs;
+
+  //   _tabController = TabController(
+  //     length: (jobs.isEmpty ? 1 : jobs.length) + (_showAddJobButton ? 1 : 0),
+  //     vsync: this,
+  //   );
+  // }
+  
+  // void _updateTabController() {
+  //   final jobProvider = Provider.of<JobProvider>(context, listen: false);
+  //   final jobs = jobProvider.jobs;
+  //   _showAddJobButton = jobs.isNotEmpty &&
+  //       !jobs.any((job) => job.isNull) &&
+  //       jobs.length < maxJobs;
+
+  //   int newLength =
+  //       (jobs.isEmpty ? 1 : jobs.length) + (_showAddJobButton ? 1 : 0);
+
+  //   if (_tabController.length != newLength) {
+  //     int oldIndex = _tabController.index;
+  //     _tabController.dispose();
+  //     _tabController = TabController(
+  //       length: newLength,
+  //       vsync: this,
+  //       initialIndex: oldIndex < newLength ? oldIndex : newLength - 1,
+  //     );
+  //     // setState(() {}); // Trigger a rebuild
+  //   }
+  // }
+
+  //   @override
+  // void dispose() {
+  //   _tabController.dispose();
+  //   super.dispose();
+  // }
