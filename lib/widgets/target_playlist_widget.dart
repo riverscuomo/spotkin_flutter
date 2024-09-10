@@ -79,13 +79,12 @@ class TargetPlaylistWidget extends StatelessWidget {
                                 playlistTitle(
                                   context,
                                   targetPlaylist,
-                                  style:
-                                      Theme.of(context).textTheme.titleMedium,
+                                  style: Theme.of(context).textTheme.titleSmall,
                                 ),
-                                const SizedBox(height: 5),
-                                Text(targetPlaylist.description ?? '',
-                                    style:
-                                        Theme.of(context).textTheme.bodyMedium),
+                                // const SizedBox(height: 5),
+                                // Text(targetPlaylist.description ?? '',
+                                //     style:
+                                //         Theme.of(context).textTheme.bodyMedium),
                               ],
                             ),
                           ),

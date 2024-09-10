@@ -204,9 +204,17 @@ class _RecipeWidgetState extends State<RecipeWidget> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            if (_ingredientRows.isNotEmpty)
+              SettingsButton(
+                index: widget.jobIndex,
+                job: widget.job,
+                updateJob: jobProvider.updateJob,
+                addJob: jobProvider.addJob,
+              ),
             IconButton(
+              iconSize: 45.0,
               icon: const Icon(Icons.add),
               onPressed: () async {
                 showModalBottomSheet(
@@ -226,18 +234,6 @@ class _RecipeWidgetState extends State<RecipeWidget> {
                 );
               },
             ),
-            const SizedBox(width: 10),
-            if (_ingredientRows.isNotEmpty)
-              SettingsButton(
-                index: widget.jobIndex,
-                job: widget.job,
-                updateJob: jobProvider.updateJob,
-                addJob: jobProvider.addJob,
-                onJobsImported: () {
-                  // Implement this if needed, or pass an empty function
-                  // This could be used to refresh the UI after importing jobs
-                },
-              ),
           ],
         ),
         if (_ingredientRows.isEmpty)

@@ -6,7 +6,6 @@ class SettingsButton extends StatelessWidget {
   final int index;
   final Function(int, Job) updateJob;
   final Function(Job) addJob;
-  final Function() onJobsImported;
 
   const SettingsButton({
     Key? key,
@@ -14,7 +13,6 @@ class SettingsButton extends StatelessWidget {
     required this.index,
     required this.updateJob,
     required this.addJob,
-    required this.onJobsImported,
   }) : super(key: key);
 
   @override

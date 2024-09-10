@@ -51,34 +51,34 @@ List<Widget> buildInfoSheetContent(BuildContext context) {
       '• Curated playlists like Rolling Stone\'s "fivehundredalbums"',
       style: theme.textTheme.bodyMedium,
     ),
-    RichText(
-      text: TextSpan(
-        children: [
-          TextSpan(
-            text: '• New releases from genres you love via the ',
-            style: theme.textTheme.bodyMedium,
-          ),
-          TextSpan(
-            text: 'new_albums script',
-            style: TextStyle(
-              color: theme.colorScheme.primary,
-              decoration: TextDecoration.underline,
-            ),
-            recognizer: TapGestureRecognizer()
-              ..onTap = () {
-                _onOpen('https://github.com/riverscuomo/new-albums');
-              },
-          ),
-        ],
-      ),
-    ),
+    // RichText(
+    //   text: TextSpan(
+    //     children: [
+    //       TextSpan(
+    //         text: '• New releases from genres you love via the ',
+    //         style: theme.textTheme.bodyMedium,
+    //       ),
+    //       TextSpan(
+    //         text: 'new_albums script',
+    //         style: TextStyle(
+    //           color: theme.colorScheme.primary,
+    //           decoration: TextDecoration.underline,
+    //         ),
+    //         recognizer: TapGestureRecognizer()
+    //           ..onTap = () {
+    //             _onOpen('https://github.com/riverscuomo/new-albums');
+    //           },
+    //       ),
+    //     ],
+    //   ),
+    // ),
     Text(
       '• Your personal "Daily Mix" playlists and "Discover Weekly"',
       style: theme.textTheme.bodyMedium,
     ),
     gap,
     Text(
-      'You can create a custom recipe for each playlist, choosing which sources to pull music from.',
+      'You can create a custom recipe for your Spotkin, choosing which sources to pull music from.',
       style: theme.textTheme.bodyMedium,
     ),
     gap,
@@ -88,7 +88,7 @@ List<Widget> buildInfoSheetContent(BuildContext context) {
     ),
     gap,
     Text(
-      'When you hit the "Update" button, I use your personalized recipe to refresh your playlists with fresh, tailored tunes!',
+      'When you hit the "Go!" button, I use your personalized recipe to refresh your playlists with fresh, tailored tunes!',
       style: theme.textTheme.bodyMedium,
     ),
     gap,
