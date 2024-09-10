@@ -49,13 +49,27 @@ class BackendService {
     }
   }
 
+  Future<void> deleteJob(String jobId) async {
+    final url = '$backendUrl/jobs/$jobId';
+    final response = await http.delete(
+      Uri.parse(url),
+      headers: await _getAuthHeaders(),
+    );
+
+    if (response.statusCode != 204) {
+      throw Exception('Failed to delete job: ${response.statusCode}');
+    }
+  }
+
   Future<Map<String, dynamic>> processJob(String jobId) async {
     final url = '$backendUrl/process_job/$jobId';
     try {
+      final headers = await _getAuthHeaders();
       final response = await http
           .post(
             Uri.parse(url),
-            headers: await _getAuthHeaders(),
+            headers: headers,
+            body: json.encode(await _getRequestBody()),
           )
           .timeout(const Duration(minutes: 5));
 
@@ -87,30 +101,38 @@ class BackendService {
     }
   }
 
-  Future<void> deleteJob(String jobId) async {
-    final url = '$backendUrl/jobs/$jobId';
-    final response = await http.delete(
-      Uri.parse(url),
-      headers: await _getAuthHeaders(),
-    );
-
-    if (response.statusCode != 204) {
-      throw Exception('Failed to delete job: ${response.statusCode}');
-    }
-  }
-
   Future<Map<String, String>> _getAuthHeaders() async {
     final spotifyService = getIt<SpotifyService>();
 
-    final credentials = await spotifyService
-        .retrieveCredentials(); // This method already handles refreshing the token
+    final credentials = await spotifyService.retrieveCredentials();
+
     if (credentials == null) {
       throw Exception("Failed to retrieve Spotify credentials");
     }
 
+    // Send only the authorization header here
     return {
       'Authorization': 'Bearer ${credentials.accessToken}',
       'Content-Type': 'application/json',
+    };
+  }
+
+  Future<Map<String, dynamic>> _getRequestBody() async {
+    final spotifyService = getIt<SpotifyService>();
+
+    final credentials = await spotifyService.retrieveCredentials();
+
+    if (credentials == null) {
+      throw Exception("Failed to retrieve Spotify credentials");
+    }
+
+    final expirationString =
+        (credentials.expiration?.millisecondsSinceEpoch ?? 0) ~/ 1000;
+
+    // Send refresh token and expiration in the body
+    return {
+      'refresh_token': credentials.refreshToken ?? '',
+      'expires_at': expirationString,
     };
   }
 }
