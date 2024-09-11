@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:spotify/spotify.dart' hide Image;
 import 'package:spotkin_flutter/app_core.dart';
+import 'package:spotkin_flutter/widgets/bottom_sheets/banned_albums_bottom_sheet.dart';
 
 import '../widgets/bottom_sheets/banned_genres_bottom_sheet.dart';
 
@@ -33,6 +34,13 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
   void initState() {
     super.initState();
     _initItems();
+
+    // Automatically open bottom sheet if the list is empty
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_items.isEmpty) {
+        showSearchBottomSheet();
+      }
+    });
   }
 
   void _initItems() {
@@ -45,6 +53,8 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
     switch (widget.fieldName) {
       case 'bannedArtists':
         return List<Artist>.from(job.bannedArtists);
+      case 'bannedAlbums':
+        return List<AlbumSimple>.from(job.bannedAlbums);
       case 'bannedTracks':
         return List<Track>.from(job.bannedTracks);
       case 'bannedGenres':
@@ -58,7 +68,7 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
     }
   }
 
-  void _updateJobAndState() {
+  void _updateJobAndStateFromSearchBottomSheet() {
     final jobProvider = Provider.of<JobProvider>(context, listen: false);
     final job = jobProvider.jobs[widget.jobIndex];
     final updatedJob = _createUpdatedJob(job);
@@ -79,13 +89,34 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
             ? BannedGenresBottomSheet(
                 jobIndex: widget.jobIndex,
               )
-            : SearchBottomSheet(
-                onItemSelected: _addItem,
-                searchTypes: widget.searchTypes,
-              );
+            : widget.fieldName == 'bannedAlbums'
+                ? BannedAlbumsBottomSheet(
+                    jobIndex: widget.jobIndex,
+                  )
+                : SearchBottomSheet(
+                    onItemSelected: _addItem,
+                    searchTypes: widget.searchTypes,
+                  );
       },
     ).then((_) {
-      _initItems();
+      // I'm sorry, this is really ugly.
+      //
+      // In order to update your list immediately after closing the bottom sheet,
+      // we need to set state in two different ways depending on the type of bottom sheet.
+      // Genres and Albums have already updated the job in their respective bottom sheets,
+      // so we only need to update the state here.
+      // For other fields, we need to update the job AND the state.
+      (widget.fieldName == 'bannedGenres' || widget.fieldName == 'bannedAlbums')
+          ? updateItemsFromSpecialBottomSheet()
+          : _updateJobAndStateFromSearchBottomSheet(); // Update immediately after closing the sheet
+    });
+  }
+
+  void updateItemsFromSpecialBottomSheet() {
+    return setState(() {
+      final jobProvider = Provider.of<JobProvider>(context, listen: false);
+      final job = jobProvider.jobs[widget.jobIndex];
+      _items = _getItems(job);
     });
   }
 
@@ -93,7 +124,7 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
     if (!_items.any((existingItem) => existingItem.id == item.id)) {
       setState(() {
         _items.add(item);
-        _updateJobAndState();
+        _updateJobAndStateFromSearchBottomSheet();
       });
     }
   }
@@ -101,7 +132,7 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
   void _removeItem(int index) {
     setState(() {
       _items.removeAt(index);
-      _updateJobAndState();
+      _updateJobAndStateFromSearchBottomSheet();
     });
   }
 
@@ -109,6 +140,8 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
     switch (widget.fieldName) {
       case 'bannedArtists':
         return job.copyWith(bannedArtists: _items as List<Artist>);
+      case 'bannedAlbums':
+        return job.copyWith(bannedAlbums: _items as List<AlbumSimple>);
       case 'bannedTracks':
         return job.copyWith(bannedTracks: _items as List<Track>);
       case 'bannedGenres':
@@ -130,6 +163,12 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
     if (item is Artist) {
       name = item.name ?? 'Unknown Artist';
       subtitle = 'Artist • Popularity: ${item.popularity ?? 'N/A'}';
+      imageUrl =
+          item.images?.isNotEmpty == true ? item.images!.first.url : null;
+    } else if (item is AlbumSimple) {
+      name = item.name ?? 'Unknown Album';
+      subtitle =
+          '${item.artists?.isNotEmpty == true ? item.artists!.first.name : 'Unknown Artist'} • ${item.releaseDate ?? 'Unknown Release Date'}';
       imageUrl =
           item.images?.isNotEmpty == true ? item.images!.first.url : null;
     } else if (item is Track) {

@@ -231,6 +231,16 @@ class SpotifyService {
     return playlistsPage.items?.toList() ?? [];
   }
 
+  Future<List<AlbumSimple>> getAlbums(List<String> albumIds) async {
+    await _ensureAuthenticated(); // Ensure the user is authenticated
+
+    // Fetch multiple albums from Spotify by their IDs
+    final albumsIterable = await _spotify.albums.list(albumIds);
+
+    // Return the list of AlbumSimple objects
+    return albumsIterable.toList();
+  }
+
   Future<List<Artist>> getArtists(List<String> artistIds) async {
     await _ensureAuthenticated();
     final artistsIterable = await _spotify.artists.list(artistIds);
@@ -255,7 +265,8 @@ class SpotifyService {
     required List<SearchType> types,
   }) async {
     try {
-      print('Performing search for query: $query with limit: $limit');
+      print(
+          'Performing search for query: $query with limit: $limit with types: $types');
       final searchResults =
           await _spotify.search.get(query, types: types).first(limit);
 

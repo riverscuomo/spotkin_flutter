@@ -32,7 +32,8 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
   List<dynamic> _searchResults = [];
   bool _isLoading = false;
   Timer? _debounceTimer;
-  late List<Artist> artistsInTargetPlaylist = [];
+  // late List<Artist> artistsInTargetPlaylist = [];
+  // late List<AlbumSimple> albumsInTargetPlaylist = [];
 
   @override
   void initState() {
@@ -104,7 +105,12 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
       final results = await spotifyService.search(
         query,
         types: widget.searchTypes ??
-            [SearchType.track, SearchType.artist, SearchType.playlist],
+            [
+              SearchType.track,
+              SearchType.artist,
+              SearchType.playlist,
+              SearchType.album
+            ],
         limit: 20,
       );
 
@@ -154,6 +160,11 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
       subtitle = 'Artist';
       imageUrl = item.images?.isNotEmpty == true ? item.images!.first.url : '';
       isArtist = true;
+    } else if (item is AlbumSimple) {
+      title = item.name ?? 'Unknown Album';
+      subtitle =
+          '${item.artists?.isNotEmpty == true ? item.artists!.first.name : 'Unknown Artist'} • ${item.releaseDate ?? 'Unknown Release Date'}';
+      imageUrl = item.images?.isNotEmpty == true ? item.images!.first.url : '';
     } else if (item is PlaylistSimple) {
       title = item.name ?? 'Unknown Playlist';
       subtitle =

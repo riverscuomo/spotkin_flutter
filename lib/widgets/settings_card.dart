@@ -158,6 +158,18 @@ class _SettingsCardState extends State<SettingsCard> {
                   ),
                 ),
                 ListTile(
+                  title: SettingsRowTitle(
+                      'Banned Albums', job.bannedAlbums.length),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => _navigateSettingManagementScreen(
+                    context,
+                    'Banned Albums',
+                    'bannedAlbums',
+                    'These albums will never appear in your Spotify playlist',
+                    [SearchType.album],
+                  ),
+                ),
+                ListTile(
                   title:
                       SettingsRowTitle('Banned Songs', job.bannedTracks.length),
                   trailing: const Icon(Icons.chevron_right),
