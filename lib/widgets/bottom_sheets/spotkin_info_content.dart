@@ -35,7 +35,7 @@ List<Widget> buildInfoSheetContent(BuildContext context) {
     ),
     gap,
     Text(
-      'I can run automatically... or you can activate me by clicking the "Update" button. ✨',
+      'I can run automatically... or you can activate me by clicking the "Go!" button. ✨',
       style: theme.textTheme.bodyMedium,
     ),
     gap,
