@@ -102,6 +102,8 @@ class TargetPlaylistSelectionOptions extends StatelessWidget {
       isScrollControlled: true,
       builder: (BuildContext context) {
         return SearchBottomSheet(
+          subtitle:
+              'Warning: This will overwrite the contents of your playlist!',
           onItemSelected: (dynamic item) {
             if (item is PlaylistSimple) {
               onPlaylistSelected(item);

@@ -9,6 +9,7 @@ class SearchBottomSheet extends StatefulWidget {
   final List<SearchType>? searchTypes;
   final bool userPlaylistsOnly;
   final String? title;
+  final String? subtitle;
 
   const SearchBottomSheet({
     Key? key,
@@ -16,6 +17,7 @@ class SearchBottomSheet extends StatefulWidget {
     this.searchTypes,
     this.userPlaylistsOnly = false,
     this.title,
+    this.subtitle,
   })  : assert(
           !(userPlaylistsOnly && (searchTypes != null)),
           'searchTypes should not be provided when userPlaylistsOnly is true',
@@ -230,6 +232,14 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
     }
     return CustomBottomSheet(
       title: Text(title),
+      subtitle: widget.subtitle != null
+          ? Text(
+              widget.subtitle!,
+              style: TextStyle(
+                fontStyle: FontStyle.italic,
+              ),
+            )
+          : null,
       content: [
         if (!widget.userPlaylistsOnly)
           Padding(

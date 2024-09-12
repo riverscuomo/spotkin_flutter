@@ -3,6 +3,7 @@ import 'spotkin_info_content.dart';
 
 class CustomBottomSheet extends StatelessWidget {
   final Widget title;
+  final Widget? subtitle;
   final List<Widget> content;
   final double initialChildSize;
   final double minChildSize;
@@ -12,6 +13,7 @@ class CustomBottomSheet extends StatelessWidget {
   const CustomBottomSheet({
     Key? key,
     required this.title,
+    this.subtitle,
     required this.content,
     this.initialChildSize = 0.9,
     this.minChildSize = 0.5,
@@ -73,6 +75,14 @@ class CustomBottomSheet extends StatelessWidget {
                 child: title,
               ),
             ),
+            if (subtitle != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: DefaultTextStyle(
+                  style: Theme.of(context).textTheme.labelMedium!,
+                  child: subtitle!,
+                ),
+              ),
             showImage
                 ? Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
