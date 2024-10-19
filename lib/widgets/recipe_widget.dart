@@ -5,6 +5,8 @@ import 'package:spotkin_flutter/app_core.dart';
 
 import 'ingredient_row.dart';
 
+const int defaultQuantity = 2;
+
 class RecipeWidget extends StatefulWidget {
   final Job job;
   final int jobIndex;
@@ -78,13 +80,13 @@ class _RecipeWidgetState extends State<RecipeWidget> {
 
     Ingredient newIngredient = Ingredient(
       playlist: playlist,
-      quantity: 5,
+      quantity: defaultQuantity,
     );
 
     setState(() {
       _ingredientRows.add(IngredientRow(
         playlist: playlist,
-        quantityController: TextEditingController(text: '5'),
+        quantityController: TextEditingController(text: defaultQuantity.toString()),
       ));
       _sortIngredientRows();
     });
@@ -175,7 +177,7 @@ class _RecipeWidgetState extends State<RecipeWidget> {
       width: 65,
       child: DropdownButtonFormField<int>(
         style: Theme.of(context).textTheme.labelLarge,
-        value: int.tryParse(row.quantityController.text) ?? 5,
+        value: int.tryParse(row.quantityController.text) ?? defaultQuantity,
         items: List.generate(21, (index) {
           return DropdownMenuItem<int>(
             value: index,
