@@ -235,7 +235,7 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
       subtitle: widget.subtitle != null
           ? Text(
               widget.subtitle!,
-              style: TextStyle(
+              style: const TextStyle(
                 fontStyle: FontStyle.italic,
               ),
             )
