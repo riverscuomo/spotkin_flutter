@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:spotify/spotify.dart' hide Image;
 import 'package:spotkin_flutter/app_core.dart';
-import 'package:spotkin_flutter/widgets/bottom_sheets/banned_albums_bottom_sheet.dart';
+import 'package:spotkin_flutter/_archive/banned_albums_bottom_sheet.dart';
+import 'package:spotkin_flutter/widgets/bottom_sheets/banned_items_bottom_sheet.dart';
 
 import '../widgets/bottom_sheets/banned_genres_bottom_sheet.dart';
 
@@ -28,25 +29,19 @@ class SettingManagementScreen extends StatefulWidget {
 }
 
 class _SettingManagementScreenState extends State<SettingManagementScreen> {
-  late List<dynamic> _items = [];
-
   @override
   void initState() {
     super.initState();
-    _initItems();
 
     // Automatically open bottom sheet if the list is empty
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_items.isEmpty) {
+      final jobProvider = Provider.of<JobProvider>(context, listen: false);
+      final job = jobProvider.jobs[widget.jobIndex];
+      final items = _getItems(job);
+      if (items.isEmpty) {
         showSearchBottomSheet();
       }
     });
-  }
-
-  void _initItems() {
-    final jobProvider = Provider.of<JobProvider>(context, listen: false);
-    final job = jobProvider.jobs[widget.jobIndex];
-    _items = _getItems(job);
   }
 
   List<dynamic> _getItems(Job job) {
@@ -68,94 +63,35 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
     }
   }
 
-  void _updateJobAndStateFromSearchBottomSheet() {
+  void _removeItem(BuildContext context, int index, List<dynamic> items) {
     final jobProvider = Provider.of<JobProvider>(context, listen: false);
     final job = jobProvider.jobs[widget.jobIndex];
-    final updatedJob = _createUpdatedJob(job);
+    items.removeAt(index);
+    final updatedJob = _createUpdatedJob(job, items);
     jobProvider.updateJob(widget.jobIndex, updatedJob);
-    setState(() {
-      _items = _getItems(updatedJob);
-    });
-    print(
-        'Job updated in SettingManagementScreen. ${widget.fieldName} count: ${_items.length}');
   }
 
-  void showSearchBottomSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (BuildContext context) {
-        return widget.fieldName == 'bannedGenres'
-            ? BannedGenresBottomSheet(
-                jobIndex: widget.jobIndex,
-              )
-            : widget.fieldName == 'bannedAlbums'
-                ? BannedAlbumsBottomSheet(
-                    jobIndex: widget.jobIndex,
-                  )
-                : SearchBottomSheet(
-                    onItemSelected: _addItem,
-                    searchTypes: widget.searchTypes,
-                  );
-      },
-    ).then((_) {
-      // I'm sorry, this is really ugly.
-      //
-      // In order to update your list immediately after closing the bottom sheet,
-      // we need to set state in two different ways depending on the type of bottom sheet.
-      // Genres and Albums have already updated the job in their respective bottom sheets,
-      // so we only need to update the state here.
-      // For other fields, we need to update the job AND the state.
-      (widget.fieldName == 'bannedGenres' || widget.fieldName == 'bannedAlbums')
-          ? updateItemsFromSpecialBottomSheet()
-          : _updateJobAndStateFromSearchBottomSheet(); // Update immediately after closing the sheet
-    });
-  }
-
-  void updateItemsFromSpecialBottomSheet() {
-    return setState(() {
-      final jobProvider = Provider.of<JobProvider>(context, listen: false);
-      final job = jobProvider.jobs[widget.jobIndex];
-      _items = _getItems(job);
-    });
-  }
-
-  void _addItem(dynamic item) {
-    if (!_items.any((existingItem) => existingItem.id == item.id)) {
-      setState(() {
-        _items.add(item);
-        _updateJobAndStateFromSearchBottomSheet();
-      });
-    }
-  }
-
-  void _removeItem(int index) {
-    setState(() {
-      _items.removeAt(index);
-      _updateJobAndStateFromSearchBottomSheet();
-    });
-  }
-
-  Job _createUpdatedJob(Job job) {
+  Job _createUpdatedJob(Job job, List<dynamic> items) {
     switch (widget.fieldName) {
       case 'bannedArtists':
-        return job.copyWith(bannedArtists: _items as List<Artist>);
+        return job.copyWith(bannedArtists: items as List<Artist>);
       case 'bannedAlbums':
-        return job.copyWith(bannedAlbums: _items as List<AlbumSimple>);
+        return job.copyWith(bannedAlbums: items as List<AlbumSimple>);
       case 'bannedTracks':
-        return job.copyWith(bannedTracks: _items as List<Track>);
+        return job.copyWith(bannedTracks: items as List<Track>);
       case 'bannedGenres':
-        return job.copyWith(bannedGenres: _items as List<String>);
+        return job.copyWith(bannedGenres: items as List<String>);
       case 'exceptionsToBannedGenres':
-        return job.copyWith(exceptionsToBannedGenres: _items as List<Artist>);
+        return job.copyWith(exceptionsToBannedGenres: items as List<Artist>);
       case 'lastTracks':
-        return job.copyWith(lastTracks: _items as List<Track>);
+        return job.copyWith(lastTracks: items as List<Track>);
       default:
         return job;
     }
   }
 
-  Widget _buildListItem(dynamic item) {
+  Widget _buildListItem(
+      BuildContext context, dynamic item, List<dynamic> items) {
     String name = '';
     String? subtitle;
     String? imageUrl;
@@ -178,17 +114,6 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
       imageUrl = item.album?.images?.isNotEmpty == true
           ? item.album!.images!.first.url
           : null;
-    } else if (item is Album) {
-      name = item.name ?? 'Unknown Album';
-      subtitle =
-          '${item.artists?.isNotEmpty == true ? item.artists!.first.name : 'Unknown Artist'} • ${item.releaseDate ?? 'Unknown Release Date'}';
-      imageUrl =
-          item.images?.isNotEmpty == true ? item.images!.first.url : null;
-    } else if (item is PlaylistSimple) {
-      name = item.name ?? 'Unknown Playlist';
-      subtitle = 'Playlist • ${item.tracksLink?.total ?? 0} tracks';
-      imageUrl =
-          item.images?.isNotEmpty == true ? item.images!.first.url : null;
     } else if (item is String) {
       name = item;
       subtitle = '';
@@ -222,56 +147,109 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
           : null,
       trailing: IconButton(
         icon: const Icon(Icons.delete),
-        onPressed: () => _removeItem(_items.indexOf(item)),
+        onPressed: () => _removeItem(context, items.indexOf(item), items),
       ),
     );
   }
 
+  void showSearchBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        switch (widget.fieldName) {
+          case 'bannedGenres':
+            return BannedGenresBottomSheet(
+              jobIndex: widget.jobIndex,
+            );
+          case 'bannedAlbums':
+            return BannedAlbumsBottomSheet(
+              jobIndex: widget.jobIndex,
+            );
+          case 'bannedTracks':
+            return BannedTracksBottomSheet(
+              jobIndex: widget.jobIndex,
+            );
+          case 'bannedArtists':
+            return BannedArtistsBottomSheet(
+              jobIndex: widget.jobIndex,
+            );
+          default:
+            return SearchBottomSheet(
+              onItemSelected: _addItem,
+              searchTypes: widget.searchTypes,
+            );
+        }
+      },
+    );
+    // No need for .then() since UI updates via Consumer
+  }
+
+  void _addItem(dynamic item) {
+    final jobProvider = Provider.of<JobProvider>(context, listen: false);
+    final job = jobProvider.jobs[widget.jobIndex];
+    final items = _getItems(job);
+
+    if (!items.any((existingItem) => existingItem.id == item.id)) {
+      items.add(item);
+      final updatedJob = _createUpdatedJob(job, items);
+      jobProvider.updateJob(widget.jobIndex, updatedJob);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.info_outline),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(widget.tooltip),
-                  duration: const Duration(seconds: 3),
+    return Consumer<JobProvider>(
+      builder: (context, jobProvider, child) {
+        final job = jobProvider.jobs[widget.jobIndex];
+        final items = _getItems(job);
+
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(widget.title),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.info_outline),
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(widget.tooltip),
+                      duration: const Duration(seconds: 3),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+          body: Column(
+            children: [
+              items.isEmpty
+                  ? Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        getEmptySettingString(widget.fieldName),
+                        style: Theme.of(context).textTheme.labelMedium,
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ElevatedButton(
+                  onPressed: showSearchBottomSheet,
+                  child: const Text('Add New Item'),
                 ),
-              );
-            },
+              ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: items.length,
+                  itemBuilder: (context, index) =>
+                      _buildListItem(context, items[index], items),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-      body: Column(
-        children: [
-          _items.isEmpty
-              ? Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    getEmptySettingString(widget.fieldName),
-                    style: Theme.of(context).textTheme.labelMedium,
-                  ),
-                )
-              : const SizedBox.shrink(),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ElevatedButton(
-              onPressed: showSearchBottomSheet,
-              child: const Text('Add New Item'),
-            ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: _items.length,
-              itemBuilder: (context, index) => _buildListItem(_items[index]),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
