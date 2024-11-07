@@ -98,17 +98,17 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
   Job _createUpdatedJob(Job job, List<dynamic> items) {
     switch (widget.fieldName) {
       case 'bannedArtists':
-        return job.copyWith(bannedArtists: items as List<Artist>);
+        return job.copyWith(bannedArtists: List<Artist>.from(items));
       case 'bannedAlbums':
-        return job.copyWith(bannedAlbums: items as List<AlbumSimple>);
+        return job.copyWith(bannedAlbums: List<AlbumSimple>.from(items));
       case 'bannedTracks':
-        return job.copyWith(bannedTracks: items as List<Track>);
+        return job.copyWith(bannedTracks: List<Track>.from(items));
       case 'bannedGenres':
-        return job.copyWith(bannedGenres: items as List<String>);
+        return job.copyWith(bannedGenres: List<String>.from(items));
       case 'exceptionsToBannedGenres':
-        return job.copyWith(exceptionsToBannedGenres: items as List<Artist>);
+        return job.copyWith(exceptionsToBannedGenres: List<Artist>.from(items));
       case 'lastTracks':
-        return job.copyWith(lastTracks: items as List<Track>);
+        return job.copyWith(lastTracks: List<Track>.from(items));
       default:
         return job;
     }
