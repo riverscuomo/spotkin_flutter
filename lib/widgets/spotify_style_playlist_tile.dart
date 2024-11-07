@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:spotify/spotify.dart' hide Image;
 import 'package:spotkin_flutter/app_core.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class SpotifyStylePlaylistTile extends StatelessWidget {
   final PlaylistSimple playlist;
@@ -72,11 +73,11 @@ class PlaylistImageIcon extends StatelessWidget {
     String? imageUrl;
     if (size > 100) {
       imageUrl = playlist.images?.isNotEmpty == true
-          ? playlist.images!.first.url
+          ? playlist.images?.first.url
           : null;
     } else {
       imageUrl = playlist.images?.isNotEmpty == true
-          ? playlist.images!.last.url
+          ? playlist.images?.last.url
           : null;
     }
 
@@ -90,15 +91,33 @@ class PlaylistImageIcon extends StatelessWidget {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(8),
           child: imageUrl != null
-              ? Image.network(
-                  imageUrl,
+              ? CachedNetworkImage(
+                  imageUrl: imageUrl,
                   width: size,
                   height: size,
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) =>
-                      _buildPlaceholder(),
+                  placeholder: (context, url) => _buildLoadingIndicator(),
+                  errorWidget: (context, url, error) => _buildPlaceholder(),
                 )
               : _buildPlaceholder(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingIndicator() {
+    return Container(
+      width: size,
+      height: size,
+      color: Colors.grey[200],
+      child: Center(
+        child: SizedBox(
+          width: size * 0.3,
+          height: size * 0.3,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.grey[600]!),
+          ),
         ),
       ),
     );

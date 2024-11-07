@@ -133,6 +133,27 @@ class _SettingsCardState extends State<SettingsCard> {
     super.dispose();
   }
 
+  void _navigateSettingManagementScreen(
+    BuildContext context,
+    String title,
+    String fieldName,
+    String tooltip,
+    List<SearchType> searchTypes,
+  ) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SettingManagementScreen(
+          title: title,
+          jobIndex: widget.index,
+          fieldName: fieldName,
+          tooltip: tooltip,
+          searchTypes: searchTypes,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<JobProvider>(
@@ -373,27 +394,6 @@ class _SettingsCardState extends State<SettingsCard> {
           ),
         );
       },
-    );
-  }
-
-  void _navigateSettingManagementScreen(
-    BuildContext context,
-    String title,
-    String fieldName,
-    String tooltip,
-    List<SearchType> searchTypes,
-  ) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SettingManagementScreen(
-          title: title,
-          jobIndex: widget.index,
-          fieldName: fieldName,
-          tooltip: tooltip,
-          searchTypes: searchTypes,
-        ),
-      ),
     );
   }
 }

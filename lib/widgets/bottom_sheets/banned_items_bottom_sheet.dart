@@ -3,11 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:spotify/spotify.dart' hide Image;
 import 'package:spotkin_flutter/app_core.dart';
 
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:spotify/spotify.dart' hide Image;
-import 'package:spotkin_flutter/app_core.dart';
-
 abstract class BannedItemsBottomSheet<ItemType> extends StatefulWidget {
   final int jobIndex;
 
