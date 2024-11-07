@@ -52,7 +52,7 @@ class TargetPlaylistWidget extends StatelessWidget {
                 Column(
                   children: [
                     PlaylistImageIcon(
-                      playlist: targetPlaylist!,
+                      playlist: targetPlaylist,
                       size: 160,
                     ),
                     const SizedBox(height: 16),

@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:spotify/spotify.dart' hide Image;
 import 'package:spotkin_flutter/app_core.dart';
 import 'package:spotkin_flutter/widgets/bottom_sheets/banned_items_bottom_sheet.dart';
-
 import '../widgets/bottom_sheets/banned_genres_bottom_sheet.dart';
 
 class SettingManagementScreen extends StatefulWidget {
@@ -31,8 +30,6 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
   @override
   void initState() {
     super.initState();
-
-    // Automatically open bottom sheet if the list is empty
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final jobProvider = Provider.of<JobProvider>(context, listen: false);
       final job = jobProvider.jobs[widget.jobIndex];
@@ -62,31 +59,211 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
     }
   }
 
-  void _removeItem(BuildContext context, int index, List<dynamic> items) {
+  void showSearchBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        switch (widget.fieldName) {
+          case 'bannedGenres':
+            return BannedGenresBottomSheet(jobIndex: widget.jobIndex);
+          case 'bannedAlbums':
+            return BannedAlbumsBottomSheet(jobIndex: widget.jobIndex);
+          case 'bannedTracks':
+            return BannedTracksBottomSheet(jobIndex: widget.jobIndex);
+          case 'bannedArtists':
+            return BannedArtistsBottomSheet(jobIndex: widget.jobIndex);
+          default:
+            return SearchBottomSheet(
+              onItemSelected: _addItem,
+              searchTypes: widget.searchTypes,
+            );
+        }
+      },
+    );
+  }
+
+  void _addItem(dynamic item) {
     final jobProvider = Provider.of<JobProvider>(context, listen: false);
     final job = jobProvider.jobs[widget.jobIndex];
-    items.removeAt(index);
-    final updatedJob = _createUpdatedJob(job, items);
-    jobProvider.updateJob(widget.jobIndex, updatedJob);
+    final items = _getItems(job);
+
+    if (!items.any((existingItem) => existingItem.id == item.id)) {
+      items.add(item);
+      final updatedJob = _createUpdatedJob(job, items);
+      jobProvider.updateJob(widget.jobIndex, updatedJob);
+    }
   }
 
   Job _createUpdatedJob(Job job, List<dynamic> items) {
     switch (widget.fieldName) {
       case 'bannedArtists':
-        return job.copyWith(bannedArtists: items as List<Artist>);
+        return job.copyWith(bannedArtists: List<Artist>.from(items));
       case 'bannedAlbums':
-        return job.copyWith(bannedAlbums: items as List<AlbumSimple>);
+        return job.copyWith(bannedAlbums: List<AlbumSimple>.from(items));
       case 'bannedTracks':
-        return job.copyWith(bannedTracks: items as List<Track>);
+        return job.copyWith(bannedTracks: List<Track>.from(items));
       case 'bannedGenres':
-        return job.copyWith(bannedGenres: items as List<String>);
+        return job.copyWith(bannedGenres: List<String>.from(items));
       case 'exceptionsToBannedGenres':
-        return job.copyWith(exceptionsToBannedGenres: items as List<Artist>);
+        return job.copyWith(exceptionsToBannedGenres: List<Artist>.from(items));
       case 'lastTracks':
-        return job.copyWith(lastTracks: items as List<Track>);
+        return job.copyWith(lastTracks: List<Track>.from(items));
       default:
         return job;
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.info_outline),
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(widget.tooltip),
+                  duration: const Duration(seconds: 3),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+      body: Consumer<JobProvider>(
+        builder: (context, jobProvider, child) {
+          final job = jobProvider.jobs[widget.jobIndex];
+          final bannedItems =
+              _getItems(job); // These are the banned items from the job
+
+          return Column(
+            children: [
+              if (bannedItems.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    getEmptySettingString(widget.fieldName),
+                    style: Theme.of(context).textTheme.labelMedium,
+                  ),
+                ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ElevatedButton(
+                  onPressed: showSearchBottomSheet,
+                  child: const Text('Add New Item'),
+                ),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: bannedItems.length,
+                  itemBuilder: (context, index) {
+                    final item = bannedItems[index];
+                    return ListTile(
+                      leading: _buildLeadingImage(item),
+                      title: Text(_getItemTitle(item)),
+                      subtitle: _buildSubtitle(context, item),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () {
+                          final updatedItems = List<dynamic>.from(bannedItems)
+                            ..removeAt(index);
+                          final updatedJob =
+                              _createUpdatedJob(job, updatedItems);
+                          jobProvider.updateJob(widget.jobIndex, updatedJob);
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildLeadingImage(dynamic item) {
+    String? imageUrl;
+    if (item is Artist) {
+      imageUrl =
+          item.images?.isNotEmpty == true ? item.images!.first.url : null;
+    } else if (item is AlbumSimple) {
+      imageUrl =
+          item.images?.isNotEmpty == true ? item.images!.first.url : null;
+    } else if (item is Track) {
+      imageUrl = item.album?.images?.isNotEmpty == true
+          ? item.album!.images!.first.url
+          : null;
+    }
+
+    if (imageUrl != null) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(4),
+        child: Image.network(
+          imageUrl,
+          width: 50,
+          height: 50,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) =>
+              const Icon(Icons.music_note, size: 50),
+        ),
+      );
+    }
+    return const Icon(Icons.music_note, size: 50);
+  }
+
+  String _getItemTitle(dynamic item) {
+    if (item is Artist) return item.name ?? 'Unknown Artist';
+    if (item is AlbumSimple) return item.name ?? 'Unknown Album';
+    if (item is Track) return item.name ?? 'Unknown Track';
+    if (item is String) return item;
+    return 'Unknown Item';
+  }
+
+  Widget? _buildSubtitle(BuildContext context, dynamic item) {
+    String? subtitle;
+    if (item is Artist) {
+      subtitle = 'Artist • Popularity: ${item.popularity ?? 'N/A'}';
+    } else if (item is AlbumSimple) {
+      subtitle =
+          '${item.artists?.isNotEmpty == true ? item.artists!.first.name : 'Unknown Artist'} • ${item.releaseDate ?? 'Unknown Release Date'}';
+    } else if (item is Track) {
+      subtitle =
+          '${item.artists?.isNotEmpty == true ? item.artists!.first.name : 'Unknown Artist'} • ${item.album?.name ?? 'Unknown Album'}';
+    }
+
+    return subtitle != null
+        ? Text(
+            subtitle,
+            style: Theme.of(context).textTheme.labelSmall,
+          )
+        : null;
+  }
+}
+
+class _ItemsList extends StatelessWidget {
+  final int jobIndex;
+  final String fieldName;
+  final List<dynamic> Function(Job) getItems;
+  final Job Function(Job, List<dynamic>) createUpdatedJob;
+
+  const _ItemsList({
+    required this.jobIndex,
+    required this.fieldName,
+    required this.getItems,
+    required this.createUpdatedJob,
+  });
+
+  void _removeItem(BuildContext context, int index, List<dynamic> items) {
+    final jobProvider = Provider.of<JobProvider>(context, listen: false);
+    final job = jobProvider.jobs[jobIndex];
+    items.removeAt(index);
+    final updatedJob = createUpdatedJob(job, items);
+    jobProvider.updateJob(jobIndex, updatedJob);
   }
 
   Widget _buildListItem(
@@ -151,102 +328,26 @@ class _SettingManagementScreenState extends State<SettingManagementScreen> {
     );
   }
 
-  void showSearchBottomSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (BuildContext context) {
-        switch (widget.fieldName) {
-          case 'bannedGenres':
-            return BannedGenresBottomSheet(
-              jobIndex: widget.jobIndex,
-            );
-          case 'bannedAlbums':
-            return BannedAlbumsBottomSheet(
-              jobIndex: widget.jobIndex,
-            );
-          case 'bannedTracks':
-            return BannedTracksBottomSheet(
-              jobIndex: widget.jobIndex,
-            );
-          case 'bannedArtists':
-            return BannedArtistsBottomSheet(
-              jobIndex: widget.jobIndex,
-            );
-          default:
-            return SearchBottomSheet(
-              onItemSelected: _addItem,
-              searchTypes: widget.searchTypes,
-            );
-        }
-      },
-    );
-    // No need for .then() since UI updates via Consumer
-  }
-
-  void _addItem(dynamic item) {
-    final jobProvider = Provider.of<JobProvider>(context, listen: false);
-    final job = jobProvider.jobs[widget.jobIndex];
-    final items = _getItems(job);
-
-    if (!items.any((existingItem) => existingItem.id == item.id)) {
-      items.add(item);
-      final updatedJob = _createUpdatedJob(job, items);
-      jobProvider.updateJob(widget.jobIndex, updatedJob);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Consumer<JobProvider>(
       builder: (context, jobProvider, child) {
-        final job = jobProvider.jobs[widget.jobIndex];
-        final items = _getItems(job);
+        final job = jobProvider.jobs[jobIndex];
+        final items = getItems(job);
 
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(widget.title),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.info_outline),
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(widget.tooltip),
-                      duration: const Duration(seconds: 3),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-          body: Column(
-            children: [
-              items.isEmpty
-                  ? Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        getEmptySettingString(widget.fieldName),
-                        style: Theme.of(context).textTheme.labelMedium,
-                      ),
-                    )
-                  : const SizedBox.shrink(),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ElevatedButton(
-                  onPressed: showSearchBottomSheet,
-                  child: const Text('Add New Item'),
-                ),
-              ),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: items.length,
-                  itemBuilder: (context, index) =>
-                      _buildListItem(context, items[index], items),
-                ),
-              ),
-            ],
-          ),
+        if (items.isEmpty) {
+          return Center(
+            child: Text(
+              getEmptySettingString(fieldName),
+              style: Theme.of(context).textTheme.labelMedium,
+            ),
+          );
+        }
+
+        return ListView.builder(
+          itemCount: items.length,
+          itemBuilder: (context, index) =>
+              _buildListItem(context, items[index], items),
         );
       },
     );

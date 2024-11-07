@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:spotify/spotify.dart' hide Image;
 import 'package:spotkin_flutter/app_core.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class SpotifyStylePlaylistTile extends StatelessWidget {
   final PlaylistSimple playlist;
@@ -69,36 +70,68 @@ class PlaylistImageIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Debug prints to check playlist images
+    print('Playlist name: ${playlist.name}');
+    print('All images: ${playlist.images?.map((img) => img.url).toList()}');
+
     String? imageUrl;
-    if (size > 100) {
-      imageUrl = playlist.images?.isNotEmpty == true
-          ? playlist.images!.first.url
-          : null;
+    if (playlist.images == null || playlist.images!.isEmpty) {
+      print('No images available for playlist');
+      imageUrl = null;
+    } else if (size > 100) {
+      imageUrl = playlist.images!.first.url;
+      print('Selected large image URL: $imageUrl');
     } else {
-      imageUrl = playlist.images?.isNotEmpty == true
-          ? playlist.images!.last.url
-          : null;
+      imageUrl = playlist.images!.last.url;
+      print('Selected small image URL: $imageUrl');
     }
 
     return InkWell(
       onTap: () {
-        Utils.myLaunch(playlist.externalUrls?.spotify ?? '');
+        if (playlist.externalUrls?.spotify != null) {
+          Utils.myLaunch(playlist.externalUrls!.spotify ?? '');
+        }
       },
       child: SizedBox(
         width: size,
         height: size,
         child: ClipRRect(
           borderRadius: BorderRadius.circular(8),
-          child: imageUrl != null
-              ? Image.network(
-                  imageUrl,
+          child: imageUrl != null && imageUrl.isNotEmpty
+              ? CachedNetworkImage(
+                  imageUrl: imageUrl,
                   width: size,
                   height: size,
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) =>
-                      _buildPlaceholder(),
+                  placeholder: (context, url) {
+                    print('Loading image: $url');
+                    return _buildLoadingIndicator();
+                  },
+                  errorWidget: (context, url, error) {
+                    print('Error loading image: $url');
+                    print('Error details: $error');
+                    return _buildPlaceholder();
+                  },
                 )
               : _buildPlaceholder(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingIndicator() {
+    return Container(
+      width: size,
+      height: size,
+      color: Colors.grey[200],
+      child: Center(
+        child: SizedBox(
+          width: size * 0.3,
+          height: size * 0.3,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.grey[600]!),
+          ),
         ),
       ),
     );

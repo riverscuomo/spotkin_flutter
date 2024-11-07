@@ -31,6 +31,7 @@ dependencies:
   audioplayers: ^6.0.0
   flutter:
     sdk: flutter
+  cached_network_image: ^3.3.0  # or the latest version
   flutter_secure_storage: ^8.0.0
   flutter_dotenv: ^5.0.2
   flutter_web_auth_2: ^3.1.2

@@ -49,12 +49,25 @@ class JobProvider extends ChangeNotifier {
   }
 
   Future<void> updateJob(int index, Job updatedJob) async {
+    // Store the original job in case we need to revert
+    final originalJob = _jobs[index];
+
     try {
-      notifyListeners();
-      await _backendService.updateJob(updatedJob);
+      // Update local state immediately
       _jobs[index] = updatedJob;
+      notifyListeners();
+
+      // Then update backend
+      await _backendService.updateJob(updatedJob);
     } catch (e) {
+      // If backend update fails, revert to original state
       print('Error updating job: $e');
+      _jobs[index] = originalJob;
+      notifyListeners();
+
+      // Optionally show an error message to the user
+      // You'll need to have access to a BuildContext or use a different state management
+      // solution for showing errors
     }
   }
 
