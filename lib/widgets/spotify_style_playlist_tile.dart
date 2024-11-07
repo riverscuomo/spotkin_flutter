@@ -70,34 +70,48 @@ class PlaylistImageIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Debug prints to check playlist images
+    print('Playlist name: ${playlist.name}');
+    print('All images: ${playlist.images?.map((img) => img.url).toList()}');
+
     String? imageUrl;
-    if (size > 100) {
-      imageUrl = playlist.images?.isNotEmpty == true
-          ? playlist.images?.first.url
-          : null;
+    if (playlist.images == null || playlist.images!.isEmpty) {
+      print('No images available for playlist');
+      imageUrl = null;
+    } else if (size > 100) {
+      imageUrl = playlist.images!.first.url;
+      print('Selected large image URL: $imageUrl');
     } else {
-      imageUrl = playlist.images?.isNotEmpty == true
-          ? playlist.images?.last.url
-          : null;
+      imageUrl = playlist.images!.last.url;
+      print('Selected small image URL: $imageUrl');
     }
 
     return InkWell(
       onTap: () {
-        Utils.myLaunch(playlist.externalUrls?.spotify ?? '');
+        if (playlist.externalUrls?.spotify != null) {
+          Utils.myLaunch(playlist.externalUrls!.spotify ?? '');
+        }
       },
       child: SizedBox(
         width: size,
         height: size,
         child: ClipRRect(
           borderRadius: BorderRadius.circular(8),
-          child: imageUrl != null
+          child: imageUrl != null && imageUrl.isNotEmpty
               ? CachedNetworkImage(
                   imageUrl: imageUrl,
                   width: size,
                   height: size,
                   fit: BoxFit.cover,
-                  placeholder: (context, url) => _buildLoadingIndicator(),
-                  errorWidget: (context, url, error) => _buildPlaceholder(),
+                  placeholder: (context, url) {
+                    print('Loading image: $url');
+                    return _buildLoadingIndicator();
+                  },
+                  errorWidget: (context, url, error) {
+                    print('Error loading image: $url');
+                    print('Error details: $error');
+                    return _buildPlaceholder();
+                  },
                 )
               : _buildPlaceholder(),
         ),
