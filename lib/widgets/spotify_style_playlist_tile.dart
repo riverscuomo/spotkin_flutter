@@ -71,8 +71,8 @@ class PlaylistImageIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Debug prints to check playlist images
-    print('Playlist name: ${playlist.name}');
-    print('All images: ${playlist.images?.map((img) => img.url).toList()}');
+    // print('Playlist name: ${playlist.name}');
+    // print('All images: ${playlist.images?.map((img) => img.url).toList()}');
 
     String? imageUrl;
     if (playlist.images == null || playlist.images!.isEmpty) {
@@ -80,10 +80,10 @@ class PlaylistImageIcon extends StatelessWidget {
       imageUrl = null;
     } else if (size > 100) {
       imageUrl = playlist.images!.first.url;
-      print('Selected large image URL: $imageUrl');
+      // print('Selected large image URL: $imageUrl');
     } else {
       imageUrl = playlist.images!.last.url;
-      print('Selected small image URL: $imageUrl');
+      // print('Selected small image URL: $imageUrl');
     }
 
     return InkWell(
