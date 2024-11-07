@@ -187,18 +187,20 @@ class _BannedAlbumsBottomSheetState
       return const SizedBox();
     }
 
-    return Card(
+    // Check if this album is already banned
+    bool isAlreadyBanned =
+        _bannedItems.any((bannedAlbum) => bannedAlbum.id == album.id);
+
+    Widget albumCard = Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // First row with album image, title, and artist name
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Square Album Image
                 album.images?.isNotEmpty == true
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(4.0),
@@ -215,14 +217,11 @@ class _BannedAlbumsBottomSheetState
                         child: Icon(Icons.album, size: 40),
                       ),
                 const SizedBox(width: 16),
-
-                // Album title and artist name
                 Expanded(
                   flex: 3,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Album title
                       Text(
                         album.name ?? 'Unknown Album',
                         style: const TextStyle(
@@ -243,21 +242,32 @@ class _BannedAlbumsBottomSheetState
                     ],
                   ),
                 ),
-
-                // Ban Album button
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
+                    backgroundColor:
+                        isAlreadyBanned ? Colors.grey[800] : Colors.red,
                     foregroundColor: Colors.white,
                   ),
-                  onPressed: () => _addItemToBanned(album),
-                  child: const Text('Ban'),
+                  onPressed: () {
+                    if (isAlreadyBanned) {
+                      // Remove from banned items
+                      setState(() {
+                        _bannedItems.removeWhere(
+                            (bannedAlbum) => bannedAlbum.id == album.id);
+                        _updateJob();
+                        _feedbackMessage =
+                            '${album.name} removed from banned albums';
+                      });
+                    } else {
+                      // Add to banned items
+                      _addItemToBanned(album);
+                    }
+                  },
+                  child: Text(isAlreadyBanned ? 'Banned' : 'Ban'),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-
-            // Song titles
             Text(
               tracks.map((track) => track.name ?? 'Unknown Track').join(' • '),
               style: const TextStyle(fontSize: 14),
@@ -267,6 +277,15 @@ class _BannedAlbumsBottomSheetState
         ),
       ),
     );
+
+    if (isAlreadyBanned) {
+      return Opacity(
+        opacity: 0.6,
+        child: albumCard,
+      );
+    }
+
+    return albumCard;
   }
 
   @override
@@ -412,23 +431,25 @@ class _BannedArtistsBottomSheetState
     return _buildArtistWidget(item, tracks);
   }
 
+// In _BannedArtistsBottomSheetState
   Widget _buildArtistWidget(Artist? artist, List<Track>? tracks) {
     if (artist == null || tracks == null) {
       return const SizedBox();
     }
 
-    return Card(
+    bool isAlreadyBanned =
+        _bannedItems.any((bannedArtist) => bannedArtist.id == artist.id);
+
+    Widget artistCard = Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // First row with artist image and name
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Circular Artist Image
                 artist.images?.isNotEmpty == true
                     ? CircleAvatar(
                         backgroundImage:
@@ -440,8 +461,6 @@ class _BannedArtistsBottomSheetState
                         child: Icon(Icons.person, size: 40),
                       ),
                 const SizedBox(width: 16),
-
-                // Artist name
                 Expanded(
                   flex: 3,
                   child: Text(
@@ -454,21 +473,30 @@ class _BannedArtistsBottomSheetState
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-
-                // Ban Artist button
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
+                    backgroundColor:
+                        isAlreadyBanned ? Colors.grey[800] : Colors.red,
                     foregroundColor: Colors.white,
                   ),
-                  onPressed: () => _addItemToBanned(artist),
-                  child: const Text('Ban'),
+                  onPressed: () {
+                    if (isAlreadyBanned) {
+                      setState(() {
+                        _bannedItems.removeWhere(
+                            (bannedArtist) => bannedArtist.id == artist.id);
+                        _updateJob();
+                        _feedbackMessage =
+                            '${artist.name} removed from banned artists';
+                      });
+                    } else {
+                      _addItemToBanned(artist);
+                    }
+                  },
+                  child: Text(isAlreadyBanned ? 'Banned' : 'Ban'),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-
-            // Song titles
             Text(
               tracks.map((track) => track.name ?? 'Unknown Track').join(' • '),
               style: const TextStyle(fontSize: 14),
@@ -478,6 +506,15 @@ class _BannedArtistsBottomSheetState
         ),
       ),
     );
+
+    if (isAlreadyBanned) {
+      return Opacity(
+        opacity: 0.6,
+        child: artistCard,
+      );
+    }
+
+    return artistCard;
   }
 
   @override
@@ -587,7 +624,10 @@ class _BannedTracksBottomSheetState
   }
 
   Widget _buildTrackWidget(Track track) {
-    return ListTile(
+    bool isAlreadyBanned =
+        _bannedItems.any((bannedTrack) => bannedTrack.id == track.id);
+
+    Widget trackCard = ListTile(
       leading: track.album?.images?.isNotEmpty == true
           ? Image.network(
               track.album!.images!.first.url!,
@@ -609,13 +649,33 @@ class _BannedTracksBottomSheetState
       ),
       trailing: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.red,
+          backgroundColor: isAlreadyBanned ? Colors.grey[800] : Colors.red,
           foregroundColor: Colors.white,
         ),
-        onPressed: () => _addItemToBanned(track),
-        child: const Text('Ban'),
+        onPressed: () {
+          if (isAlreadyBanned) {
+            setState(() {
+              _bannedItems
+                  .removeWhere((bannedTrack) => bannedTrack.id == track.id);
+              _updateJob();
+              _feedbackMessage = '${track.name} removed from banned tracks';
+            });
+          } else {
+            _addItemToBanned(track);
+          }
+        },
+        child: Text(isAlreadyBanned ? 'Banned' : 'Ban'),
       ),
     );
+
+    if (isAlreadyBanned) {
+      return Opacity(
+        opacity: 0.6,
+        child: trackCard,
+      );
+    }
+
+    return trackCard;
   }
 
   @override
