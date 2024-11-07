@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:spotify/spotify.dart' hide Image;
 import 'package:spotkin_flutter/app_core.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
 class SpotifyStylePlaylistTile extends StatelessWidget {
   final PlaylistSimple playlist;
@@ -70,20 +69,15 @@ class PlaylistImageIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Debug prints to check playlist images
-    print('Playlist name: ${playlist.name}');
-    print('All images: ${playlist.images?.map((img) => img.url).toList()}');
-
     String? imageUrl;
-    if (playlist.images == null || playlist.images!.isEmpty) {
-      print('No images available for playlist');
-      imageUrl = null;
-    } else if (size > 100) {
-      imageUrl = playlist.images!.first.url;
-      print('Selected large image URL: $imageUrl');
+    if (size > 100) {
+      imageUrl = playlist.images?.isNotEmpty == true
+          ? playlist.images?.first.url
+          : null;
     } else {
-      imageUrl = playlist.images!.last.url;
-      print('Selected small image URL: $imageUrl');
+      imageUrl = playlist.images?.isNotEmpty == true
+          ? playlist.images?.last.url
+          : null;
     }
 
     return InkWell(
@@ -97,21 +91,25 @@ class PlaylistImageIcon extends StatelessWidget {
         height: size,
         child: ClipRRect(
           borderRadius: BorderRadius.circular(8),
-          child: imageUrl != null && imageUrl.isNotEmpty
-              ? CachedNetworkImage(
-                  imageUrl: imageUrl,
+          child: imageUrl != null
+              ? Image.network(
+                  imageUrl,
                   width: size,
                   height: size,
                   fit: BoxFit.cover,
-                  placeholder: (context, url) {
-                    print('Loading image: $url');
-                    return _buildLoadingIndicator();
-                  },
-                  errorWidget: (context, url, error) {
-                    print('Error loading image: $url');
-                    print('Error details: $error');
+                  errorBuilder: (context, error, stackTrace) {
+                    // Log the error without breaking
+                    debugPrint('Error loading image: $imageUrl');
+                    debugPrint('Error details: $error');
                     return _buildPlaceholder();
                   },
+                  // frameBuilder:
+                  //     (context, child, frame, wasSynchronouslyLoaded) {
+                  //   if (frame == null) {
+                  //     return _buildLoadingIndicator();
+                  //   }
+                  //   return child;
+                  // },
                 )
               : _buildPlaceholder(),
         ),
