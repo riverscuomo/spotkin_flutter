@@ -109,3 +109,20 @@ List<Widget> buildSettingsInfoSheetContent(BuildContext context) {
     ),
   ];
 }
+
+List<Widget> buildAcousticnessInfoSheetContent(BuildContext context) {
+  final theme = Theme.of(context);
+
+  return [
+    Text(
+      'Higher values (closer to 100) indicate that a track has strong acoustic qualities, meaning it likely features traditional acoustic instruments (like guitar, piano, or vocals without heavy electronic processing).',
+      style: theme.textTheme.bodyMedium,
+    ),
+    gap,
+    Text(
+      'Lower values (closer to 0) suggest that a track is more likely to be produced electronically or features heavier processing, synthetic sounds, or amplified instrumentation.',
+      style: theme.textTheme.bodyMedium,
+    )
+  ];
+}
+
