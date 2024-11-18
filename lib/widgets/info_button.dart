@@ -32,3 +32,19 @@ class SettingsInfoButton extends StatelessWidget {
     );
   }
 }
+
+class AcousticnessInfoButton extends StatelessWidget {
+  const AcousticnessInfoButton({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.info),
+      onPressed: () {
+        showAcousticnessInfoBottomSheet(context);
+      },
+    );
+  }
+}

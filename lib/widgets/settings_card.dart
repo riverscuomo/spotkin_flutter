@@ -82,11 +82,17 @@ class _SettingsCardState extends State<SettingsCard> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                fontSize: 16,
-              ),
+        Row(
+          children: [
+            Text(
+              title,
+              style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                    fontSize: 16,
+                    ),
+            ), 
+            if (title == 'Acousticness') // add button for acousticness info
+              const AcousticnessInfoButton(),
+          ],
         ),
         const SizedBox(height: 8),
         Row(

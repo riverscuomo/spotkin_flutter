@@ -134,3 +134,12 @@ void showSettingsInfoBottomSheet(BuildContext context) {
     showImage: true,
   );
 }
+
+void showAcousticnessInfoBottomSheet(BuildContext context) {
+  CustomBottomSheet.show(
+    context: context,
+    title: const Text('About Acousticness'),
+    content: buildAcousticnessInfoSheetContent(context),
+    showImage: true,
+  );
+}
