@@ -23,7 +23,9 @@ class _UpdateButtonState extends State<UpdateButton> {
   @override
   void initState() {
     super.initState();
-    _audioPlayer.setSource(AssetSource('sounds/update_button_sound.mp3'));
+    // _audioPlayer.setSource(AssetSource('sounds/baby_giggle.mp3'));
+    // Set initial volume (0.0 to 1.0)
+    _audioPlayer.setVolume(0.2);
   }
 
   @override
@@ -34,7 +36,7 @@ class _UpdateButtonState extends State<UpdateButton> {
 
   void _handlePress() async {
     if (!widget.isProcessing) {
-      await _audioPlayer.play(AssetSource('sounds/update_button_sound.mp3'));
+      await _audioPlayer.play(AssetSource('sounds/baby_giggle.mp3'));
       widget.onPressed();
     }
   }
