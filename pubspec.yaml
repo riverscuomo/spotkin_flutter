@@ -77,7 +77,7 @@ flutter:
     - assets/images/spotkin.jpg
     - assets/images/cropped_spotkin.jpg
     - assets/images/transparent_spotkin.png
-    - assets/sounds/update_button_sound.mp3
+    - assets/sounds/baby_giggle.mp3
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
