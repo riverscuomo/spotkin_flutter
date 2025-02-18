@@ -20,6 +20,11 @@ final spotifyThemeData = ThemeData(
       borderRadius: BorderRadius.circular(20),
     ),
   ),
+   textButtonTheme: TextButtonThemeData(
+    style: ButtonStyle(
+      foregroundColor: MaterialStateProperty.all(Colors.white),
+    ),
+  ),
   expansionTileTheme: ExpansionTileThemeData(
     backgroundColor: spotifyWidgetColor,
     collapsedBackgroundColor: spotifyWidgetColor,
@@ -61,6 +66,9 @@ final spotifyThemeData = ThemeData(
       borderSide: const BorderSide(color: Colors.white24),
     ),
     labelStyle: const TextStyle(color: Colors.white54),
+  ),
+  progressIndicatorTheme: const ProgressIndicatorThemeData(
+    color: Colors.green, 
   ),
   iconTheme: const IconThemeData(color: Colors.white),
   dividerTheme: const DividerThemeData(
