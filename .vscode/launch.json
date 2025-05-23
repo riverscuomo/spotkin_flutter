@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Flutter Web",
+      "name": "Spotkin Web Client",
       "request": "launch",
       "type": "dart",
       "program": "lib/main.dart",

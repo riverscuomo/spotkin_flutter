@@ -23,7 +23,7 @@ To run locally,  I use these launch settings in vscode:
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Flutter Web",
+      "name": "Spotkin Flutter Web Client",
       "request": "launch",
       "type": "dart",
       "program": "lib/main.dart",
