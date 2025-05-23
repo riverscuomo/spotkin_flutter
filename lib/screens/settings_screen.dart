@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:spotkin_flutter/app_core.dart';
+import '../widgets/debug_label_wrapper.dart';
 
 class SettingsScreen extends StatelessWidget {
   final int index;
@@ -25,13 +26,13 @@ class SettingsScreen extends StatelessWidget {
                 const SizedBox(height: 16),
                 SettingsCard(
                   index: index,
-                ),
+                ).withDebugLabel('SettingsCard'),
               ],
-            ),
+            ).withDebugLabel('SettingsListView'),
           ),
           const SizedBox(height: 16),
         ],
-      ),
-    );
+      ).withDebugLabel('SettingsColumn'),
+    ).withDebugLabel('SettingsScaffold');
   }
 }

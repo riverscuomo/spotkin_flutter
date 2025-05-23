@@ -5,6 +5,7 @@ import 'package:spotify/spotify.dart';
 import 'package:spotkin_flutter/app_core.dart';
 import '../widgets/target_playlist_widget.dart';
 import 'package:uuid/uuid.dart';
+import '../widgets/debug_label_wrapper.dart';
 
 class HomeScreen extends StatefulWidget {
   final Map<String, dynamic> config;
@@ -199,7 +200,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     // _updateTabController();
   }
 
-  Widget _buildRecipeCard(Job job, int index) {
+  Widget _buildRecipeContainer(Job job, int index) {
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).scaffoldBackgroundColor,
@@ -259,9 +260,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Consumer<JobProvider>(
       builder: (context, jobProvider, child) {
         if (jobProvider.isLoading) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+          return Center(
+            child: CircularProgressIndicator().withDebugLabel('HomeLoader'),
+          ).withDebugLabel('LoadingCenter');
         }
 
         final jobs = jobProvider.jobs;
@@ -298,30 +299,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       _isExpanded = expanded;
                     });
                   },
-                ),
+                ).withDebugLabel('TargetPlaylistWidget'),
                 SizedBox(height: widgetPadding),
-                if (!job.isNull) _buildRecipeCard(job, jobEntry.key),
+                if (!job.isNull)
+                  _buildRecipeContainer(job, jobEntry.key)
+                      .withDebugLabel('RecipeContainer'),
               ],
             ),
-
-            // if (_showAddJobButton)
-            //   SingleChildScrollView(
-            //     child: Column(
-            //       children: [
-            //         const SizedBox(height: 15),
-            //         ElevatedButton(
-            //           onPressed: () {
-            //             _addNewJob(Job.empty());
-            //           },
-            //           child: const Text('Add new job'),
-            //         ),
-            //       ],
-            //     ),
-            //   ),
-            // ],
           ),
-          // ),
-        );
+        ).withDebugLabel('HomeScaffold');
       },
     );
   }

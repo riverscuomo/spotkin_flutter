@@ -7,3 +7,4 @@ export 'settings_button.dart';
 export 'settings_card.dart';
 export 'spotify_style_playlist_tile.dart';
 export 'ui.dart';
+export 'debug_label_wrapper.dart';
