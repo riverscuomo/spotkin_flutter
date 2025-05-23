@@ -6,7 +6,6 @@ import 'package:spotkin_flutter/app_core.dart';
 import '../widgets/target_playlist_widget.dart';
 import 'package:uuid/uuid.dart';
 import '../widgets/debug_label_wrapper.dart';
-import 'dart:ui' as ui;
 
 class HomeScreen extends StatefulWidget {
   final Map<String, dynamic> config;
@@ -23,7 +22,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final BackendService _backendService = getIt<BackendService>();
   final SpotifyService spotifyService = getIt<SpotifyService>();
-  // late TabController _tabController;
+  late TabController _tabController;
 
   bool isProcessing = false;
   bool _isExpanded = false;
@@ -35,6 +34,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _verifyToken(); // You can keep the token verification in initState
+    _tabController = TabController(length: 3, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   Future<void> _verifyToken() async {
@@ -198,131 +204,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     setState(() {
       _isExpanded = false; // Collapse after changing the target playlist
     });
-    // _updateTabController();
-  }
-
-  Widget _buildRecipeContainer(Job job, int index) {
-    return StatefulBuilder(
-      builder: (BuildContext context, StateSetter setInnerState) {
-        // Create a PageController to navigate between pages
-        final PageController pageController = PageController(initialPage: 0);
-        // Track which page is active (0 = TrackEditWidget, 1 = RecipeWidget)
-        var currentPage = 0;
-
-        return Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 4,
-                offset: const ui.Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Tab selector buttons
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  padding: const EdgeInsets.all(4),
-                  child: Row(
-                    children: [
-                      // Track Editor button
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            pageController.animateToPage(
-                              0,
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: currentPage == 0
-                                ? Theme.of(context).primaryColor
-                                : Colors.grey.withOpacity(0.2),
-                            foregroundColor: currentPage == 0
-                                ? Colors.white
-                                : Theme.of(context).textTheme.bodyMedium?.color,
-                            elevation: currentPage == 0 ? 2 : 0,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                          ),
-                          child: const Text('Tracks'),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      // Recipe button
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            pageController.animateToPage(
-                              1,
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: currentPage == 1
-                                ? Theme.of(context).primaryColor
-                                : Colors.grey.withOpacity(0.2),
-                            foregroundColor: currentPage == 1
-                                ? Colors.white
-                                : Theme.of(context).textTheme.bodyMedium?.color,
-                            elevation: currentPage == 1 ? 2 : 0,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                          ),
-                          child: const Text('Playlists'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 12),
-                // PageView to hold both widgets
-                Container(
-                  constraints: BoxConstraints(
-                    minHeight: 300,
-                    maxHeight: MediaQuery.of(context).size.height * 0.6, // 60% of screen height max
-                  ),
-                  child: PageView(
-                    controller: pageController,
-                    onPageChanged: (int page) {
-                      setInnerState(() {
-                        currentPage = page;
-                      });
-                    },
-                    children: [
-                      // TrackEditWidget is the default view
-                      SingleChildScrollView(
-                        child: TrackEditWidget(
-                          job: job,
-                          jobIndex: index,
-                        ),
-                      ),
-                      // RecipeWidget is to the right
-                      SingleChildScrollView(
-                        child: RecipeWidget(
-                          job: job,
-                          jobIndex: index,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
   }
 
   Widget buildTargetPlaylistSelectionOptions(int index) {
@@ -376,9 +257,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         final jobEntry = jobsIterable.first;
         final job = jobEntry.value;
 
-        // // Ensure tab controller is up to date
-        // _updateTabController();
-
         return Scaffold(
           backgroundColor: Colors.black,
           appBar: AppBar(
@@ -388,28 +266,80 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               InfoButton(),
             ],
           ),
-          body: SingleChildScrollView(
-            child: Column(
-              children: [
-                TargetPlaylistWidget(
-                  index: jobEntry.key,
-                  isProcessing: isProcessing,
-                  processJob: _processJob,
-                  buildTargetPlaylistSelectionOptions:
-                      buildTargetPlaylistSelectionOptions,
-                  isExpanded: _isExpanded,
-                  onExpandChanged: (expanded) {
-                    setState(() {
-                      _isExpanded = expanded;
-                    });
-                  },
-                ).withDebugLabel('TargetPlaylistWidget'),
-                SizedBox(height: widgetPadding),
-                if (!job.isNull)
-                  _buildRecipeContainer(job, jobEntry.key)
-                      .withDebugLabel('RecipeContainer'),
-              ],
-            ),
+          body: Column(
+            children: [
+              // Target Playlist Widget stays at the top for all tabs
+              TargetPlaylistWidget(
+                index: jobEntry.key,
+                isProcessing: isProcessing,
+                processJob: _processJob,
+                buildTargetPlaylistSelectionOptions:
+                    buildTargetPlaylistSelectionOptions,
+                isExpanded: _isExpanded,
+                onExpandChanged: (expanded) {
+                  setState(() {
+                    _isExpanded = expanded;
+                  });
+                },
+              ).withDebugLabel('TargetPlaylistWidget'),
+              SizedBox(height: widgetPadding),
+              
+              // Tab selector
+              if (!job.isNull)
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  child: TabBar(
+                    controller: _tabController,
+                    tabs: const [
+                      Tab(text: 'Tracks'),
+                      Tab(text: 'Playlists'),
+                      Tab(text: 'Algorithm Settings'),
+                    ],
+                    indicatorColor: Theme.of(context).primaryColor,
+                    labelColor: Theme.of(context).primaryColor,
+                    unselectedLabelColor: Colors.grey,
+                    indicatorSize: TabBarIndicatorSize.tab,
+                    dividerColor: Colors.transparent,
+                  ),
+                ),
+              SizedBox(height: widgetPadding),
+              
+              // Main content with tabs
+              if (!job.isNull)
+                Expanded(
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      // Tracks Tab
+                      SingleChildScrollView(
+                        child: TrackEditWidget(
+                          job: job,
+                          jobIndex: jobEntry.key,
+                        ),
+                      ),
+                      
+                      // Playlists Tab
+                      SingleChildScrollView(
+                        child: RecipeWidget(
+                          job: job,
+                          jobIndex: jobEntry.key,
+                        ),
+                      ),
+                      
+                      // Algorithm Settings Tab
+                      SingleChildScrollView(
+                        child: SettingsCard(
+                          index: jobEntry.key,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
           ),
         ).withDebugLabel('HomeScaffold');
       },
