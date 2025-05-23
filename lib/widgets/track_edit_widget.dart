@@ -31,9 +31,9 @@ class _TrackEditWidgetState extends State<TrackEditWidget> {
           ),
           const SizedBox(height: 8),
           Text(
-            widget.job.targetPlaylist == null
-                ? 'Target Playlist: None selected'
-                : 'Target Playlist: ${widget.job.targetPlaylist.name}',
+            widget.job.targetPlaylist != null
+                ? 'Target Playlist: ${widget.job.targetPlaylist.name}'
+                : 'Target Playlist: None selected',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: 16),

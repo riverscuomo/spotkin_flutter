@@ -4,7 +4,6 @@ import 'package:spotify/spotify.dart';
 import 'package:spotkin_flutter/app_core.dart';
 
 import 'ingredient_row.dart';
-import 'debug_label_wrapper.dart';
 
 const int defaultQuantity = 2;
 
@@ -202,20 +201,12 @@ class _RecipeWidgetState extends State<RecipeWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final jobProvider = Provider.of<JobProvider>(context, listen: false);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            if (_ingredientRows.isNotEmpty)
-              SettingsButton(
-                index: widget.jobIndex,
-                job: widget.job,
-                updateJob: jobProvider.updateJob,
-                addJob: jobProvider.addJob,
-              ).withDebugLabel('SettingsButton'),
             IconButton(
               iconSize: 45.0,
               icon: const Icon(Icons.add),
