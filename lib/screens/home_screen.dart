@@ -283,7 +283,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 },
               ).withDebugLabel('TargetPlaylistWidget'),
               SizedBox(height: widgetPadding),
-              
+
               // Tab selector
               if (!job.isNull)
                 Container(
@@ -291,23 +291,50 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     color: Colors.grey.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   child: TabBar(
                     controller: _tabController,
                     tabs: const [
-                      Tab(text: 'Tracks'),
-                      Tab(text: 'Playlists'),
-                      Tab(text: 'Algorithm Settings'),
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        child: Text('Tracks'),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        child: Text('Playlists'),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        child: Text('Algorithm'),
+                      ),
                     ],
-                    indicatorColor: Theme.of(context).primaryColor,
-                    labelColor: Theme.of(context).primaryColor,
-                    unselectedLabelColor: Colors.grey,
+                    labelStyle: const TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                    ),
+                    unselectedLabelStyle: const TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                    ),
+                    // Both selected and unselected use the same white color
+                    labelColor: Colors.white,
+                    unselectedLabelColor: Colors.white.withOpacity(0.7),
+                    // Indicator styling - subtle underline
+                    indicator: UnderlineTabIndicator(
+                      borderSide: BorderSide(
+                        width: 3.0,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                      insets: const EdgeInsets.symmetric(horizontal: 16.0),
+                    ),
                     indicatorSize: TabBarIndicatorSize.tab,
+                    indicatorWeight: 3,
                     dividerColor: Colors.transparent,
                   ),
                 ),
               SizedBox(height: widgetPadding),
-              
+
               // Main content with tabs
               if (!job.isNull)
                 Expanded(
@@ -321,7 +348,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           jobIndex: jobEntry.key,
                         ),
                       ),
-                      
+
                       // Playlists Tab
                       SingleChildScrollView(
                         child: RecipeWidget(
@@ -329,8 +356,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           jobIndex: jobEntry.key,
                         ),
                       ),
-                      
-                      // Algorithm Settings Tab
+
+                      // Algorithm  Tab
                       SingleChildScrollView(
                         child: SettingsCard(
                           index: jobEntry.key,
