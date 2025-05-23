@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:spotkin_flutter/app_core.dart';
-import 'package:spotkin_flutter/widgets/update_button.dart';
+import 'package:spotkin_flutter/ui/widgets/update_button.dart';
 
 class TargetPlaylistWidget extends StatelessWidget {
   final int index;

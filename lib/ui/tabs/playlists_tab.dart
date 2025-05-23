@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:spotify/spotify.dart';
 import 'package:spotkin_flutter/app_core.dart';
-import 'ingredient_row.dart';
+import '../widgets/ingredient_row.dart';
 
 const int defaultQuantity = 2;
 
@@ -85,7 +85,8 @@ class _PlaylistsTabState extends State<PlaylistsTab> {
     setState(() {
       _ingredientRows.add(IngredientRow(
         playlist: playlist,
-        quantityController: TextEditingController(text: defaultQuantity.toString()),
+        quantityController:
+            TextEditingController(text: defaultQuantity.toString()),
       ));
       _sortIngredientRows();
     });

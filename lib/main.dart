@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:spotkin_flutter/app_core.dart';
 import 'helpers/load_config.dart';
 import 'spotify_theme_data.dart';
-import 'widgets/debug_label_wrapper.dart';
+import 'ui/widgets/debug_label_wrapper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -62,7 +62,8 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       onGenerateRoute: (settings) {
         return MaterialPageRoute(
-          builder: (context) => AuthScreen(config: config).withDebugLabel('AuthScreen'),
+          builder: (context) =>
+              AuthScreen(config: config).withDebugLabel('AuthScreen'),
         );
       },
     );

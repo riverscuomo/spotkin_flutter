@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:spotkin_flutter/app_core.dart';
-import '../widgets/debug_label_wrapper.dart';
 
 class AuthScreen extends StatefulWidget {
   final Map<String, dynamic> config;

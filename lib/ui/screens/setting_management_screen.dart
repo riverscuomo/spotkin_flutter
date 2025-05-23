@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:spotify/spotify.dart' hide Image;
 import 'package:spotkin_flutter/app_core.dart';
-import 'package:spotkin_flutter/widgets/bottom_sheets/banned_items_bottom_sheet.dart';
+import 'package:spotkin_flutter/ui/widgets/bottom_sheets/banned_items_bottom_sheet.dart';
 import '../widgets/bottom_sheets/banned_genres_bottom_sheet.dart';
 
 class SettingManagementScreen extends StatefulWidget {

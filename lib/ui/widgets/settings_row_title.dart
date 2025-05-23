@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:spotkin_flutter/widgets/quantity_circle.dart';
+import 'package:spotkin_flutter/ui/widgets/quantity_circle.dart';
 
 class SettingsRowTitle extends StatelessWidget {
   const SettingsRowTitle(

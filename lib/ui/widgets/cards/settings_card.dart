@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:spotify/spotify.dart';
 import 'package:spotkin_flutter/app_core.dart';
-import '../screens/edit_description_screen.dart';
-import '../screens/setting_management_screen.dart';
-import 'settings_row_title.dart';
+import '../../screens/edit_description_screen.dart';
+import '../../screens/setting_management_screen.dart';
+import '../settings_row_title.dart';
 
 class SettingsCard extends StatefulWidget {
   final int index;
@@ -88,8 +88,8 @@ class _SettingsCardState extends State<SettingsCard> {
               title,
               style: Theme.of(context).textTheme.titleSmall!.copyWith(
                     fontSize: 16,
-                    ),
-            ), 
+                  ),
+            ),
             if (title == 'Acousticness') // add button for acousticness info
               const AcousticnessInfoButton(),
           ],
