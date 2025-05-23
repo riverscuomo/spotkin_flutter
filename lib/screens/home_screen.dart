@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
-import 'package:spotify/spotify.dart';
+import 'package:spotify/spotify.dart' hide Offset;
 import 'package:spotkin_flutter/app_core.dart';
 import '../widgets/target_playlist_widget.dart';
 import 'package:uuid/uuid.dart';
 import '../widgets/debug_label_wrapper.dart';
+import 'dart:ui' as ui;
 
 class HomeScreen extends StatefulWidget {
   final Map<String, dynamic> config;
@@ -201,23 +202,126 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildRecipeContainer(Job job, int index) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            RecipeWidget(
-              job: job,
-              jobIndex: index,
+    return StatefulBuilder(
+      builder: (BuildContext context, StateSetter setInnerState) {
+        // Create a PageController to navigate between pages
+        final PageController pageController = PageController(initialPage: 0);
+        // Track which page is active (0 = TrackEditWidget, 1 = RecipeWidget)
+        var currentPage = 0;
+
+        return Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 4,
+                offset: const ui.Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Tab selector buttons
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.all(4),
+                  child: Row(
+                    children: [
+                      // Track Editor button
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            pageController.animateToPage(
+                              0,
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: currentPage == 0
+                                ? Theme.of(context).primaryColor
+                                : Colors.grey.withOpacity(0.2),
+                            foregroundColor: currentPage == 0
+                                ? Colors.white
+                                : Theme.of(context).textTheme.bodyMedium?.color,
+                            elevation: currentPage == 0 ? 2 : 0,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                          child: const Text('Track Editor'),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      // Recipe button
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            pageController.animateToPage(
+                              1,
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: currentPage == 1
+                                ? Theme.of(context).primaryColor
+                                : Colors.grey.withOpacity(0.2),
+                            foregroundColor: currentPage == 1
+                                ? Colors.white
+                                : Theme.of(context).textTheme.bodyMedium?.color,
+                            elevation: currentPage == 1 ? 2 : 0,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                          child: const Text('Recipe Details'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                // PageView to hold both widgets
+                Container(
+                  constraints: BoxConstraints(
+                    minHeight: 300,
+                    maxHeight: MediaQuery.of(context).size.height * 0.6, // 60% of screen height max
+                  ),
+                  child: PageView(
+                    controller: pageController,
+                    onPageChanged: (int page) {
+                      setInnerState(() {
+                        currentPage = page;
+                      });
+                    },
+                    children: [
+                      // TrackEditWidget is the default view
+                      SingleChildScrollView(
+                        child: TrackEditWidget(
+                          job: job,
+                          jobIndex: index,
+                        ),
+                      ),
+                      // RecipeWidget is to the right
+                      SingleChildScrollView(
+                        child: RecipeWidget(
+                          job: job,
+                          jobIndex: index,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 

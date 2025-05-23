@@ -1,4 +1,5 @@
 export 'recipe_widget.dart';
+export 'track_edit_widget.dart';
 export 'bottom_sheets/bottom_sheets.dart';
 export 'info_button.dart';
 export 'playlist_widgets.dart';
