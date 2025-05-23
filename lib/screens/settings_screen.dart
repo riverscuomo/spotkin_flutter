@@ -15,7 +15,7 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: const Text('Algorithm Settings'),
         actions: const [SettingsInfoButton()],
       ),
       body: Column(
