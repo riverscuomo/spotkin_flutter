@@ -2,26 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:spotify/spotify.dart';
 import 'package:spotkin_flutter/app_core.dart';
-
 import 'ingredient_row.dart';
 
 const int defaultQuantity = 2;
 
-class RecipeWidget extends StatefulWidget {
+class PlaylistsTab extends StatefulWidget {
   final Job job;
   final int jobIndex;
 
-  const RecipeWidget({
+  const PlaylistsTab({
     Key? key,
     required this.jobIndex,
     required this.job,
   }) : super(key: key);
 
   @override
-  _RecipeWidgetState createState() => _RecipeWidgetState();
+  _PlaylistsTabState createState() => _PlaylistsTabState();
 }
 
-class _RecipeWidgetState extends State<RecipeWidget> {
+class _PlaylistsTabState extends State<PlaylistsTab> {
   late List<IngredientRow> _ingredientRows;
   final SpotifyService spotifyService = getIt<SpotifyService>();
 
@@ -61,7 +60,7 @@ class _RecipeWidgetState extends State<RecipeWidget> {
   }
 
   @override
-  void didUpdateWidget(RecipeWidget oldWidget) {
+  void didUpdateWidget(PlaylistsTab oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.job.recipe != oldWidget.job.recipe) {
       _initIngredientRows();
@@ -230,50 +229,119 @@ class _RecipeWidgetState extends State<RecipeWidget> {
             ),
           ],
         ),
-        if (_ingredientRows.isEmpty)
-          const SizedBox.shrink()
-        else
-          ..._ingredientRows.map((row) {
-            final playlist = row.playlist;
-            if (playlist == null) {
-              return const SizedBox.shrink();
-            }
-            return Dismissible(
-              key: ValueKey(playlist.id),
-              background: Container(
-                color: Colors.orange,
-                alignment: Alignment.centerLeft,
-                padding: const EdgeInsets.only(left: 20.0),
-                child: const Row(
-                  children: [
-                    Icon(Icons.archive, color: Colors.white),
-                    SizedBox(width: 8),
-                    Text('Archive', style: TextStyle(color: Colors.white)),
-                  ],
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Recipe',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              Text(
+                'Source playlists and quantities',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        if (_ingredientRows.isEmpty) ...[
+          const Center(
+            child: Text(
+              'Add a source playlist to start building your recipe',
+              style: TextStyle(fontStyle: FontStyle.italic),
+            ),
+          ),
+        ] else
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: _ingredientRows.length,
+            itemBuilder: (context, index) {
+              final row = _ingredientRows[index];
+              final playlistId = row.playlist?.id;
+
+              if (playlistId == null) {
+                return const SizedBox.shrink();
+              }
+
+              return Dismissible(
+                key: Key(playlistId),
+                background: Container(
+                  color: Colors.yellow,
+                  alignment: Alignment.centerLeft,
+                  padding: const EdgeInsets.only(left: 16),
+                  child: const Icon(Icons.archive, color: Colors.black),
                 ),
-              ),
-              secondaryBackground: Container(
-                color: Colors.red,
-                alignment: Alignment.centerRight,
-                padding: const EdgeInsets.only(right: 20.0),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Text('Delete', style: TextStyle(color: Colors.white)),
-                    SizedBox(width: 8),
-                    Icon(Icons.delete, color: Colors.white),
-                  ],
+                secondaryBackground: Container(
+                  color: Colors.red,
+                  alignment: Alignment.centerRight,
+                  padding: const EdgeInsets.only(right: 16),
+                  child: const Icon(Icons.delete, color: Colors.white),
                 ),
-              ),
-              confirmDismiss: (direction) =>
-                  _handleDismiss(direction, playlist.id!),
-              child: SpotifyStylePlaylistTile(
-                playlist: playlist,
-                trailingButton: buildQuantityDropdown(row),
-                active: row.quantityController.text != '0',
-              ),
-            );
-          }),
+                confirmDismiss: (direction) =>
+                    _handleDismiss(direction, playlistId),
+                child: Card(
+                  margin: const EdgeInsets.symmetric(
+                    vertical: 4,
+                    horizontal: 8,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Row(
+                      children: [
+                        if (row.playlist?.images?.isNotEmpty ?? false)
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(4),
+                              image: DecorationImage(
+                                image: NetworkImage(
+                                    row.playlist!.images!.first.url!),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          )
+                        else
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: Colors.grey,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Icon(Icons.music_note,
+                                color: Colors.white),
+                          ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                row.playlist?.name ?? 'Unknown Playlist',
+                                style: Theme.of(context).textTheme.titleMedium,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                'Spotify',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        buildQuantityDropdown(row),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
       ],
     );
   }

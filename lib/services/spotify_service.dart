@@ -1,10 +1,7 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-// import 'dart:html' as html;
 import 'package:spotify/spotify.dart';
-import 'package:spotkin_flutter/services/storage_service.dart';
 
 class SpotifyService {
   static const FlutterSecureStorage _secureStorage = FlutterSecureStorage();

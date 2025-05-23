@@ -343,7 +343,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     children: [
                       // Tracks Tab
                       SingleChildScrollView(
-                        child: TrackEditWidget(
+                        child: TracksTab(
                           job: job,
                           jobIndex: jobEntry.key,
                         ),
@@ -351,15 +351,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
                       // Playlists Tab
                       SingleChildScrollView(
-                        child: RecipeWidget(
+                        child: PlaylistsTab(
                           job: job,
                           jobIndex: jobEntry.key,
                         ),
                       ),
 
-                      // Algorithm  Tab
+                      // Algorithm Tab
                       SingleChildScrollView(
-                        child: SettingsCard(
+                        child: AlgorithmTab(
                           index: jobEntry.key,
                         ),
                       ),
