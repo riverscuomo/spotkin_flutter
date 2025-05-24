@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:spotify/spotify.dart';
 import 'package:spotkin_flutter/app_core.dart';
-import '../widgets/ingredient_row.dart';
+import '../widgets/playlist/ingredient_row.dart';
 
 const int defaultQuantity = 2;
 
