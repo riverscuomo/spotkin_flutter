@@ -145,6 +145,124 @@ class _TracksTabState extends State<TracksTab> with AutomaticKeepAliveClientMixi
     }
   }
 
+  void _handleBanGenre(spotify.Track track, String genre) {
+    final jobProvider = Provider.of<JobProvider>(context, listen: false);
+
+    // Add to banned genres if not already banned
+    if (!widget.job.bannedGenres.contains(genre)) {
+      final updatedBannedGenres = [...widget.job.bannedGenres, genre];
+      final updatedJob = widget.job.copyWith(bannedGenres: updatedBannedGenres);
+      jobProvider.updateJob(widget.jobIndex, updatedJob);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Banned genre: $genre')),
+      );
+    }
+  }
+  
+  // Show a dialog with the artist's genres for selection
+  void _showGenreSelectionDialog(BuildContext context, spotify.Track track) async {
+    if (track.artists == null || track.artists!.isEmpty || track.artists!.first.id == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No artist information available for this track')),
+      );
+      return;
+    }
+    
+    setState(() {
+      _isLoading = true;
+    });
+    
+    try {
+      // Get the artist details including genres
+      final artistId = track.artists!.first.id!;
+      final artists = await spotifyService.getArtists([artistId]);
+      
+      setState(() {
+        _isLoading = false;
+      });
+      
+      if (artists.isEmpty || artists.first.genres == null || artists.first.genres!.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No genres found for this artist')),
+        );
+        return;
+      }
+      
+      final artist = artists.first;
+      final genres = artist.genres!;
+      
+      // Filter out already banned genres
+      final availableGenres = genres
+          .where((genre) => !widget.job.bannedGenres.contains(genre))
+          .toList();
+      
+      if (availableGenres.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('All genres for this artist are already banned')),
+        );
+        return;
+      }
+      
+      // Sort alphabetically
+      availableGenres.sort();
+      
+      // Show the dialog with artist's genres
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Select genre to ban from ${artist.name}'),
+            content: SizedBox(
+              width: double.maxFinite,
+              height: 300,
+              child: Column(
+                children: [
+                  if (artist.images?.isNotEmpty == true)
+                    CircleAvatar(
+                      backgroundImage: NetworkImage(artist.images!.first.url!),
+                      radius: 40,
+                    ),
+                  const SizedBox(height: 16),
+                  Text('Artist: ${artist.name}', style: Theme.of(context).textTheme.titleMedium),
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: availableGenres.length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          title: Text(availableGenres[index]),
+                          onTap: () {
+                            Navigator.pop(context);
+                            _handleBanGenre(track, availableGenres[index]);
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+            ],
+          );
+        },
+      );
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error loading artist genres: ${e.toString()}')),
+      );
+    }
+  }
+
   void _showTrackInfo(spotify.Track track) {
     showModalBottomSheet(
       context: context,
@@ -256,6 +374,14 @@ class _TracksTabState extends State<TracksTab> with AutomaticKeepAliveClientMixi
                   onTap: () {
                     Navigator.pop(context);
                     _handleBanAlbum(track);
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.category_outlined),
+                  title: const Text('Ban Genre'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showGenreSelectionDialog(context, track);
                   },
                 ),
               ],
