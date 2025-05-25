@@ -9,7 +9,7 @@ bool showDebugLabels = kDebugMode;
 class DebugLabelWrapper extends StatelessWidget {
   final Widget child;
   final String widgetName;
-  
+
   const DebugLabelWrapper({
     Key? key,
     required this.child,
@@ -22,7 +22,7 @@ class DebugLabelWrapper extends StatelessWidget {
     if (!kDebugMode || !showDebugLabels) {
       return child;
     }
-    
+
     // Use a simpler approach with decoration
     return Container(
       decoration: BoxDecoration(
@@ -59,7 +59,7 @@ class DebugLabelWrapper extends StatelessWidget {
 extension DebugLabelExtension on Widget {
   Widget withDebugLabel(String widgetName) {
     // Skip labeling if not in debug mode
-    if (!kDebugMode || !showDebugLabels) {
+    if (true || !kDebugMode || !showDebugLabels) {
       return this;
     }
     return DebugLabelWrapper(

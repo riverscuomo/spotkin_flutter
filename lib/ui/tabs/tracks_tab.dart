@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:spotify/spotify.dart' as spotify;
 import 'package:spotkin_flutter/app_core.dart';
+import 'package:spotkin_flutter/ui/widgets/track_card.dart';
 
 class TracksTab extends StatefulWidget {
   final Job job;
@@ -17,7 +18,8 @@ class TracksTab extends StatefulWidget {
   _TracksTabState createState() => _TracksTabState();
 }
 
-class _TracksTabState extends State<TracksTab> with AutomaticKeepAliveClientMixin {
+class _TracksTabState extends State<TracksTab>
+    with AutomaticKeepAliveClientMixin {
   final SpotifyService spotifyService = getIt<SpotifyService>();
   List<spotify.Track> _allTracks = [];
   bool _isLoading = true;
@@ -159,54 +161,61 @@ class _TracksTabState extends State<TracksTab> with AutomaticKeepAliveClientMixi
       );
     }
   }
-  
+
   // Show a dialog with the artist's genres for selection
-  void _showGenreSelectionDialog(BuildContext context, spotify.Track track) async {
-    if (track.artists == null || track.artists!.isEmpty || track.artists!.first.id == null) {
+  void _showGenreSelectionDialog(
+      BuildContext context, spotify.Track track) async {
+    if (track.artists == null ||
+        track.artists!.isEmpty ||
+        track.artists!.first.id == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No artist information available for this track')),
+        const SnackBar(
+            content: Text('No artist information available for this track')),
       );
       return;
     }
-    
+
     setState(() {
       _isLoading = true;
     });
-    
+
     try {
       // Get the artist details including genres
       final artistId = track.artists!.first.id!;
       final artists = await spotifyService.getArtists([artistId]);
-      
+
       setState(() {
         _isLoading = false;
       });
-      
-      if (artists.isEmpty || artists.first.genres == null || artists.first.genres!.isEmpty) {
+
+      if (artists.isEmpty ||
+          artists.first.genres == null ||
+          artists.first.genres!.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('No genres found for this artist')),
         );
         return;
       }
-      
+
       final artist = artists.first;
       final genres = artist.genres!;
-      
+
       // Filter out already banned genres
       final availableGenres = genres
           .where((genre) => !widget.job.bannedGenres.contains(genre))
           .toList();
-      
+
       if (availableGenres.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('All genres for this artist are already banned')),
+          const SnackBar(
+              content: Text('All genres for this artist are already banned')),
         );
         return;
       }
-      
+
       // Sort alphabetically
       availableGenres.sort();
-      
+
       // Show the dialog with artist's genres
       showDialog(
         context: context,
@@ -224,7 +233,8 @@ class _TracksTabState extends State<TracksTab> with AutomaticKeepAliveClientMixi
                       radius: 40,
                     ),
                   const SizedBox(height: 16),
-                  Text('Artist: ${artist.name}', style: Theme.of(context).textTheme.titleMedium),
+                  Text('Artist: ${artist.name}',
+                      style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 16),
                   Expanded(
                     child: ListView.builder(
@@ -354,7 +364,7 @@ class _TracksTabState extends State<TracksTab> with AutomaticKeepAliveClientMixi
               children: <Widget>[
                 ListTile(
                   leading: const Icon(Icons.block),
-                  title: const Text('Ban Track'),
+                  title: const Text('Ban Song'),
                   onTap: () {
                     Navigator.pop(context);
                     _handleBanTrack(track);
@@ -514,105 +524,12 @@ class _TracksTabState extends State<TracksTab> with AutomaticKeepAliveClientMixi
         itemCount: _allTracks.length,
         itemBuilder: (context, index) {
           final track = _allTracks[index];
-          return _buildTrackCard(context, track);
+          return TrackCard(
+            track: track,
+            onDismiss: _handleDismiss,
+          );
         },
       );
     }
-  }
-
-  Widget _buildTrackCard(BuildContext context, spotify.Track track) {
-    String? albumImageUrl;
-    if (track.album?.images?.isNotEmpty == true &&
-        track.album!.images!.first.url != null) {
-      albumImageUrl = track.album!.images!.first.url!;
-    }
-    final artistName =
-        track.artists?.isNotEmpty == true && track.artists!.first.name != null
-            ? track.artists!.first.name!
-            : 'Unknown Artist';
-
-    return Dismissible(
-      key: Key(track.id ?? 'unknown-${track.name}-$artistName'),
-      background: Container(
-        color: Colors.green,
-        alignment: Alignment.centerLeft,
-        padding: const EdgeInsets.only(left: 16),
-        child: const Icon(Icons.info_outline, color: Colors.white),
-      ),
-      secondaryBackground: Container(
-        color: Colors.red,
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 16),
-        child: const Icon(Icons.block, color: Colors.white),
-      ),
-      confirmDismiss: (direction) => _handleDismiss(direction, context, track),
-      child: Card(
-        margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: [
-              // Album artwork
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: albumImageUrl != null
-                    ? Image.network(
-                        albumImageUrl,
-                        width: 56,
-                        height: 56,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            width: 56,
-                            height: 56,
-                            color: Colors.grey,
-                            child: const Icon(Icons.music_note,
-                                color: Colors.white),
-                          );
-                        },
-                      )
-                    : Container(
-                        width: 56,
-                        height: 56,
-                        color: Colors.grey,
-                        child:
-                            const Icon(Icons.music_note, color: Colors.white),
-                      ),
-              ),
-              const SizedBox(width: 12),
-              // Track info
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      track.name ?? 'Unknown Track',
-                      style: Theme.of(context).textTheme.titleMedium,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      artistName,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (track.album != null)
-                      Text(
-                        track.album!.name ?? 'Unknown Album',
-                        style: Theme.of(context).textTheme.bodySmall,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                  ],
-                ),
-              ),
-              // Duration
-              Text(
-                _formatDuration(track.durationMs ?? 0),
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }
