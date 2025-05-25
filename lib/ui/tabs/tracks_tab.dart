@@ -17,7 +17,7 @@ class TracksTab extends StatefulWidget {
   _TracksTabState createState() => _TracksTabState();
 }
 
-class _TracksTabState extends State<TracksTab> {
+class _TracksTabState extends State<TracksTab> with AutomaticKeepAliveClientMixin {
   final SpotifyService spotifyService = getIt<SpotifyService>();
   List<spotify.Track> _allTracks = [];
   bool _isLoading = true;
@@ -314,7 +314,11 @@ class _TracksTabState extends State<TracksTab> {
   }
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context); // Required by AutomaticKeepAliveClientMixin
     return SizedBox(
       height: MediaQuery.of(context).size.height -
           170, // Adjust based on your app's needs

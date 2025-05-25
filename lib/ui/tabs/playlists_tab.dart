@@ -20,7 +20,7 @@ class PlaylistsTab extends StatefulWidget {
   _PlaylistsTabState createState() => _PlaylistsTabState();
 }
 
-class _PlaylistsTabState extends State<PlaylistsTab> {
+class _PlaylistsTabState extends State<PlaylistsTab> with AutomaticKeepAliveClientMixin {
   late List<IngredientRow> _ingredientRows;
   final SpotifyService spotifyService = getIt<SpotifyService>();
 
@@ -200,7 +200,11 @@ class _PlaylistsTabState extends State<PlaylistsTab> {
   }
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context); // Required by AutomaticKeepAliveClientMixin
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
