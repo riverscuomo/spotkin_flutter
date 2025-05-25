@@ -339,7 +339,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               width: 1,
                             ),
                           ),
-                          child: const Text('Playlists'),
+                          child: const Text('Sources'),
                         ),
                       ),
                       Material(
