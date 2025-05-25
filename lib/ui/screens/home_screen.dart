@@ -34,7 +34,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _verifyToken(); // You can keep the token verification in initState
-    _tabController = TabController(length: 3, vsync: this, initialIndex: 2); // Start with Tracks tab (index 2)
+    _tabController = TabController(
+        length: 3,
+        vsync: this,
+        initialIndex: 2); // Start with Tracks tab (index 2)
     _tabController.addListener(() {
       // This will trigger a rebuild when the tab changes
       if (!_tabController.indexIsChanging) {
@@ -295,9 +298,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               if (!job.isNull)
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.black, // Darker background for more contrast with pills
+                    color: Colors
+                        .black, // Darker background for more contrast with pills
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey.withOpacity(0.3), width: 1),
+                    border: Border.all(
+                        color: Colors.grey.withOpacity(0.3), width: 1),
                   ),
                   margin:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -311,13 +316,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         borderRadius: BorderRadius.circular(30),
                         color: Colors.transparent,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                          constraints: const BoxConstraints(minHeight: 38), // Fixed height constraint
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 20),
+                          constraints: const BoxConstraints(
+                              minHeight: 38), // Fixed height constraint
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(30),
-                            color: _tabController.index == 0 ? const Color(0xFF4CAF50) : Colors.grey.withOpacity(0.15),
+                            color: _tabController.index == 0
+                                ? const Color(0xFF4CAF50)
+                                : Colors.grey.withOpacity(0.15),
                             border: Border.all(
-                              color: _tabController.index == 0 ? const Color(0xFF4CAF50) : Colors.transparent,
+                              color: _tabController.index == 0
+                                  ? const Color(0xFF4CAF50)
+                                  : Colors.transparent,
                               width: 1,
                             ),
                           ),
@@ -329,13 +340,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         borderRadius: BorderRadius.circular(30),
                         color: Colors.transparent,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                          constraints: const BoxConstraints(minHeight: 38), // Fixed height constraint
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 20),
+                          constraints: const BoxConstraints(
+                              minHeight: 38), // Fixed height constraint
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(30),
-                            color: _tabController.index == 1 ? const Color(0xFF4CAF50) : Colors.grey.withOpacity(0.15),
+                            color: _tabController.index == 1
+                                ? const Color(0xFF4CAF50)
+                                : Colors.grey.withOpacity(0.15),
                             border: Border.all(
-                              color: _tabController.index == 1 ? const Color(0xFF4CAF50) : Colors.transparent,
+                              color: _tabController.index == 1
+                                  ? const Color(0xFF4CAF50)
+                                  : Colors.transparent,
                               width: 1,
                             ),
                           ),
@@ -347,13 +364,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         borderRadius: BorderRadius.circular(30),
                         color: Colors.transparent,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                          constraints: const BoxConstraints(minHeight: 38), // Fixed height constraint
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 20),
+                          constraints: const BoxConstraints(
+                              minHeight: 38), // Fixed height constraint
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(30),
-                            color: _tabController.index == 2 ? const Color(0xFF4CAF50) : Colors.grey.withOpacity(0.15),
+                            color: _tabController.index == 2
+                                ? const Color(0xFF4CAF50)
+                                : Colors.grey.withOpacity(0.15),
                             border: Border.all(
-                              color: _tabController.index == 2 ? const Color(0xFF4CAF50) : Colors.transparent,
+                              color: _tabController.index == 2
+                                  ? const Color(0xFF4CAF50)
+                                  : Colors.transparent,
                               width: 1,
                             ),
                           ),
@@ -375,9 +398,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     indicator: const BoxDecoration(),
                     indicatorSize: TabBarIndicatorSize.tab,
                     dividerColor: Colors.transparent,
-                    padding: const EdgeInsets.all(8.0),
-                    // Add space between tabs
-                    labelPadding: const EdgeInsets.symmetric(horizontal: 8),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 8.0, horizontal: 4.0),
+                    // Minimal space between tabs
+                    labelPadding: const EdgeInsets.symmetric(horizontal: 2),
                   ),
                 ),
               SizedBox(height: widgetPadding),
@@ -397,7 +421,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
                       // Playlists Tab
                       SingleChildScrollView(
-                        child: PlaylistsTab(
+                        child: SourcesTab(
                           job: job,
                           jobIndex: jobEntry.key,
                         ),

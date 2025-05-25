@@ -6,7 +6,7 @@ export 'cards/settings_card.dart';
 
 // Tab widgets
 export '../tabs/tracks_tab.dart';
-export '../tabs/playlists_tab.dart';
+export '../tabs/sources_tab.dart';
 export '../tabs/filters_tab.dart';
 export 'playlist/spotify_style_playlist_tile.dart';
 export 'styles/green_button_style.dart';

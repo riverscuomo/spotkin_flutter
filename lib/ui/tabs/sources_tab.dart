@@ -6,21 +6,22 @@ import '../widgets/playlist/ingredient_row.dart';
 
 const int defaultQuantity = 2;
 
-class PlaylistsTab extends StatefulWidget {
+class SourcesTab extends StatefulWidget {
   final Job job;
   final int jobIndex;
 
-  const PlaylistsTab({
+  const SourcesTab({
     Key? key,
     required this.jobIndex,
     required this.job,
   }) : super(key: key);
 
   @override
-  _PlaylistsTabState createState() => _PlaylistsTabState();
+  _SourcesTabState createState() => _SourcesTabState();
 }
 
-class _PlaylistsTabState extends State<PlaylistsTab> with AutomaticKeepAliveClientMixin {
+class _SourcesTabState extends State<SourcesTab>
+    with AutomaticKeepAliveClientMixin {
   late List<IngredientRow> _ingredientRows;
   final SpotifyService spotifyService = getIt<SpotifyService>();
 
@@ -60,7 +61,7 @@ class _PlaylistsTabState extends State<PlaylistsTab> with AutomaticKeepAliveClie
   }
 
   @override
-  void didUpdateWidget(PlaylistsTab oldWidget) {
+  void didUpdateWidget(SourcesTab oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.job.recipe != oldWidget.job.recipe) {
       _initIngredientRows();
