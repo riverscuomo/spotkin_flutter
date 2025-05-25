@@ -35,6 +35,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     super.initState();
     _verifyToken(); // You can keep the token verification in initState
     _tabController = TabController(length: 3, vsync: this, initialIndex: 2); // Start with Tracks tab (index 2)
+    _tabController.addListener(() {
+      // This will trigger a rebuild when the tab changes
+      if (!_tabController.indexIsChanging) {
+        setState(() {});
+      }
+    });
   }
 
   @override
@@ -289,49 +295,89 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               if (!job.isNull)
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
+                    color: Colors.black, // Darker background for more contrast with pills
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.withOpacity(0.3), width: 1),
                   ),
                   margin:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   child: TabBar(
                     controller: _tabController,
+                    isScrollable: true, // Allow horizontal scrolling
+                    // Use custom tab decorations with more visible pills
                     tabs: [
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 12),
-                        child: Text('Filters'),
+                      Material(
+                        elevation: _tabController.index == 0 ? 12 : 0,
+                        borderRadius: BorderRadius.circular(30),
+                        color: Colors.transparent,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                          constraints: const BoxConstraints(minHeight: 38), // Fixed height constraint
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(30),
+                            color: _tabController.index == 0 ? const Color(0xFF4CAF50) : Colors.grey.withOpacity(0.15),
+                            border: Border.all(
+                              color: _tabController.index == 0 ? const Color(0xFF4CAF50) : Colors.transparent,
+                              width: 1,
+                            ),
+                          ),
+                          child: const Text('Filters'),
+                        ),
                       ),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 12),
-                        child: Text('Playlists'),
+                      Material(
+                        elevation: _tabController.index == 1 ? 12 : 0,
+                        borderRadius: BorderRadius.circular(30),
+                        color: Colors.transparent,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                          constraints: const BoxConstraints(minHeight: 38), // Fixed height constraint
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(30),
+                            color: _tabController.index == 1 ? const Color(0xFF4CAF50) : Colors.grey.withOpacity(0.15),
+                            border: Border.all(
+                              color: _tabController.index == 1 ? const Color(0xFF4CAF50) : Colors.transparent,
+                              width: 1,
+                            ),
+                          ),
+                          child: const Text('Playlists'),
+                        ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        child: Text(job.targetPlaylist.name ?? 'Tracks'),
+                      Material(
+                        elevation: _tabController.index == 2 ? 12 : 0,
+                        borderRadius: BorderRadius.circular(30),
+                        color: Colors.transparent,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                          constraints: const BoxConstraints(minHeight: 38), // Fixed height constraint
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(30),
+                            color: _tabController.index == 2 ? const Color(0xFF4CAF50) : Colors.grey.withOpacity(0.15),
+                            border: Border.all(
+                              color: _tabController.index == 2 ? const Color(0xFF4CAF50) : Colors.transparent,
+                              width: 1,
+                            ),
+                          ),
+                          child: Text(job.targetPlaylist.name ?? 'Tracks'),
+                        ),
                       ),
                     ],
                     labelStyle: const TextStyle(
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w800,
                       fontSize: 14,
                     ),
                     unselectedLabelStyle: const TextStyle(
                       fontWeight: FontWeight.w500,
                       fontSize: 14,
                     ),
-                    // Both selected and unselected use the same white color
                     labelColor: Colors.white,
                     unselectedLabelColor: Colors.white.withOpacity(0.7),
-                    // Indicator styling - subtle underline
-                    indicator: UnderlineTabIndicator(
-                      borderSide: BorderSide(
-                        width: 3.0,
-                        color: Theme.of(context).primaryColor,
-                      ),
-                      insets: const EdgeInsets.symmetric(horizontal: 16.0),
-                    ),
+                    // Remove default indicator
+                    indicator: const BoxDecoration(),
                     indicatorSize: TabBarIndicatorSize.tab,
-                    indicatorWeight: 3,
                     dividerColor: Colors.transparent,
+                    padding: const EdgeInsets.all(8.0),
+                    // Add space between tabs
+                    labelPadding: const EdgeInsets.symmetric(horizontal: 8),
                   ),
                 ),
               SizedBox(height: widgetPadding),
