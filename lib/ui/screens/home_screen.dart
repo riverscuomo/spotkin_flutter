@@ -295,17 +295,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   child: TabBar(
                     controller: _tabController,
-                    tabs: const [
+                    tabs: [
                       Padding(
                         padding: EdgeInsets.symmetric(vertical: 12),
-                        child: Text('Tracks'),
+                        child: Text(job.targetPlaylist.name ?? 'Tracks'),
                       ),
                       Padding(
-                        padding: EdgeInsets.symmetric(vertical: 12),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
                         child: Text('Playlists'),
                       ),
                       Padding(
-                        padding: EdgeInsets.symmetric(vertical: 12),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
                         child: Text('Filters'),
                       ),
                     ],
