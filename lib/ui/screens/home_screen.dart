@@ -34,7 +34,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _verifyToken(); // You can keep the token verification in initState
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 3, vsync: this, initialIndex: 2); // Start with Tracks tab (index 2)
   }
 
   @override
@@ -246,7 +246,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       builder: (context, jobProvider, child) {
         if (jobProvider.isLoading) {
           return Center(
-            child: CircularProgressIndicator().withDebugLabel('HomeLoader'),
+            child:
+                const CircularProgressIndicator().withDebugLabel('HomeLoader'),
           ).withDebugLabel('LoadingCenter');
         }
 
@@ -296,17 +297,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   child: TabBar(
                     controller: _tabController,
                     tabs: [
-                      Padding(
+                      const Padding(
                         padding: EdgeInsets.symmetric(vertical: 12),
-                        child: Text(job.targetPlaylist.name ?? 'Tracks'),
+                        child: Text('Filters'),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 12),
                         child: Text('Playlists'),
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 12),
-                        child: Text('Filters'),
+                        child: Text(job.targetPlaylist.name ?? 'Tracks'),
                       ),
                     ],
                     labelStyle: const TextStyle(
@@ -341,11 +342,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   child: TabBarView(
                     controller: _tabController,
                     children: [
-                      // Tracks Tab
+                      // Filters Tab
                       SingleChildScrollView(
-                        child: TracksTab(
-                          job: job,
-                          jobIndex: jobEntry.key,
+                        child: FiltersTab(
+                          index: jobEntry.key,
                         ),
                       ),
 
@@ -357,10 +357,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         ),
                       ),
 
-                      // Filters Tab
+                      // Tracks Tab
                       SingleChildScrollView(
-                        child: FiltersTab(
-                          index: jobEntry.key,
+                        child: TracksTab(
+                          job: job,
+                          jobIndex: jobEntry.key,
                         ),
                       ),
                     ],
