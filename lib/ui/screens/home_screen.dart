@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
-import 'package:spotify/spotify.dart';
+import 'package:spotify/spotify.dart' hide Offset;
 import 'package:spotkin_flutter/app_core.dart';
-import '../widgets/target_playlist_widget.dart';
+import '../widgets/playlist/target_playlist_widget.dart';
 import 'package:uuid/uuid.dart';
+import '../widgets/debug_label_wrapper.dart';
 
 class HomeScreen extends StatefulWidget {
   final Map<String, dynamic> config;
@@ -21,7 +22,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final BackendService _backendService = getIt<BackendService>();
   final SpotifyService spotifyService = getIt<SpotifyService>();
-  // late TabController _tabController;
+  late TabController _tabController;
 
   bool isProcessing = false;
   bool _isExpanded = false;
@@ -33,6 +34,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _verifyToken(); // You can keep the token verification in initState
+    _tabController = TabController(length: 3, vsync: this, initialIndex: 2); // Start with Tracks tab (index 2)
+    _tabController.addListener(() {
+      // This will trigger a rebuild when the tab changes
+      if (!_tabController.indexIsChanging) {
+        setState(() {});
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   Future<void> _verifyToken() async {
@@ -196,28 +210,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     setState(() {
       _isExpanded = false; // Collapse after changing the target playlist
     });
-    // _updateTabController();
-  }
-
-  Widget _buildRecipeCard(Job job, int index) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            RecipeWidget(
-              job: job,
-              jobIndex: index,
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   Widget buildTargetPlaylistSelectionOptions(int index) {
@@ -259,9 +251,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Consumer<JobProvider>(
       builder: (context, jobProvider, child) {
         if (jobProvider.isLoading) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+          return Center(
+            child:
+                const CircularProgressIndicator().withDebugLabel('HomeLoader'),
+          ).withDebugLabel('LoadingCenter');
         }
 
         final jobs = jobProvider.jobs;
@@ -270,9 +263,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
         final jobEntry = jobsIterable.first;
         final job = jobEntry.value;
-
-        // // Ensure tab controller is up to date
-        // _updateTabController();
 
         return Scaffold(
           backgroundColor: Colors.black,
@@ -283,45 +273,149 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               InfoButton(),
             ],
           ),
-          body: SingleChildScrollView(
-            child: Column(
-              children: [
-                TargetPlaylistWidget(
-                  index: jobEntry.key,
-                  isProcessing: isProcessing,
-                  processJob: _processJob,
-                  buildTargetPlaylistSelectionOptions:
-                      buildTargetPlaylistSelectionOptions,
-                  isExpanded: _isExpanded,
-                  onExpandChanged: (expanded) {
-                    setState(() {
-                      _isExpanded = expanded;
-                    });
-                  },
-                ),
-                SizedBox(height: widgetPadding),
-                if (!job.isNull) _buildRecipeCard(job, jobEntry.key),
-              ],
-            ),
+          body: Column(
+            children: [
+              // Target Playlist Widget stays at the top for all tabs
+              TargetPlaylistWidget(
+                index: jobEntry.key,
+                isProcessing: isProcessing,
+                processJob: _processJob,
+                buildTargetPlaylistSelectionOptions:
+                    buildTargetPlaylistSelectionOptions,
+                isExpanded: _isExpanded,
+                onExpandChanged: (expanded) {
+                  setState(() {
+                    _isExpanded = expanded;
+                  });
+                },
+              ).withDebugLabel('TargetPlaylistWidget'),
+              SizedBox(height: widgetPadding),
 
-            // if (_showAddJobButton)
-            //   SingleChildScrollView(
-            //     child: Column(
-            //       children: [
-            //         const SizedBox(height: 15),
-            //         ElevatedButton(
-            //           onPressed: () {
-            //             _addNewJob(Job.empty());
-            //           },
-            //           child: const Text('Add new job'),
-            //         ),
-            //       ],
-            //     ),
-            //   ),
-            // ],
+              // Tab selector
+              if (!job.isNull)
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black, // Darker background for more contrast with pills
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.withOpacity(0.3), width: 1),
+                  ),
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  child: TabBar(
+                    controller: _tabController,
+                    isScrollable: true, // Allow horizontal scrolling
+                    // Use custom tab decorations with more visible pills
+                    tabs: [
+                      Material(
+                        elevation: _tabController.index == 0 ? 12 : 0,
+                        borderRadius: BorderRadius.circular(30),
+                        color: Colors.transparent,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                          constraints: const BoxConstraints(minHeight: 38), // Fixed height constraint
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(30),
+                            color: _tabController.index == 0 ? const Color(0xFF4CAF50) : Colors.grey.withOpacity(0.15),
+                            border: Border.all(
+                              color: _tabController.index == 0 ? const Color(0xFF4CAF50) : Colors.transparent,
+                              width: 1,
+                            ),
+                          ),
+                          child: const Text('Filters'),
+                        ),
+                      ),
+                      Material(
+                        elevation: _tabController.index == 1 ? 12 : 0,
+                        borderRadius: BorderRadius.circular(30),
+                        color: Colors.transparent,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                          constraints: const BoxConstraints(minHeight: 38), // Fixed height constraint
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(30),
+                            color: _tabController.index == 1 ? const Color(0xFF4CAF50) : Colors.grey.withOpacity(0.15),
+                            border: Border.all(
+                              color: _tabController.index == 1 ? const Color(0xFF4CAF50) : Colors.transparent,
+                              width: 1,
+                            ),
+                          ),
+                          child: const Text('Sources'),
+                        ),
+                      ),
+                      Material(
+                        elevation: _tabController.index == 2 ? 12 : 0,
+                        borderRadius: BorderRadius.circular(30),
+                        color: Colors.transparent,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                          constraints: const BoxConstraints(minHeight: 38), // Fixed height constraint
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(30),
+                            color: _tabController.index == 2 ? const Color(0xFF4CAF50) : Colors.grey.withOpacity(0.15),
+                            border: Border.all(
+                              color: _tabController.index == 2 ? const Color(0xFF4CAF50) : Colors.transparent,
+                              width: 1,
+                            ),
+                          ),
+                          child: Text(job.targetPlaylist.name ?? 'Tracks'),
+                        ),
+                      ),
+                    ],
+                    labelStyle: const TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 14,
+                    ),
+                    unselectedLabelStyle: const TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                    ),
+                    labelColor: Colors.white,
+                    unselectedLabelColor: Colors.white.withOpacity(0.7),
+                    // Remove default indicator
+                    indicator: const BoxDecoration(),
+                    indicatorSize: TabBarIndicatorSize.tab,
+                    dividerColor: Colors.transparent,
+                    padding: const EdgeInsets.all(8.0),
+                    // Add space between tabs
+                    labelPadding: const EdgeInsets.symmetric(horizontal: 8),
+                  ),
+                ),
+              SizedBox(height: widgetPadding),
+
+              // Main content with tabs
+              if (!job.isNull)
+                Expanded(
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      // Filters Tab
+                      SingleChildScrollView(
+                        child: FiltersTab(
+                          index: jobEntry.key,
+                        ),
+                      ),
+
+                      // Playlists Tab
+                      SingleChildScrollView(
+                        child: PlaylistsTab(
+                          job: job,
+                          jobIndex: jobEntry.key,
+                        ),
+                      ),
+
+                      // Tracks Tab
+                      SingleChildScrollView(
+                        child: TracksTab(
+                          job: job,
+                          jobIndex: jobEntry.key,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
           ),
-          // ),
-        );
+        ).withDebugLabel('HomeScaffold');
       },
     );
   }

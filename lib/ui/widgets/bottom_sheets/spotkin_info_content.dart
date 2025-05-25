@@ -78,7 +78,7 @@ List<Widget> buildInfoSheetContent(BuildContext context) {
     ),
     gap,
     Text(
-      'You can create a custom recipe for your Spotkin, choosing which sources to pull music from.',
+      'You can create a custom algorithm for your Spotkin, choosing which sources to pull music from.',
       style: theme.textTheme.bodyMedium,
     ),
     gap,
@@ -88,7 +88,7 @@ List<Widget> buildInfoSheetContent(BuildContext context) {
     ),
     gap,
     Text(
-      'When you hit the "Go!" button, I use your personalized recipe to refresh your playlists with fresh, tailored tunes!',
+      'When you hit the "Go!" button, I use your personalized algorithm to refresh your playlists with fresh, tailored tunes!',
       style: theme.textTheme.bodyMedium,
     ),
     gap,
@@ -125,4 +125,3 @@ List<Widget> buildAcousticnessInfoSheetContent(BuildContext context) {
     )
   ];
 }
-

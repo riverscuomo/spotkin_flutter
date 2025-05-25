@@ -130,12 +130,12 @@ class _AuthScreenState extends State<AuthScreen> {
     return Scaffold(
       body: Center(
         child: _isLoading
-            ? CircularProgressIndicator()
+            ? CircularProgressIndicator().withDebugLabel('AuthLoader')
             : ElevatedButton(
                 onPressed: _initiateSpotifyLogin,
                 child: const Text('Login with Spotify'),
-              ),
+              ).withDebugLabel('SpotifyLoginButton'),
       ),
-    );
+    ).withDebugLabel('AuthScaffold');
   }
 }

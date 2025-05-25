@@ -1,10 +1,7 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-// import 'dart:html' as html;
 import 'package:spotify/spotify.dart';
-import 'package:spotkin_flutter/services/storage_service.dart';
 
 class SpotifyService {
   static const FlutterSecureStorage _secureStorage = FlutterSecureStorage();
@@ -248,8 +245,28 @@ class SpotifyService {
   }
 
   Future<Iterable<Track>> getPlaylistTracks(String playlistId) async {
-    await _ensureAuthenticated();
-    return await _spotify.playlists.getTracksByPlaylistId(playlistId).all();
+    try {
+      print('SpotifyService: Getting tracks for playlist: $playlistId');
+      await _ensureAuthenticated();
+      
+      // Get tracks with a timeout to prevent hanging
+      final tracks = await _spotify.playlists.getTracksByPlaylistId(playlistId)
+          .all()
+          .timeout(
+            const Duration(seconds: 20),
+            onTimeout: () {
+              print('SpotifyService: Timeout getting tracks for playlist: $playlistId');
+              return <Track>[];
+            },
+          );
+      
+      print('SpotifyService: Retrieved ${tracks.length} tracks for playlist: $playlistId');
+      return tracks;
+    } catch (e, stackTrace) {
+      print('SpotifyService: Error getting tracks for playlist $playlistId: $e');
+      print('Stack trace: $stackTrace');
+      return <Track>[];
+    }
   }
 
   Future<void> logout() async {

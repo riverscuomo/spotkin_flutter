@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:spotkin_flutter/app_core.dart';
-import 'package:spotkin_flutter/widgets/update_button.dart';
+import 'package:spotkin_flutter/ui/widgets/buttons/update_button.dart';
 
 class TargetPlaylistWidget extends StatelessWidget {
   final int index;
@@ -73,21 +73,7 @@ class TargetPlaylistWidget extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                playlistTitle(
-                                  context,
-                                  targetPlaylist,
-                                  style:
-                                      Theme.of(context).textTheme.titleMedium,
-                                ),
-                                // const SizedBox(height: 5),
-                                // Text(targetPlaylist.description ?? '',
-                                //     style:
-                                //         Theme.of(context).textTheme.bodyMedium),
-                              ],
-                            ),
+                            child: const SizedBox(),
                           ),
                           Row(
                             children: [
