@@ -39,7 +39,7 @@ class _TracksTabState extends State<TracksTab> {
       print('TracksTab: Starting to fetch tracks from recipe...');
       final tracks = await _fetchTracksFromRecipe();
       print('TracksTab: Fetched ${tracks.length} tracks successfully');
-      
+
       setState(() {
         _allTracks = tracks;
         _isLoading = false;
@@ -57,24 +57,28 @@ class _TracksTabState extends State<TracksTab> {
   Future<List<spotify.Track>> _fetchTracksFromRecipe() async {
     // Instead of recipe playlists, we'll load tracks from the target playlist
     if (widget.job.targetPlaylist.id == null) {
-      print('TracksTab: Target playlist ID is null, returning empty track list');
+      print(
+          'TracksTab: Target playlist ID is null, returning empty track list');
       return [];
     }
-    
-    print('TracksTab: Fetching tracks from target playlist ${widget.job.targetPlaylist.name}');
-    
+
+    print(
+        'TracksTab: Fetching tracks from target playlist ${widget.job.targetPlaylist.name}');
+
     try {
       // Add a timeout to prevent hanging if the Spotify API is slow
-      final playlistTracks = await spotifyService.getPlaylistTracks(widget.job.targetPlaylist.id!)
+      final playlistTracks = await spotifyService
+          .getPlaylistTracks(widget.job.targetPlaylist.id!)
           .timeout(
-            const Duration(seconds: 30),
-            onTimeout: () {
-              print('TracksTab: Timeout fetching tracks from target playlist');
-              return <spotify.Track>[];
-            },
-          );
-      
-      print('TracksTab: Retrieved ${playlistTracks.length} tracks from target playlist');
+        const Duration(seconds: 30),
+        onTimeout: () {
+          print('TracksTab: Timeout fetching tracks from target playlist');
+          return <spotify.Track>[];
+        },
+      );
+
+      print(
+          'TracksTab: Retrieved ${playlistTracks.length} tracks from target playlist');
       return playlistTracks.toList();
     } catch (e, stackTrace) {
       print('TracksTab: Error fetching tracks from target playlist: $e');
@@ -85,13 +89,14 @@ class _TracksTabState extends State<TracksTab> {
 
   void _handleBanTrack(spotify.Track track) {
     final jobProvider = Provider.of<JobProvider>(context, listen: false);
-    
+
     // Add to banned tracks if not already banned
-    if (!widget.job.bannedTracks.any((bannedTrack) => bannedTrack.id == track.id)) {
+    if (!widget.job.bannedTracks
+        .any((bannedTrack) => bannedTrack.id == track.id)) {
       final updatedBannedTracks = [...widget.job.bannedTracks, track];
       final updatedJob = widget.job.copyWith(bannedTracks: updatedBannedTracks);
       jobProvider.updateJob(widget.jobIndex, updatedJob);
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Banned track: ${track.name}')),
       );
@@ -100,16 +105,18 @@ class _TracksTabState extends State<TracksTab> {
 
   void _handleBanArtist(spotify.Track track) {
     final jobProvider = Provider.of<JobProvider>(context, listen: false);
-    
+
     if (track.artists != null && track.artists!.isNotEmpty) {
       final artist = track.artists!.first;
-      
+
       // Add to banned artists if not already banned
-      if (!widget.job.bannedArtists.any((bannedArtist) => bannedArtist.id == artist.id)) {
+      if (!widget.job.bannedArtists
+          .any((bannedArtist) => bannedArtist.id == artist.id)) {
         final updatedBannedArtists = [...widget.job.bannedArtists, artist];
-        final updatedJob = widget.job.copyWith(bannedArtists: updatedBannedArtists);
+        final updatedJob =
+            widget.job.copyWith(bannedArtists: updatedBannedArtists);
         jobProvider.updateJob(widget.jobIndex, updatedJob);
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Banned artist: ${artist.name}')),
         );
@@ -119,16 +126,18 @@ class _TracksTabState extends State<TracksTab> {
 
   void _handleBanAlbum(spotify.Track track) {
     final jobProvider = Provider.of<JobProvider>(context, listen: false);
-    
+
     if (track.album != null) {
       final album = track.album!;
-      
+
       // Add to banned albums if not already banned
-      if (!widget.job.bannedAlbums.any((bannedAlbum) => bannedAlbum.id == album.id)) {
+      if (!widget.job.bannedAlbums
+          .any((bannedAlbum) => bannedAlbum.id == album.id)) {
         final updatedBannedAlbums = [...widget.job.bannedAlbums, album];
-        final updatedJob = widget.job.copyWith(bannedAlbums: updatedBannedAlbums);
+        final updatedJob =
+            widget.job.copyWith(bannedAlbums: updatedBannedAlbums);
         jobProvider.updateJob(widget.jobIndex, updatedJob);
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Banned album: ${album.name}')),
         );
@@ -160,10 +169,15 @@ class _TracksTabState extends State<TracksTab> {
                   const SizedBox(height: 16),
                   _buildInfoRow('Name', track.name ?? 'Unknown'),
                   if (track.artists != null && track.artists!.isNotEmpty)
-                    _buildInfoRow('Artist', track.artists!.map((a) => a.name ?? 'Unknown Artist').join(', ')),
+                    _buildInfoRow(
+                        'Artist',
+                        track.artists!
+                            .map((a) => a.name ?? 'Unknown Artist')
+                            .join(', ')),
                   if (track.album != null)
                     _buildInfoRow('Album', track.album!.name ?? 'Unknown'),
-                  _buildInfoRow('Duration', _formatDuration(track.durationMs ?? 0)),
+                  _buildInfoRow(
+                      'Duration', _formatDuration(track.durationMs ?? 0)),
                   if (track.popularity != null)
                     _buildInfoRow('Popularity', '${track.popularity}/100'),
                   const SizedBox(height: 16),
@@ -210,8 +224,8 @@ class _TracksTabState extends State<TracksTab> {
     return '$minutes:$seconds';
   }
 
-  Future<bool> _handleDismiss(
-      DismissDirection direction, BuildContext context, spotify.Track track) async {
+  Future<bool> _handleDismiss(DismissDirection direction, BuildContext context,
+      spotify.Track track) async {
     if (direction == DismissDirection.endToStart) {
       // Negative options (ban)
       showModalBottomSheet(
@@ -273,7 +287,8 @@ class _TracksTabState extends State<TracksTab> {
                       Navigator.pop(context);
                       // TODO: Implement artist info view
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Artist info coming soon')),
+                        const SnackBar(
+                            content: Text('Artist info coming soon')),
                       );
                     },
                   ),
@@ -301,29 +316,30 @@ class _TracksTabState extends State<TracksTab> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: MediaQuery.of(context).size.height - 170, // Adjust based on your app's needs
+      height: MediaQuery.of(context).size.height -
+          170, // Adjust based on your app's needs
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Tracks',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                Text(
-                  'Swipe left to ban, swipe right for info',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 8),
-          
+          // // Header
+          // Container(
+          //   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          //   child: Column(
+          //     crossAxisAlignment: CrossAxisAlignment.start,
+          //     children: [
+          //       Text(
+          //         'Tracks',
+          //         style: Theme.of(context).textTheme.titleLarge,
+          //       ),
+          //       Text(
+          //         'Swipe left to ban, swipe right for info',
+          //         style: Theme.of(context).textTheme.bodyMedium,
+          //       ),
+          //     ],
+          //   ),
+          // ),
+          // const SizedBox(height: 8),
+
           // Main content
           Expanded(
             child: _buildContent(context),
@@ -332,7 +348,7 @@ class _TracksTabState extends State<TracksTab> {
       ),
     );
   }
-  
+
   Widget _buildContent(BuildContext context) {
     if (_isLoading) {
       return const Center(
@@ -376,12 +392,14 @@ class _TracksTabState extends State<TracksTab> {
 
   Widget _buildTrackCard(BuildContext context, spotify.Track track) {
     String? albumImageUrl;
-    if (track.album?.images?.isNotEmpty == true && track.album!.images!.first.url != null) {
+    if (track.album?.images?.isNotEmpty == true &&
+        track.album!.images!.first.url != null) {
       albumImageUrl = track.album!.images!.first.url!;
     }
-    final artistName = track.artists?.isNotEmpty == true && track.artists!.first.name != null
-        ? track.artists!.first.name!
-        : 'Unknown Artist';
+    final artistName =
+        track.artists?.isNotEmpty == true && track.artists!.first.name != null
+            ? track.artists!.first.name!
+            : 'Unknown Artist';
 
     return Dismissible(
       key: Key(track.id ?? 'unknown-${track.name}-$artistName'),
@@ -418,7 +436,8 @@ class _TracksTabState extends State<TracksTab> {
                             width: 56,
                             height: 56,
                             color: Colors.grey,
-                            child: const Icon(Icons.music_note, color: Colors.white),
+                            child: const Icon(Icons.music_note,
+                                color: Colors.white),
                           );
                         },
                       )
@@ -426,7 +445,8 @@ class _TracksTabState extends State<TracksTab> {
                         width: 56,
                         height: 56,
                         color: Colors.grey,
-                        child: const Icon(Icons.music_note, color: Colors.white),
+                        child:
+                            const Icon(Icons.music_note, color: Colors.white),
                       ),
               ),
               const SizedBox(width: 12),

@@ -207,6 +207,10 @@ class _PlaylistsTabState extends State<PlaylistsTab> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            // Text(
+            //   'Source playlists and quantities',
+            //   style: Theme.of(context).textTheme.bodyMedium,
+            // ),
             IconButton(
               iconSize: 45.0,
               icon: const Icon(Icons.add),
@@ -231,23 +235,6 @@ class _PlaylistsTabState extends State<PlaylistsTab> {
           ],
         ),
         const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Recipe',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              Text(
-                'Source playlists and quantities',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
         if (_ingredientRows.isEmpty) ...[
           const Center(
             child: Text(

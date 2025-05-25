@@ -16,14 +16,14 @@ class FiltersTab extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              'Filters Settings',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-          ),
-          const SizedBox(height: 8),
+          // Padding(
+          //   padding: const EdgeInsets.all(8.0),
+          //   child: Text(
+          //     'Filters Settings',
+          //     style: Theme.of(context).textTheme.titleLarge,
+          //   ),
+          // ),
+          // const SizedBox(height: 8),
           // Use the existing SettingsCard that already works
           SettingsCard(index: index),
         ],
