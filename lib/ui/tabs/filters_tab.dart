@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:spotkin_flutter/app_core.dart';
 
-class AlgorithmTab extends StatelessWidget {
+class FiltersTab extends StatelessWidget {
   final int index;
 
-  const AlgorithmTab({
+  const FiltersTab({
     Key? key,
     required this.index,
   }) : super(key: key);
@@ -19,7 +19,7 @@ class AlgorithmTab extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
-              'Algorithm Settings',
+              'Filters Settings',
               style: Theme.of(context).textTheme.titleLarge,
             ),
           ),

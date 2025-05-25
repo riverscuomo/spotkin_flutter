@@ -306,7 +306,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       ),
                       Padding(
                         padding: EdgeInsets.symmetric(vertical: 12),
-                        child: Text('Algorithm'),
+                        child: Text('Filters'),
                       ),
                     ],
                     labelStyle: const TextStyle(
@@ -357,9 +357,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         ),
                       ),
 
-                      // Algorithm Tab
+                      // Filters Tab
                       SingleChildScrollView(
-                        child: AlgorithmTab(
+                        child: FiltersTab(
                           index: jobEntry.key,
                         ),
                       ),
