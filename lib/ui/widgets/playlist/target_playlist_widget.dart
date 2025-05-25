@@ -72,8 +72,8 @@ class TargetPlaylistWidget extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Expanded(
-                            child: const SizedBox(),
+                          const Expanded(
+                            child: SizedBox(),
                           ),
                           Row(
                             children: [

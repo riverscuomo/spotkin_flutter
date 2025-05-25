@@ -36,6 +36,6 @@ To run locally,  I use these launch settings in vscode:
 }
 ```
 
-## Note
+## DEPLOYMENT
 
-Essentially, this front end replaces the old spreadsheet method of storing and editing Spotkin jobs. <https://docs.google.com/spreadsheets/d/1z5MejG6EKg8rf8vYKeFhw9XT_3PxkDFOrPSEKT_jYqI/edit?gid=1936655481#gid=1936655481>
+Any push to the main branch will trigger a GitHub Actions workflow that will build the app and deploy it to Firebase Hosting.
