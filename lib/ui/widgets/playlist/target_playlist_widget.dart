@@ -69,22 +69,16 @@ class TargetPlaylistWidget extends StatelessWidget {
                       )
                     else
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                        // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          const Expanded(
-                            child: SizedBox(),
-                          ),
-                          Row(
-                            children: [
-                              job.recipe.isEmpty
-                                  ? const SizedBox()
-                                  : UpdateButton(
-                                      isProcessing: isProcessing,
-                                      onPressed: () => processJob(job),
-                                    ),
-                            ],
-                          ),
+                          // SizedBox(),
+                          job.recipe.isEmpty
+                              ? const SizedBox()
+                              : UpdateButton(
+                                  isProcessing: isProcessing,
+                                  onPressed: () => processJob(job),
+                                ),
                         ],
                       ),
                     if (isExpanded) ...[

@@ -55,9 +55,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Future<void> _verifyToken() async {
     try {
       await spotifyService.checkAuthentication();
-      print('Home screen: Token is valid');
+      debugPrint('Home screen: Token is valid');
     } catch (e) {
-      print('Token verification failed: $e');
+      debugPrint('Token verification failed: $e');
       // Handle re-authentication here
     }
   }
@@ -103,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Future<void> _processJob(Job job) async {
-    print('Processing job: ${job.targetPlaylist.name}, id: ${job.id}');
+    debugPrint('Processing job: ${job.targetPlaylist.name}, id: ${job.id}');
 
     setState(() {
       isProcessing = true;
@@ -111,11 +111,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     try {
       final allJobs = Provider.of<JobProvider>(context, listen: false).jobs;
-      print('Total jobs: ${allJobs.length}');
+      debugPrint('Total jobs: ${allJobs.length}');
 
       final results = await _backendService.processJob(job.id);
 
-      print('Received results: $results');
+      debugPrint('Received results: $results');
 
       setState(() {
         isProcessing = false;
@@ -135,8 +135,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         });
       }
     } catch (e, stackTrace) {
-      print('Error in _processJob: $e');
-      print('Stack trace: $stackTrace');
+      debugPrint('Error in _processJob: $e');
+      debugPrint('Stack trace: $stackTrace');
 
       setState(() {
         isProcessing = false;

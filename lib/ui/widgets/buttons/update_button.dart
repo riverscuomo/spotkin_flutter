@@ -88,7 +88,7 @@ class _UpdateButtonState extends State<UpdateButton> {
           width: 85, // Fixed width for the label
           child: Center(
             child: Text(
-              widget.isProcessing ? 'Processing...' : 'Go!',
+              widget.isProcessing ? 'Processing...' : 'Update',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),

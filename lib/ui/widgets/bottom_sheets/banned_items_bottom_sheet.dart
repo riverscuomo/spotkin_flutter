@@ -136,7 +136,7 @@ class _BannedAlbumsBottomSheetState
         _isLoading = false;
       });
     } catch (e) {
-      print('Error fetching playlist tracks: $e');
+      debugPrint('Error fetching playlist tracks: $e');
       setState(() {
         _isLoading = false;
       });
@@ -385,7 +385,7 @@ class _BannedArtistsBottomSheetState
         _isLoading = false;
       });
     } catch (e) {
-      print('Error fetching playlist tracks or artist details: $e');
+      debugPrint('Error fetching playlist tracks or artist details: $e');
       setState(() {
         _isLoading = false;
       });
@@ -579,7 +579,7 @@ class _BannedTracksBottomSheetState
         _isLoading = false;
       });
     } catch (e) {
-      print('Error fetching playlist tracks: $e');
+      debugPrint('Error fetching playlist tracks: $e');
       setState(() {
         _isLoading = false;
       });

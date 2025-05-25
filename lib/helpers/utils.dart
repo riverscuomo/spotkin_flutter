@@ -49,7 +49,7 @@ class Utils {
   // }
 
   static Future<void> myLaunch(String url) async {
-    print('Launching URL: $url');
+    debugPrint('Launching URL: $url');
     final uri = Uri.parse(url);
     if (await url_launcher.canLaunchUrl(uri)) {
       await url_launcher.launchUrl(uri);

@@ -59,7 +59,7 @@ class _AuthScreenState extends State<AuthScreen> {
       _isInitiatingLogin = true;
     });
 
-    print(
+    debugPrint(
         "widget.config['SPOTIFY_REDIRECT_URI']: ${widget.config['SPOTIFY_REDIRECT_URI']}");
 
     final authUrl = Uri.https('accounts.spotify.com', '/authorize', {
@@ -89,10 +89,10 @@ class _AuthScreenState extends State<AuthScreen> {
         await _handleAuthorizationCode(
             authCode); // Use SpotifyService to exchange the code
       } else {
-        print('Failed to extract authorization code');
+        debugPrint('Failed to extract authorization code');
       }
     } catch (e) {
-      print('Error during Spotify login: $e');
+      debugPrint('Error during Spotify login: $e');
       _showErrorSnackBar('Failed to login with Spotify');
     } finally {
       setState(() {
@@ -114,7 +114,7 @@ class _AuthScreenState extends State<AuthScreen> {
         ),
       );
     } catch (e) {
-      print('Error handling authorization code: $e');
+      debugPrint('Error handling authorization code: $e');
       _showErrorSnackBar('Failed to authenticate with Spotify');
     }
   }

@@ -9,11 +9,11 @@ class BackendService {
   BackendService({required this.backendUrl});
 
   Future<List<Job>> getJobs() async {
-    print('backendService.getJobs');
+    debugPrint('backendService.getJobs');
     final spotifyService = getIt<SpotifyService>();
     final userId = await spotifyService.getUserId();
     final url = '$backendUrl/jobs/$userId';
-    print('url: $url');
+    debugPrint('url: $url');
     final response = await http.get(
       Uri.parse(url),
       headers: await _getAuthHeaders(),
@@ -21,7 +21,7 @@ class BackendService {
 
     if (response.statusCode == 200) {
       final List<dynamic> responseData = json.decode(response.body);
-      print('responseData: ${responseData.length}');
+      debugPrint('responseData: ${responseData.length}');
       if (responseData.isEmpty) {
         return [Job.empty()];
       }
@@ -80,14 +80,14 @@ class BackendService {
         throw Exception('Failed to process jobs: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error processing jobs: $e');
+      debugPrint('Error processing jobs: $e');
       rethrow;
     }
   }
 
   Future<Job> updateJob(Job job) async {
     final url = '$backendUrl/jobs/${job.id}';
-    print('updateJob: $url');
+    debugPrint('updateJob: $url');
     final response = await http.put(
       Uri.parse(url),
       headers: await _getAuthHeaders(),

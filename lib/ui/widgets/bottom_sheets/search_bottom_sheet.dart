@@ -81,7 +81,7 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
         _isLoading = false;
       });
     } catch (e) {
-      print('Error fetching user playlists: $e');
+      debugPrint('Error fetching user playlists: $e');
       setState(() {
         _searchResults = [];
         _isLoading = false;
@@ -135,7 +135,7 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
         _isLoading = false;
       });
     } catch (e) {
-      print('Error performing search: $e');
+      debugPrint('Error performing search: $e');
       setState(() {
         _searchResults = [];
         _isLoading = false;
@@ -181,7 +181,7 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
           radius: 25,
           backgroundImage: NetworkImage(imageUrl),
           onBackgroundImageError: (exception, stackTrace) {
-            print('Error loading image: $exception');
+            debugPrint('Error loading image: $exception');
           },
           child: Container(
             decoration: BoxDecoration(

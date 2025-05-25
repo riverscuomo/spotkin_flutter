@@ -15,22 +15,22 @@ class JobProvider extends ChangeNotifier {
   }
 
   Future<void> loadJobs() async {
-    print('Loading jobs...');
+    debugPrint('Loading jobs...');
     _isLoading = true;
     notifyListeners();
 
     try {
       _jobs = await _backendService.getJobs();
 
-      print('Jobs loaded: ${_jobs.length}');
+      debugPrint('Jobs loaded: ${_jobs.length}');
       // if (_jobs.isEmpty) {
-      //   print('Adding empty job');
+      //   debugPrint('Adding empty job');
       //   _jobs.add(Job.empty());
       // }
     } catch (e) {
-      print('Error loading jobs: $e');
+      debugPrint('Error loading jobs: $e');
       if (e.runtimeType == ClientException) {
-        print('Did you forget to run the backend server locally?');
+        debugPrint('Did you forget to run the backend server locally?');
       }
     } finally {
       _isLoading = false;
@@ -44,7 +44,7 @@ class JobProvider extends ChangeNotifier {
       _jobs.add(newJob);
       notifyListeners();
     } catch (e) {
-      print('Error adding job: $e');
+      debugPrint('Error adding job: $e');
     }
   }
 
@@ -61,7 +61,7 @@ class JobProvider extends ChangeNotifier {
       await _backendService.updateJob(updatedJob);
     } catch (e) {
       // If backend update fails, revert to original state
-      print('Error updating job: $e');
+      debugPrint('Error updating job: $e');
       _jobs[index] = originalJob;
       notifyListeners();
 
@@ -77,7 +77,7 @@ class JobProvider extends ChangeNotifier {
       _jobs.removeAt(index);
       notifyListeners();
     } catch (e) {
-      print('Error deleting job: $e');
+      debugPrint('Error deleting job: $e');
     }
   }
 }

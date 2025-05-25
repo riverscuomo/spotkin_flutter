@@ -43,7 +43,7 @@ class _BannedGenresBottomSheetState extends State<BannedGenresBottomSheet> {
         _updateJob();
         _feedbackMessage = '$genre added to banned genres';
       });
-      print(
+      debugPrint(
           'Genre added: $genre. Total banned genres: ${_bannedGenres.length}');
     }
   }
@@ -53,7 +53,7 @@ class _BannedGenresBottomSheetState extends State<BannedGenresBottomSheet> {
     final job = jobProvider.jobs[widget.jobIndex];
     final updatedJob = job.copyWith(bannedGenres: _bannedGenres);
     jobProvider.updateJob(widget.jobIndex, updatedJob);
-    print(
+    debugPrint(
         'Job updated. Banned genres count: ${updatedJob.bannedGenres.length}');
   }
 
@@ -93,7 +93,7 @@ class _BannedGenresBottomSheetState extends State<BannedGenresBottomSheet> {
         _isLoading = false;
       });
     } catch (e) {
-      print('Error fetching playlist artists: $e');
+      debugPrint('Error fetching playlist artists: $e');
       setState(() {
         _isLoading = false;
       });

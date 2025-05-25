@@ -64,7 +64,7 @@ class Job {
   bool get isNull => targetPlaylist.id == null;
 
   factory Job.fromJson(Map<String, dynamic> json) {
-    print('Job.fromJson: ${json['target_playlist']['name']}');
+    debugPrint('Job.fromJson: ${json['target_playlist']['name']}');
     return Job(
       id: json['id'],
       targetPlaylist: PlaylistSimple.fromJson(

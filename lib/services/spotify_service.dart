@@ -53,10 +53,10 @@ class SpotifyService {
     try {
       await _ensureAuthenticated();
       final me = await _spotify.me.get();
-      print('Authentication successful. User ID: ${me.id}');
+      debugPrint('Authentication successful. User ID: ${me.id}');
       return true;
     } catch (e) {
-      print('Authentication check failed: $e');
+      debugPrint('Authentication check failed: $e');
       return false;
     }
   }
@@ -85,7 +85,7 @@ class SpotifyService {
             'Failed to authenticate with Spotify: ${response.reasonPhrase}');
       }
     } catch (e) {
-      print('Error exchanging code for token: $e');
+      debugPrint('Error exchanging code for token: $e');
       rethrow;
     }
   }
@@ -116,7 +116,7 @@ class SpotifyService {
   }
 
   Future<SpotifyApiCredentials?> retrieveCredentials() async {
-    print('retrieveCredentials');
+    debugPrint('retrieveCredentials');
     final accessToken = await _secureStorage.read(key: _accessTokenKey);
     final refreshToken = await _secureStorage.read(key: _refreshTokenKey);
     final expirationString = await _secureStorage.read(key: _expirationKey);
@@ -172,7 +172,7 @@ class SpotifyService {
         return false;
       }
     } catch (e) {
-      print('Error refreshing access token: $e');
+      debugPrint('Error refreshing access token: $e');
       return false;
     }
   }
@@ -246,25 +246,29 @@ class SpotifyService {
 
   Future<Iterable<Track>> getPlaylistTracks(String playlistId) async {
     try {
-      print('SpotifyService: Getting tracks for playlist: $playlistId');
+      debugPrint('SpotifyService: Getting tracks for playlist: $playlistId');
       await _ensureAuthenticated();
-      
+
       // Get tracks with a timeout to prevent hanging
-      final tracks = await _spotify.playlists.getTracksByPlaylistId(playlistId)
+      final tracks = await _spotify.playlists
+          .getTracksByPlaylistId(playlistId)
           .all()
           .timeout(
-            const Duration(seconds: 20),
-            onTimeout: () {
-              print('SpotifyService: Timeout getting tracks for playlist: $playlistId');
-              return <Track>[];
-            },
-          );
-      
-      print('SpotifyService: Retrieved ${tracks.length} tracks for playlist: $playlistId');
+        const Duration(seconds: 20),
+        onTimeout: () {
+          debugPrint(
+              'SpotifyService: Timeout getting tracks for playlist: $playlistId');
+          return <Track>[];
+        },
+      );
+
+      debugPrint(
+          'SpotifyService: Retrieved ${tracks.length} tracks for playlist: $playlistId');
       return tracks;
     } catch (e, stackTrace) {
-      print('SpotifyService: Error getting tracks for playlist $playlistId: $e');
-      print('Stack trace: $stackTrace');
+      debugPrint(
+          'SpotifyService: Error getting tracks for playlist $playlistId: $e');
+      debugPrint('Stack trace: $stackTrace');
       return <Track>[];
     }
   }
@@ -282,12 +286,12 @@ class SpotifyService {
     required List<SearchType> types,
   }) async {
     try {
-      print(
+      debugPrint(
           'Performing search for query: $query with limit: $limit with types: $types');
       final searchResults =
           await _spotify.search.get(query, types: types).first(limit);
 
-      print('Number of pages: ${searchResults.length}');
+      debugPrint('Number of pages: ${searchResults.length}');
 
       final unifiedResults = <dynamic>[];
 
@@ -297,12 +301,12 @@ class SpotifyService {
         }
       }
 
-      print(
+      debugPrint(
           'SPOTIFY SERVICE: Total number of results: ${unifiedResults.length}');
 
       return unifiedResults;
     } catch (e) {
-      print('Error searching Spotify: $e');
+      debugPrint('Error searching Spotify: $e');
       return [];
     }
   }

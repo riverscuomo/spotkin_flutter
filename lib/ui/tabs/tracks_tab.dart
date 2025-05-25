@@ -29,6 +29,31 @@ class _TracksTabState extends State<TracksTab>
   void initState() {
     super.initState();
     _loadTracks();
+
+    // Listen for job updates to refresh tracks
+    final jobProvider = Provider.of<JobProvider>(context, listen: false);
+    jobProvider.addListener(_onJobsUpdated);
+  }
+
+  @override
+  void dispose() {
+    final jobProvider = Provider.of<JobProvider>(context, listen: false);
+    jobProvider.removeListener(_onJobsUpdated);
+    super.dispose();
+  }
+
+  void _onJobsUpdated() {
+    // Check if we need to refresh the tracks list
+    final jobProvider = Provider.of<JobProvider>(context, listen: false);
+    if (jobProvider.jobs.length > widget.jobIndex) {
+      final updatedJob = jobProvider.jobs[widget.jobIndex];
+
+      // If this is our job and it's been updated, refresh the tracks
+      if (updatedJob.id == widget.job.id && updatedJob != widget.job) {
+        debugPrint('TracksTab: Job updated, refreshing tracks...');
+        _loadTracks();
+      }
+    }
   }
 
   Future<void> _loadTracks() async {
@@ -38,17 +63,17 @@ class _TracksTabState extends State<TracksTab>
         _errorMessage = null;
       });
 
-      print('TracksTab: Starting to fetch tracks from recipe...');
+      debugPrint('TracksTab: Starting to fetch tracks from recipe...');
       final tracks = await _fetchTracksFromRecipe();
-      print('TracksTab: Fetched ${tracks.length} tracks successfully');
+      debugPrint('TracksTab: Fetched ${tracks.length} tracks successfully');
 
       setState(() {
         _allTracks = tracks;
         _isLoading = false;
       });
     } catch (e, stackTrace) {
-      print('TracksTab: Error loading tracks: $e');
-      print('Stack trace: $stackTrace');
+      debugPrint('TracksTab: Error loading tracks: $e');
+      debugPrint('Stack trace: $stackTrace');
       setState(() {
         _isLoading = false;
         _errorMessage = 'Failed to load tracks: ${e.toString()}';
@@ -59,12 +84,12 @@ class _TracksTabState extends State<TracksTab>
   Future<List<spotify.Track>> _fetchTracksFromRecipe() async {
     // Instead of recipe playlists, we'll load tracks from the target playlist
     if (widget.job.targetPlaylist.id == null) {
-      print(
+      debugPrint(
           'TracksTab: Target playlist ID is null, returning empty track list');
       return [];
     }
 
-    print(
+    debugPrint(
         'TracksTab: Fetching tracks from target playlist ${widget.job.targetPlaylist.name}');
 
     try {
@@ -74,17 +99,17 @@ class _TracksTabState extends State<TracksTab>
           .timeout(
         const Duration(seconds: 30),
         onTimeout: () {
-          print('TracksTab: Timeout fetching tracks from target playlist');
+          debugPrint('TracksTab: Timeout fetching tracks from target playlist');
           return <spotify.Track>[];
         },
       );
 
-      print(
+      debugPrint(
           'TracksTab: Retrieved ${playlistTracks.length} tracks from target playlist');
       return playlistTracks.toList();
     } catch (e, stackTrace) {
-      print('TracksTab: Error fetching tracks from target playlist: $e');
-      print('Stack trace: $stackTrace');
+      debugPrint('TracksTab: Error fetching tracks from target playlist: $e');
+      debugPrint('Stack trace: $stackTrace');
       return [];
     }
   }
