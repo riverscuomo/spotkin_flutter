@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:spotify/spotify.dart' as spotify;
 import 'package:spotkin_flutter/app_core.dart';
-import 'package:spotkin_flutter/ui/widgets/track_card.dart';
+import 'package:spotkin_flutter/ui/widgets/cards/track_card.dart';
 
 class TracksTab extends StatefulWidget {
   final Job job;

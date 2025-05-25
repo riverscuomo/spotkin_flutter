@@ -306,102 +306,113 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   ),
                   margin:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  child: TabBar(
-                    controller: _tabController,
-                    isScrollable: true, // Allow horizontal scrolling
-                    // Use custom tab decorations with more visible pills
-                    tabs: [
-                      Material(
-                        elevation: _tabController.index == 0 ? 12 : 0,
-                        borderRadius: BorderRadius.circular(30),
-                        color: Colors.transparent,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 10, horizontal: 20),
-                          constraints: const BoxConstraints(
-                              minHeight: 38), // Fixed height constraint
-                          decoration: BoxDecoration(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      // Determine if we should use fixed tabs or scrollable tabs
+                      // based on the available width
+                      final screenWidth = constraints.maxWidth;
+                      final bool useFixedTabs = screenWidth > 500; // Threshold for switching modes
+                      
+                      return TabBar(
+                        controller: _tabController,
+                        isScrollable: !useFixedTabs, // Scrollable on narrow screens, fixed on wide screens
+                        tabs: [
+                          Material(
+                            elevation: _tabController.index == 0 ? 12 : 0,
                             borderRadius: BorderRadius.circular(30),
-                            color: _tabController.index == 0
-                                ? const Color(0xFF4CAF50)
-                                : Colors.grey.withOpacity(0.15),
-                            border: Border.all(
-                              color: _tabController.index == 0
-                                  ? const Color(0xFF4CAF50)
-                                  : Colors.transparent,
-                              width: 1,
+                            color: Colors.transparent,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 10, horizontal: 20),
+                              constraints: const BoxConstraints(minHeight: 38),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(30),
+                                color: _tabController.index == 0
+                                    ? const Color(0xFF4CAF50)
+                                    : Colors.grey.withOpacity(0.15),
+                                border: Border.all(
+                                  color: _tabController.index == 0
+                                      ? const Color(0xFF4CAF50)
+                                      : Colors.transparent,
+                                  width: 1,
+                                ),
+                              ),
+                              child: const Text('Filters'),
                             ),
                           ),
-                          child: const Text('Filters'),
-                        ),
-                      ),
-                      Material(
-                        elevation: _tabController.index == 1 ? 12 : 0,
-                        borderRadius: BorderRadius.circular(30),
-                        color: Colors.transparent,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 10, horizontal: 20),
-                          constraints: const BoxConstraints(
-                              minHeight: 38), // Fixed height constraint
-                          decoration: BoxDecoration(
+                          Material(
+                            elevation: _tabController.index == 1 ? 12 : 0,
                             borderRadius: BorderRadius.circular(30),
-                            color: _tabController.index == 1
-                                ? const Color(0xFF4CAF50)
-                                : Colors.grey.withOpacity(0.15),
-                            border: Border.all(
-                              color: _tabController.index == 1
-                                  ? const Color(0xFF4CAF50)
-                                  : Colors.transparent,
-                              width: 1,
+                            color: Colors.transparent,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 10, horizontal: 20),
+                              constraints: const BoxConstraints(
+                                  minHeight: 38), // Fixed height constraint
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(30),
+                                color: _tabController.index == 1
+                                    ? const Color(0xFF4CAF50)
+                                    : Colors.grey.withOpacity(0.15),
+                                border: Border.all(
+                                  color: _tabController.index == 1
+                                      ? const Color(0xFF4CAF50)
+                                      : Colors.transparent,
+                                  width: 1,
+                                ),
+                              ),
+                              child: const Text('Sources'),
                             ),
                           ),
-                          child: const Text('Sources'),
-                        ),
-                      ),
-                      Material(
-                        elevation: _tabController.index == 2 ? 12 : 0,
-                        borderRadius: BorderRadius.circular(30),
-                        color: Colors.transparent,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 10, horizontal: 20),
-                          constraints: const BoxConstraints(
-                              minHeight: 38), // Fixed height constraint
-                          decoration: BoxDecoration(
+                          Material(
+                            elevation: _tabController.index == 2 ? 12 : 0,
                             borderRadius: BorderRadius.circular(30),
-                            color: _tabController.index == 2
-                                ? const Color(0xFF4CAF50)
-                                : Colors.grey.withOpacity(0.15),
-                            border: Border.all(
-                              color: _tabController.index == 2
-                                  ? const Color(0xFF4CAF50)
-                                  : Colors.transparent,
-                              width: 1,
+                            color: Colors.transparent,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 10, horizontal: 20),
+                              constraints: const BoxConstraints(
+                                  minHeight: 38), // Fixed height constraint
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(30),
+                                color: _tabController.index == 2
+                                    ? const Color(0xFF4CAF50)
+                                    : Colors.grey.withOpacity(0.15),
+                                border: Border.all(
+                                  color: _tabController.index == 2
+                                      ? const Color(0xFF4CAF50)
+                                      : Colors.transparent,
+                                  width: 1,
+                                ),
+                              ),
+                              child: Text(job.targetPlaylist.name ?? 'Tracks'),
                             ),
                           ),
-                          child: Text(job.targetPlaylist.name ?? 'Tracks'),
+                        ],
+                        labelStyle: const TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 14,
                         ),
-                      ),
-                    ],
-                    labelStyle: const TextStyle(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 14,
-                    ),
-                    unselectedLabelStyle: const TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 14,
-                    ),
-                    labelColor: Colors.white,
-                    unselectedLabelColor: Colors.white.withOpacity(0.7),
-                    // Remove default indicator
-                    indicator: const BoxDecoration(),
-                    indicatorSize: TabBarIndicatorSize.tab,
-                    dividerColor: Colors.transparent,
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 8.0, horizontal: 4.0),
-                    // Minimal space between tabs
-                    labelPadding: const EdgeInsets.symmetric(horizontal: 2),
+                        unselectedLabelStyle: const TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                        ),
+                        labelColor: Colors.white,
+                        unselectedLabelColor: Colors.white.withOpacity(0.7),
+                        // Remove default indicator
+                        indicator: const BoxDecoration(),
+                        indicatorSize: TabBarIndicatorSize.tab,
+                        dividerColor: Colors.transparent,
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 8.0, horizontal: 4.0),
+                        // Responsive spacing between tabs based on screen width
+                        labelPadding: EdgeInsets.symmetric(
+                          horizontal: useFixedTabs 
+                              ? (constraints.maxWidth / 50).clamp(4.0, 12.0) 
+                              : 2.0,
+                        ),
+                      );
+                    },
                   ),
                 ),
               SizedBox(height: widgetPadding),
