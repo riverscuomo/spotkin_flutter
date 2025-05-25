@@ -245,8 +245,28 @@ class SpotifyService {
   }
 
   Future<Iterable<Track>> getPlaylistTracks(String playlistId) async {
-    await _ensureAuthenticated();
-    return await _spotify.playlists.getTracksByPlaylistId(playlistId).all();
+    try {
+      print('SpotifyService: Getting tracks for playlist: $playlistId');
+      await _ensureAuthenticated();
+      
+      // Get tracks with a timeout to prevent hanging
+      final tracks = await _spotify.playlists.getTracksByPlaylistId(playlistId)
+          .all()
+          .timeout(
+            const Duration(seconds: 20),
+            onTimeout: () {
+              print('SpotifyService: Timeout getting tracks for playlist: $playlistId');
+              return <Track>[];
+            },
+          );
+      
+      print('SpotifyService: Retrieved ${tracks.length} tracks for playlist: $playlistId');
+      return tracks;
+    } catch (e, stackTrace) {
+      print('SpotifyService: Error getting tracks for playlist $playlistId: $e');
+      print('Stack trace: $stackTrace');
+      return <Track>[];
+    }
   }
 
   Future<void> logout() async {

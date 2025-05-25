@@ -36,13 +36,17 @@ class _TracksTabState extends State<TracksTab> {
         _errorMessage = null;
       });
 
+      print('TracksTab: Starting to fetch tracks from recipe...');
       final tracks = await _fetchTracksFromRecipe();
+      print('TracksTab: Fetched ${tracks.length} tracks successfully');
       
       setState(() {
         _allTracks = tracks;
         _isLoading = false;
       });
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('TracksTab: Error loading tracks: $e');
+      print('Stack trace: $stackTrace');
       setState(() {
         _isLoading = false;
         _errorMessage = 'Failed to load tracks: ${e.toString()}';
@@ -51,27 +55,32 @@ class _TracksTabState extends State<TracksTab> {
   }
 
   Future<List<spotify.Track>> _fetchTracksFromRecipe() async {
-    if (widget.job.recipe.isEmpty) {
+    // Instead of recipe playlists, we'll load tracks from the target playlist
+    if (widget.job.targetPlaylist.id == null) {
+      print('TracksTab: Target playlist ID is null, returning empty track list');
       return [];
     }
-
-    final allTracks = <spotify.Track>[];
     
-    // Fetch tracks from each playlist in the recipe
-    for (final ingredient in widget.job.recipe) {
-      if (ingredient.playlist.id != null) {
-        try {
-          final playlistTracks = await spotifyService.getPlaylistTracks(ingredient.playlist.id!);
-          // The quantity in the recipe determines how many tracks we take from each playlist
-          final tracksToAdd = playlistTracks.take(ingredient.quantity).toList();
-          allTracks.addAll(tracksToAdd);
-        } catch (e) {
-          print('Error fetching tracks from playlist ${ingredient.playlist.name}: $e');
-        }
-      }
+    print('TracksTab: Fetching tracks from target playlist ${widget.job.targetPlaylist.name}');
+    
+    try {
+      // Add a timeout to prevent hanging if the Spotify API is slow
+      final playlistTracks = await spotifyService.getPlaylistTracks(widget.job.targetPlaylist.id!)
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () {
+              print('TracksTab: Timeout fetching tracks from target playlist');
+              return <spotify.Track>[];
+            },
+          );
+      
+      print('TracksTab: Retrieved ${playlistTracks.length} tracks from target playlist');
+      return playlistTracks.toList();
+    } catch (e, stackTrace) {
+      print('TracksTab: Error fetching tracks from target playlist: $e');
+      print('Stack trace: $stackTrace');
+      return [];
     }
-
-    return allTracks;
   }
 
   void _handleBanTrack(spotify.Track track) {
@@ -202,7 +211,7 @@ class _TracksTabState extends State<TracksTab> {
   }
 
   Future<bool> _handleDismiss(
-      DismissDirection direction, spotify.Track track) async {
+      DismissDirection direction, BuildContext context, spotify.Track track) async {
     if (direction == DismissDirection.endToStart) {
       // Negative options (ban)
       showModalBottomSheet(
@@ -291,77 +300,81 @@ class _TracksTabState extends State<TracksTab> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Tracks',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              Text(
-                'Swipe left to ban, swipe right for info',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 8),
-        
-        if (_isLoading)
-          const Expanded(
-            child: Center(
-              child: CircularProgressIndicator(),
-            ),
-          )
-        else if (_errorMessage != null)
-          Expanded(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    _errorMessage!,
-                    style: const TextStyle(color: Colors.red),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: _loadTracks,
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
-            ),
-          )
-        else if (_allTracks.isEmpty)
-          const Expanded(
-            child: Center(
-              child: Text(
-                'No tracks found. Add playlists to your recipe first.',
-                style: TextStyle(fontStyle: FontStyle.italic),
-              ),
-            ),
-          )
-        else
-          Expanded(
-            child: ListView.builder(
-              itemCount: _allTracks.length,
-              itemBuilder: (context, index) {
-                final track = _allTracks[index];
-                return _buildTrackCard(track);
-              },
+    return SizedBox(
+      height: MediaQuery.of(context).size.height - 170, // Adjust based on your app's needs
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Tracks',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                Text(
+                  'Swipe left to ban, swipe right for info',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ],
             ),
           ),
-      ],
+          const SizedBox(height: 8),
+          
+          // Main content
+          Expanded(
+            child: _buildContent(context),
+          ),
+        ],
+      ),
     );
   }
+  
+  Widget _buildContent(BuildContext context) {
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    } else if (_errorMessage != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              _errorMessage!,
+              style: const TextStyle(color: Colors.red),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _loadTracks,
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
+    } else if (_allTracks.isEmpty) {
+      return const Center(
+        child: Text(
+          'No tracks found. Add playlists to your recipe first.',
+          style: TextStyle(fontStyle: FontStyle.italic),
+        ),
+      );
+    } else {
+      return ListView.builder(
+        itemCount: _allTracks.length,
+        itemBuilder: (context, index) {
+          final track = _allTracks[index];
+          return _buildTrackCard(context, track);
+        },
+      );
+    }
+  }
 
-  Widget _buildTrackCard(spotify.Track track) {
+  Widget _buildTrackCard(BuildContext context, spotify.Track track) {
     String? albumImageUrl;
     if (track.album?.images?.isNotEmpty == true && track.album!.images!.first.url != null) {
       albumImageUrl = track.album!.images!.first.url!;
@@ -384,7 +397,7 @@ class _TracksTabState extends State<TracksTab> {
         padding: const EdgeInsets.only(right: 16),
         child: const Icon(Icons.block, color: Colors.white),
       ),
-      confirmDismiss: (direction) => _handleDismiss(direction, track),
+      confirmDismiss: (direction) => _handleDismiss(direction, context, track),
       child: Card(
         margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
         child: Padding(
