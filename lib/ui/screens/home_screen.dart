@@ -5,7 +5,6 @@ import 'package:spotify/spotify.dart' hide Offset;
 import 'package:spotkin_flutter/app_core.dart';
 import '../widgets/playlist/target_playlist_widget.dart';
 import 'package:uuid/uuid.dart';
-import '../widgets/debug_label_wrapper.dart';
 
 class HomeScreen extends StatefulWidget {
   final Map<String, dynamic> config;
@@ -311,11 +310,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       // Determine if we should use fixed tabs or scrollable tabs
                       // based on the available width
                       final screenWidth = constraints.maxWidth;
-                      final bool useFixedTabs = screenWidth > 500; // Threshold for switching modes
-                      
+                      final bool useFixedTabs =
+                          screenWidth > 500; // Threshold for switching modes
+
                       return TabBar(
                         controller: _tabController,
-                        isScrollable: !useFixedTabs, // Scrollable on narrow screens, fixed on wide screens
+                        isScrollable:
+                            !useFixedTabs, // Scrollable on narrow screens, fixed on wide screens
                         tabs: [
                           Material(
                             elevation: _tabController.index == 0 ? 12 : 0,
@@ -407,8 +408,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             vertical: 8.0, horizontal: 4.0),
                         // Responsive spacing between tabs based on screen width
                         labelPadding: EdgeInsets.symmetric(
-                          horizontal: useFixedTabs 
-                              ? (constraints.maxWidth / 50).clamp(4.0, 12.0) 
+                          horizontal: useFixedTabs
+                              ? (constraints.maxWidth / 50).clamp(4.0, 12.0)
                               : 2.0,
                         ),
                       );
@@ -439,11 +440,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       ),
 
                       // Tracks Tab
-                      SingleChildScrollView(
-                        child: TracksTab(
-                          job: job,
-                          jobIndex: jobEntry.key,
-                        ),
+                      TracksTab(
+                        job: job,
+                        jobIndex: jobEntry.key,
                       ),
                     ],
                   ),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:spotkin_flutter/app_core.dart';
 import 'helpers/load_config.dart';
-import 'spotify_theme_data.dart';
+import 'ui/widgets/styles/spotify_theme_data.dart';
 import 'ui/widgets/debug_label_wrapper.dart';
 
 void main() async {

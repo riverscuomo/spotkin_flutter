@@ -480,38 +480,7 @@ class _TracksTabState extends State<TracksTab>
   @override
   Widget build(BuildContext context) {
     super.build(context); // Required by AutomaticKeepAliveClientMixin
-    return SizedBox(
-      height: MediaQuery.of(context).size.height -
-          170, // Adjust based on your app's needs
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // // Header
-          // Container(
-          //   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          //   child: Column(
-          //     crossAxisAlignment: CrossAxisAlignment.start,
-          //     children: [
-          //       Text(
-          //         'Tracks',
-          //         style: Theme.of(context).textTheme.titleLarge,
-          //       ),
-          //       Text(
-          //         'Swipe left to ban, swipe right for info',
-          //         style: Theme.of(context).textTheme.bodyMedium,
-          //       ),
-          //     ],
-          //   ),
-          // ),
-          // const SizedBox(height: 8),
-
-          // Main content
-          Expanded(
-            child: _buildContent(context),
-          ),
-        ],
-      ),
-    );
+    return _buildContent(context);
   }
 
   Widget _buildContent(BuildContext context) {
