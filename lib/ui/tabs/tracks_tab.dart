@@ -514,7 +514,9 @@ class _TracksTabState extends State<TracksTab>
         ),
       );
     } else {
+      // Use the simplest ListView implementation for maximum compatibility
       return ListView.builder(
+        // No custom physics or other parameters that might cause issues
         itemCount: _allTracks.length,
         itemBuilder: (context, index) {
           final track = _allTracks[index];
