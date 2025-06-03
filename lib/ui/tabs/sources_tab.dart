@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:spotify/spotify.dart';
 import 'package:spotkin_flutter/app_core.dart';
 import '../widgets/playlist/ingredient_row.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 const int defaultQuantity = 2;
 
@@ -276,15 +277,37 @@ class _SourcesTabState extends State<SourcesTab>
                 ),
                 confirmDismiss: (direction) =>
                     _handleDismiss(direction, playlistId),
-                child: Card(
-                  margin: const EdgeInsets.symmetric(
-                    vertical: 4,
-                    horizontal: 8,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: Row(
-                      children: [
+                child: InkWell(
+                  onTap: () async {
+                    // Open Spotify playlist when tapped
+                    final spotifyUrl = 'spotify:playlist:${playlistId}';
+                    final Uri uri = Uri.parse(spotifyUrl);
+                    if (await canLaunchUrl(uri)) {
+                      await launchUrl(uri);
+                    } else {
+                      // Fallback to web URL if app URL doesn't work
+                      final webUrl = 'https://open.spotify.com/playlist/${playlistId}';
+                      final webUri = Uri.parse(webUrl);
+                      if (await canLaunchUrl(webUri)) {
+                        await launchUrl(webUri);
+                      } else {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Could not open Spotify')),
+                          );
+                        }
+                      }
+                    }
+                  },
+                  child: Card(
+                    margin: const EdgeInsets.symmetric(
+                      vertical: 4,
+                      horizontal: 8,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Row(
+                        children: [
                         if (row.playlist?.images?.isNotEmpty ?? false)
                           Container(
                             width: 40,
@@ -331,6 +354,7 @@ class _SourcesTabState extends State<SourcesTab>
                       ],
                     ),
                   ),
+                ),
                 ),
               );
             },
