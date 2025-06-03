@@ -298,54 +298,7 @@ class _TracksTabState extends State<TracksTab>
     }
   }
 
-  void _showTrackInfo(spotify.Track track) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (BuildContext context) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.6,
-          minChildSize: 0.3,
-          maxChildSize: 0.9,
-          expand: false,
-          builder: (context, scrollController) {
-            return Container(
-              padding: const EdgeInsets.all(16),
-              child: ListView(
-                controller: scrollController,
-                children: [
-                  Text(
-                    'Track Information',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  _buildInfoRow('Name', track.name ?? 'Unknown'),
-                  if (track.artists != null && track.artists!.isNotEmpty)
-                    _buildInfoRow(
-                        'Artist',
-                        track.artists!
-                            .map((a) => a.name ?? 'Unknown Artist')
-                            .join(', ')),
-                  if (track.album != null)
-                    _buildInfoRow('Album', track.album!.name ?? 'Unknown'),
-                  _buildInfoRow(
-                      'Duration', _formatDuration(track.durationMs ?? 0)),
-                  if (track.popularity != null)
-                    _buildInfoRow('Popularity', '${track.popularity}/100'),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Close'),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
+  // Method removed since it's been replaced by _showTrackInfoData
 
   Widget _buildInfoRow(String label, String value) {
     return Padding(
@@ -425,48 +378,120 @@ class _TracksTabState extends State<TracksTab>
         },
       );
     } else if (direction == DismissDirection.startToEnd) {
-      // Positive options (info)
+      // Show track info and options in a single modal sheet
       showModalBottomSheet(
         context: context,
+        isScrollControlled: true,
         builder: (BuildContext context) {
-          return SafeArea(
-            child: Wrap(
-              children: <Widget>[
-                ListTile(
-                  leading: const Icon(Icons.music_note),
-                  title: const Text('Track Info'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _showTrackInfo(track);
-                  },
+          return DraggableScrollableSheet(
+            initialChildSize: 0.7,
+            minChildSize: 0.5,
+            maxChildSize: 0.95,
+            expand: false,
+            builder: (context, scrollController) {
+              return SingleChildScrollView(
+                controller: scrollController,
+                child: SafeArea(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Track Info Section
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            
+                            // Album Image
+                            if (track.album?.images?.isNotEmpty == true)
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.network(
+                                  track.album!.images!.first.url!,
+                                  height: 150,
+                                  width: 150,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(
+                                      height: 150,
+                                      width: 150,
+                                      color: Colors.grey,
+                                      child: const Icon(Icons.music_note, size: 64, color: Colors.white),
+                                    );
+                                  },
+                                ),
+                              ),
+                            const SizedBox(height: 16),
+                            
+                            // Track Details
+                            _buildInfoRow('Name', track.name ?? 'Unknown'),
+                            if (track.artists != null && track.artists!.isNotEmpty)
+                              _buildInfoRow(
+                                  'Artist',
+                                  track.artists!
+                                      .map((a) => a.name ?? 'Unknown Artist')
+                                      .join(', ')),
+                            if (track.album != null)
+                              _buildInfoRow('Album', track.album!.name ?? 'Unknown'),
+                            _buildInfoRow(
+                                'Duration', _formatDuration(track.durationMs ?? 0)),
+                            if (track.popularity != null)
+                              _buildInfoRow('Popularity', '${track.popularity}/100'),
+                          ],
+                        ),
+                      ),
+                      
+                      // Divider between track info and options
+                      const Divider(thickness: 1),
+                      
+                      // Info Options Section
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ListTile(
+                              leading: const Icon(Icons.music_note),
+                              title: const Text('More Track Info'),
+                              onTap: () {
+                                Navigator.pop(context);
+                                // Show "coming soon" message
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Track info coming soon')),
+                                );
+                              },
+                            ),
+                            if (track.artists != null && track.artists!.isNotEmpty)
+                              ListTile(
+                                leading: const Icon(Icons.person),
+                                title: const Text('More Artist Info'),
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Artist info coming soon')),
+                                  );
+                                },
+                              ),
+                            if (track.album != null)
+                              ListTile(
+                                leading: const Icon(Icons.album),
+                                title: const Text('More Album Info'),
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Album info coming soon')),
+                                  );
+                                },
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                if (track.artists != null && track.artists!.isNotEmpty)
-                  ListTile(
-                    leading: const Icon(Icons.person),
-                    title: const Text('Artist Info'),
-                    onTap: () {
-                      Navigator.pop(context);
-                      // TODO: Implement artist info view
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text('Artist info coming soon')),
-                      );
-                    },
-                  ),
-                if (track.album != null)
-                  ListTile(
-                    leading: const Icon(Icons.album),
-                    title: const Text('Album Info'),
-                    onTap: () {
-                      Navigator.pop(context);
-                      // TODO: Implement album info view
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Album info coming soon')),
-                      );
-                    },
-                  ),
-              ],
-            ),
+              );
+            },
           );
         },
       );
