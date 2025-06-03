@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:spotify/spotify.dart' as spotify;
 import 'package:spotkin_flutter/app_core.dart';
+import 'package:spotkin_flutter/services/openai_service.dart';
 import 'package:spotkin_flutter/ui/widgets/cards/track_card.dart';
+import 'package:spotkin_flutter/ui/widgets/dialogs/ai_info_dialog.dart';
 
 class TracksTab extends StatefulWidget {
   final Job job;
@@ -21,9 +23,11 @@ class TracksTab extends StatefulWidget {
 class _TracksTabState extends State<TracksTab>
     with AutomaticKeepAliveClientMixin {
   final SpotifyService spotifyService = getIt<SpotifyService>();
+  final OpenAIService _openAIService = OpenAIService();
   List<spotify.Track> _allTracks = [];
   bool _isLoading = true;
   String? _errorMessage;
+  bool _isLoadingAIInfo = false;
 
   @override
   void initState() {
@@ -330,6 +334,173 @@ class _TracksTabState extends State<TracksTab>
     return '$minutes:$seconds';
   }
 
+  // Shows loading dialog while waiting for AI response
+  void _showLoadingDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                CircularProgressIndicator(),
+                SizedBox(height: 20),
+                Text('Getting information...'),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // Shows AI-generated track info in a dialog
+  Future<void> _showTrackAIInfo(BuildContext context, spotify.Track track) async {
+    if (_isLoadingAIInfo) return;
+    
+    setState(() {
+      _isLoadingAIInfo = true;
+    });
+    
+    _showLoadingDialog(context);
+    
+    try {
+      final trackInfo = await _openAIService.getTrackInfo(track);
+      
+      // Close loading dialog
+      if (mounted) {
+        Navigator.of(context).pop();
+        
+        // Show info dialog
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AIInfoDialog(
+              title: 'About "${track.name}"',
+              content: trackInfo,
+              imageUrl: track.album?.images?.isNotEmpty == true
+                  ? track.album!.images!.first.url
+                  : null,
+            );
+          },
+        );
+      }
+    } catch (e) {
+      debugPrint('Error showing track AI info: $e');
+      if (mounted) {
+        Navigator.of(context).pop(); // Close loading dialog
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to get track information: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingAIInfo = false;
+        });
+      }
+    }
+  }
+
+  // Shows AI-generated artist info in a dialog
+  Future<void> _showArtistAIInfo(BuildContext context, spotify.Artist artist) async {
+    if (_isLoadingAIInfo) return;
+    
+    setState(() {
+      _isLoadingAIInfo = true;
+    });
+    
+    _showLoadingDialog(context);
+    
+    try {
+      final artistInfo = await _openAIService.getArtistInfo(artist);
+      
+      // Close loading dialog
+      if (mounted) {
+        Navigator.of(context).pop();
+        
+        // Show info dialog
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AIInfoDialog(
+              title: 'About ${artist.name}',
+              content: artistInfo,
+              imageUrl: artist.images?.isNotEmpty == true
+                  ? artist.images!.first.url
+                  : null,
+            );
+          },
+        );
+      }
+    } catch (e) {
+      debugPrint('Error showing artist AI info: $e');
+      if (mounted) {
+        Navigator.of(context).pop(); // Close loading dialog
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to get artist information: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingAIInfo = false;
+        });
+      }
+    }
+  }
+
+  // Shows AI-generated album info in a dialog
+  Future<void> _showAlbumAIInfo(BuildContext context, dynamic album) async {
+    if (_isLoadingAIInfo) return;
+    
+    setState(() {
+      _isLoadingAIInfo = true;
+    });
+    
+    _showLoadingDialog(context);
+    
+    try {
+      final albumInfo = await _openAIService.getAlbumInfo(album);
+      
+      // Close loading dialog
+      if (mounted) {
+        Navigator.of(context).pop();
+        
+        // Show info dialog
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AIInfoDialog(
+              title: 'About "${album.name}"',
+              content: albumInfo,
+              imageUrl: album.images?.isNotEmpty == true
+                  ? album.images!.first.url
+                  : null,
+            );
+          },
+        );
+      }
+    } catch (e) {
+      debugPrint('Error showing album AI info: $e');
+      if (mounted) {
+        Navigator.of(context).pop(); // Close loading dialog
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to get album information: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingAIInfo = false;
+        });
+      }
+    }
+  }
+
   Future<bool> _handleDismiss(DismissDirection direction, BuildContext context,
       spotify.Track track) async {
     if (direction == DismissDirection.endToStart) {
@@ -402,7 +573,6 @@ class _TracksTabState extends State<TracksTab>
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            
                             // Album Image
                             if (track.album?.images?.isNotEmpty == true)
                               ClipRRect(
@@ -423,7 +593,6 @@ class _TracksTabState extends State<TracksTab>
                                 ),
                               ),
                             const SizedBox(height: 16),
-                            
                             // Track Details
                             _buildInfoRow('Name', track.name ?? 'Unknown'),
                             if (track.artists != null && track.artists!.isNotEmpty)
@@ -441,10 +610,8 @@ class _TracksTabState extends State<TracksTab>
                           ],
                         ),
                       ),
-                      
                       // Divider between track info and options
                       const Divider(thickness: 1),
-                      
                       // Info Options Section
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -456,10 +623,7 @@ class _TracksTabState extends State<TracksTab>
                               title: const Text('More Track Info'),
                               onTap: () {
                                 Navigator.pop(context);
-                                // Show "coming soon" message
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Track info coming soon')),
-                                );
+                                _showTrackAIInfo(context, track);
                               },
                             ),
                             if (track.artists != null && track.artists!.isNotEmpty)
@@ -468,9 +632,9 @@ class _TracksTabState extends State<TracksTab>
                                 title: const Text('More Artist Info'),
                                 onTap: () {
                                   Navigator.pop(context);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Artist info coming soon')),
-                                  );
+                                  if (track.artists != null && track.artists!.isNotEmpty) {
+                                    _showArtistAIInfo(context, track.artists!.first);
+                                  }
                                 },
                               ),
                             if (track.album != null)
@@ -479,9 +643,9 @@ class _TracksTabState extends State<TracksTab>
                                 title: const Text('More Album Info'),
                                 onTap: () {
                                   Navigator.pop(context);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Album info coming soon')),
-                                  );
+                                  if (track.album != null) {
+                                    _showAlbumAIInfo(context, track.album!);
+                                  }
                                 },
                               ),
                           ],

@@ -8,6 +8,10 @@ import 'ui/widgets/debug_label_wrapper.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Skip .env file loading for web app
+  // Web apps should use compile-time environment variables instead
+  debugPrint('Using compile-time environment variables for API keys');
+
   Map<String, dynamic> config = await loadConfig();
 
   // Add checks for required config values
