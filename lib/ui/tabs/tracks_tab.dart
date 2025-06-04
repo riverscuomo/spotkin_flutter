@@ -23,7 +23,7 @@ class TracksTab extends StatefulWidget {
 class _TracksTabState extends State<TracksTab>
     with AutomaticKeepAliveClientMixin {
   final SpotifyService spotifyService = getIt<SpotifyService>();
-  final OpenAIService _openAIService = OpenAIService();
+  final OpenAIService _openAIService = getIt<OpenAIService>();
   List<spotify.Track> _allTracks = [];
   bool _isLoading = true;
   String? _errorMessage;
