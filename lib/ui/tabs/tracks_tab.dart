@@ -304,25 +304,33 @@ class _TracksTabState extends State<TracksTab>
 
   // Method removed since it's been replaced by _showTrackInfoData
 
-  Widget _buildInfoRow(String label, String value) {
+  Widget _buildInfoRow(String label, String value, {VoidCallback? onTap}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              '$label:',
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(4),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: 100,
+                child: Text(
+                  '$label:',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
-            ),
+              Expanded(
+                child: Text(value),
+              ),
+              if (onTap != null) const Icon(Icons.info_outline, size: 16),
+            ],
           ),
-          Expanded(
-            child: Text(value),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -358,26 +366,27 @@ class _TracksTabState extends State<TracksTab>
   }
 
   // Shows AI-generated track info in a dialog
-  Future<void> _showTrackAIInfo(BuildContext context, spotify.Track track) async {
+  Future<void> _showTrackAIInfo(
+      BuildContext context, spotify.Track track) async {
     if (_isLoadingAIInfo) return;
-    
+
+    // Store the context before starting async work
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final navigatorContext = Navigator.of(context).context;
+
     setState(() {
       _isLoadingAIInfo = true;
     });
-    
-    _showLoadingDialog(context);
-    
+
     try {
       final trackInfo = await _openAIService.getTrackInfo(track);
-      
-      // Close loading dialog
+
+      // Show info dialog using the stored context
       if (mounted) {
-        Navigator.of(context).pop();
-        
-        // Show info dialog
+        // Use navigatorContext to show dialog after awaiting
         showDialog(
-          context: context,
-          builder: (BuildContext context) {
+          context: navigatorContext,
+          builder: (BuildContext dialogContext) {
             return AIInfoDialog(
               title: 'About "${track.name}"',
               content: trackInfo,
@@ -391,8 +400,7 @@ class _TracksTabState extends State<TracksTab>
     } catch (e) {
       debugPrint('Error showing track AI info: $e');
       if (mounted) {
-        Navigator.of(context).pop(); // Close loading dialog
-        ScaffoldMessenger.of(context).showSnackBar(
+        scaffoldMessenger.showSnackBar(
           SnackBar(content: Text('Failed to get track information: $e')),
         );
       }
@@ -406,22 +414,23 @@ class _TracksTabState extends State<TracksTab>
   }
 
   // Shows AI-generated artist info in a dialog
-  Future<void> _showArtistAIInfo(BuildContext context, spotify.Artist artist) async {
+  Future<void> _showArtistAIInfo(
+      BuildContext context, spotify.Artist artist) async {
     if (_isLoadingAIInfo) return;
-    
+
     setState(() {
       _isLoadingAIInfo = true;
     });
-    
-    _showLoadingDialog(context);
-    
+
+    // _showLoadingDialog(context);
+
     try {
       final artistInfo = await _openAIService.getArtistInfo(artist);
-      
+
       // Close loading dialog
       if (mounted) {
-        Navigator.of(context).pop();
-        
+        // Navigator.of(context).pop();
+
         // Show info dialog
         showDialog(
           context: context,
@@ -454,26 +463,26 @@ class _TracksTabState extends State<TracksTab>
   }
 
   // Shows AI-generated album info in a dialog
-  Future<void> _showAlbumAIInfo(BuildContext context, dynamic album) async {
+  Future<void> _showAlbumAIInfo(
+      BuildContext context, spotify.AlbumSimple album) async {
     if (_isLoadingAIInfo) return;
-    
+
+    // Store the context before starting async work
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final navigatorContext = Navigator.of(context).context;
+
     setState(() {
       _isLoadingAIInfo = true;
     });
-    
-    _showLoadingDialog(context);
-    
+
     try {
       final albumInfo = await _openAIService.getAlbumInfo(album);
-      
-      // Close loading dialog
+
       if (mounted) {
-        Navigator.of(context).pop();
-        
-        // Show info dialog
+        // Show info dialog using the stored context
         showDialog(
-          context: context,
-          builder: (BuildContext context) {
+          context: navigatorContext,
+          builder: (BuildContext dialogContext) {
             return AIInfoDialog(
               title: 'About "${album.name}"',
               content: albumInfo,
@@ -487,8 +496,7 @@ class _TracksTabState extends State<TracksTab>
     } catch (e) {
       debugPrint('Error showing album AI info: $e');
       if (mounted) {
-        Navigator.of(context).pop(); // Close loading dialog
-        ScaffoldMessenger.of(context).showSnackBar(
+        scaffoldMessenger.showSnackBar(
           SnackBar(content: Text('Failed to get album information: $e')),
         );
       }
@@ -587,70 +595,56 @@ class _TracksTabState extends State<TracksTab>
                                       height: 150,
                                       width: 150,
                                       color: Colors.grey,
-                                      child: const Icon(Icons.music_note, size: 64, color: Colors.white),
+                                      child: const Icon(Icons.music_note,
+                                          size: 64, color: Colors.white),
                                     );
                                   },
                                 ),
                               ),
                             const SizedBox(height: 16),
-                            // Track Details
-                            _buildInfoRow('Name', track.name ?? 'Unknown'),
-                            if (track.artists != null && track.artists!.isNotEmpty)
-                              _buildInfoRow(
-                                  'Artist',
-                                  track.artists!
-                                      .map((a) => a.name ?? 'Unknown Artist')
-                                      .join(', ')),
-                            if (track.album != null)
-                              _buildInfoRow('Album', track.album!.name ?? 'Unknown'),
-                            _buildInfoRow(
-                                'Duration', _formatDuration(track.durationMs ?? 0)),
-                            if (track.popularity != null)
-                              _buildInfoRow('Popularity', '${track.popularity}/100'),
-                          ],
-                        ),
-                      ),
-                      // Divider between track info and options
-                      const Divider(thickness: 1),
-                      // Info Options Section
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ListTile(
-                              leading: const Icon(Icons.music_note),
-                              title: const Text('More Track Info'),
-                              onTap: () {
-                                Navigator.pop(context);
-                                _showTrackAIInfo(context, track);
-                              },
-                            ),
-                            if (track.artists != null && track.artists!.isNotEmpty)
-                              ListTile(
-                                leading: const Icon(Icons.person),
-                                title: const Text('More Artist Info'),
+                            // Track Details - now each row is tappable
+                            _buildInfoRow('Name', track.name ?? 'Unknown',
                                 onTap: () {
-                                  Navigator.pop(context);
-                                  if (track.artists != null && track.artists!.isNotEmpty) {
-                                    _showArtistAIInfo(context, track.artists!.first);
+                              // Navigator.pop(context); // Close the bottom sheet
+                              _showTrackAIInfo(context, track);
+                            }),
+                            if (track.artists != null &&
+                                track.artists!.isNotEmpty)
+                              _buildInfoRow(
+                                'Artist',
+                                track.artists!
+                                    .map((a) => a.name ?? 'Unknown Artist')
+                                    .join(', '),
+                                onTap: () {
+                                  // Navigator.pop(context); // Close the bottom sheet
+                                  if (track.artists != null &&
+                                      track.artists!.isNotEmpty) {
+                                    _showArtistAIInfo(
+                                        context, track.artists!.first);
                                   }
                                 },
                               ),
                             if (track.album != null)
-                              ListTile(
-                                leading: const Icon(Icons.album),
-                                title: const Text('More Album Info'),
+                              _buildInfoRow(
+                                'Album',
+                                track.album!.name ?? 'Unknown',
                                 onTap: () {
-                                  Navigator.pop(context);
+                                  // Navigator.pop(context); // Close the bottom sheet
                                   if (track.album != null) {
                                     _showAlbumAIInfo(context, track.album!);
                                   }
                                 },
                               ),
+                            _buildInfoRow('Duration',
+                                _formatDuration(track.durationMs ?? 0)),
+                            if (track.popularity != null)
+                              _buildInfoRow(
+                                  'Popularity', '${track.popularity}/100'),
                           ],
                         ),
                       ),
+                      // Add some spacing at the bottom
+                      const SizedBox(height: 16),
                     ],
                   ),
                 ),
