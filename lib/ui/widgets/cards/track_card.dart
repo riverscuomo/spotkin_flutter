@@ -30,8 +30,7 @@ class _TrackCardState extends State<TrackCard> {
   @override
   void initState() {
     super.initState();
-    _hasPreview =
-        widget.track.previewUrl != null && widget.track.previewUrl!.isNotEmpty;
+    _hasPreview = widget.track.previewUrl != null && widget.track.previewUrl!.isNotEmpty;
 
     // Listen for player state changes
     _audioPlayer.onPlayerStateChanged.listen((state) {
@@ -115,7 +114,7 @@ class _TrackCardState extends State<TrackCard> {
       child: Card(
         margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
         child: InkWell(
-          onTap: _togglePlayPause,
+          onTap: _togglePlayPause, // Restored play toggle functionality
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
@@ -156,15 +155,16 @@ class _TrackCardState extends State<TrackCard> {
                       InkWell(
                         onTap: () => _showTrackAIInfo(context, widget.track),
                         child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Expanded(
                               child: Text(
                                 widget.track.name ?? 'Unknown Track',
                                 style: Theme.of(context).textTheme.titleMedium,
                                 overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
                               ),
                             ),
-                            const Icon(Icons.info_outline, size: 16),
                           ],
                         ),
                       ),
@@ -175,15 +175,16 @@ class _TrackCardState extends State<TrackCard> {
                           }
                         },
                         child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Expanded(
                               child: Text(
                                 artistName,
                                 style: Theme.of(context).textTheme.bodyMedium,
                                 overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
                               ),
                             ),
-                            const Icon(Icons.info_outline, size: 16),
                           ],
                         ),
                       ),
@@ -191,42 +192,24 @@ class _TrackCardState extends State<TrackCard> {
                         InkWell(
                           onTap: () => _showAlbumAIInfo(context, widget.track.album!),
                           child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Expanded(
                                 child: Text(
                                   widget.track.album!.name ?? 'Unknown Album',
                                   style: Theme.of(context).textTheme.bodySmall,
                                   overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
                                 ),
                               ),
-                              const Icon(Icons.info_outline, size: 16),
                             ],
                           ),
                         ),
                     ],
                   ),
                 ),
-                // Play/Pause icon and Duration
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (_hasPreview)
-                      Icon(
-                        _isPlaying
-                            ? Icons.pause_circle_outline
-                            : Icons.play_circle_outline,
-                        color: _isPlaying
-                            ? Theme.of(context).primaryColor
-                            : Colors.grey.shade600,
-                        size: 24,
-                      ),
-                    if (widget.track.durationMs != null)
-                      Text(
-                        _formatDuration(widget.track.durationMs!),
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                  ],
-                ),
+                // No duration or play button
+                const SizedBox(width: 4),
               ],
             ),
           ),
@@ -368,13 +351,5 @@ class _TrackCardState extends State<TrackCard> {
         });
       }
     }
-  }
-
-  String _formatDuration(int milliseconds) {
-    if (milliseconds <= 0) return '0:00';
-    final seconds = (milliseconds / 1000).floor();
-    final minutes = (seconds / 60).floor();
-    final remainingSeconds = seconds % 60;
-    return '$minutes:${remainingSeconds.toString().padLeft(2, '0')}';
   }
 }
