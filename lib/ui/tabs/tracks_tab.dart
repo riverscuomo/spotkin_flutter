@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:spotify/spotify.dart' as spotify;
 import 'package:spotkin_flutter/app_core.dart';
-import 'package:spotkin_flutter/services/openai_service.dart';
 import 'package:spotkin_flutter/ui/widgets/cards/track_card.dart';
-import 'package:spotkin_flutter/ui/widgets/dialogs/ai_info_dialog.dart';
 
 class TracksTab extends StatefulWidget {
   final Job job;
@@ -23,11 +21,9 @@ class TracksTab extends StatefulWidget {
 class _TracksTabState extends State<TracksTab>
     with AutomaticKeepAliveClientMixin {
   final SpotifyService spotifyService = getIt<SpotifyService>();
-  final OpenAIService _openAIService = getIt<OpenAIService>();
   List<spotify.Track> _allTracks = [];
   bool _isLoading = true;
   String? _errorMessage;
-  bool _isLoadingAIInfo = false;
 
   @override
   void initState() {
@@ -302,213 +298,6 @@ class _TracksTabState extends State<TracksTab>
     }
   }
 
-  // Method removed since it's been replaced by _showTrackInfoData
-
-  Widget _buildInfoRow(String label, String value, {VoidCallback? onTap}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(4),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                width: 100,
-                child: Text(
-                  '$label:',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Text(value),
-              ),
-              if (onTap != null) const Icon(Icons.info_outline, size: 16),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  String _formatDuration(int milliseconds) {
-    final duration = Duration(milliseconds: milliseconds);
-    final minutes = duration.inMinutes;
-    final seconds = (duration.inSeconds % 60).toString().padLeft(2, '0');
-    return '$minutes:$seconds';
-  }
-
-  // Shows loading dialog while waiting for AI response
-  void _showLoadingDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return Dialog(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: const [
-                CircularProgressIndicator(),
-                SizedBox(height: 20),
-                Text('Getting information...'),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  // Shows AI-generated track info in a dialog
-  Future<void> _showTrackAIInfo(
-      BuildContext context, spotify.Track track) async {
-    if (_isLoadingAIInfo) return;
-
-    // Store the context before starting async work
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
-    final navigatorContext = Navigator.of(context).context;
-
-    setState(() {
-      _isLoadingAIInfo = true;
-    });
-
-    try {
-      final trackInfo = await _openAIService.getTrackInfo(track);
-
-      // Show info dialog using the stored context
-      if (mounted) {
-        // Use navigatorContext to show dialog after awaiting
-        showDialog(
-          context: navigatorContext,
-          builder: (BuildContext dialogContext) {
-            return AIInfoDialog(
-              title: 'About "${track.name}"',
-              content: trackInfo,
-              imageUrl: track.album?.images?.isNotEmpty == true
-                  ? track.album!.images!.first.url
-                  : null,
-            );
-          },
-        );
-      }
-    } catch (e) {
-      debugPrint('Error showing track AI info: $e');
-      if (mounted) {
-        scaffoldMessenger.showSnackBar(
-          SnackBar(content: Text('Failed to get track information: $e')),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoadingAIInfo = false;
-        });
-      }
-    }
-  }
-
-  // Shows AI-generated artist info in a dialog
-  Future<void> _showArtistAIInfo(
-      BuildContext context, spotify.Artist artist) async {
-    if (_isLoadingAIInfo) return;
-
-    setState(() {
-      _isLoadingAIInfo = true;
-    });
-
-    // _showLoadingDialog(context);
-
-    try {
-      final artistInfo = await _openAIService.getArtistInfo(artist);
-
-      // Close loading dialog
-      if (mounted) {
-        // Navigator.of(context).pop();
-
-        // Show info dialog
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AIInfoDialog(
-              title: 'About ${artist.name}',
-              content: artistInfo,
-              imageUrl: artist.images?.isNotEmpty == true
-                  ? artist.images!.first.url
-                  : null,
-            );
-          },
-        );
-      }
-    } catch (e) {
-      debugPrint('Error showing artist AI info: $e');
-      if (mounted) {
-        Navigator.of(context).pop(); // Close loading dialog
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to get artist information: $e')),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoadingAIInfo = false;
-        });
-      }
-    }
-  }
-
-  // Shows AI-generated album info in a dialog
-  Future<void> _showAlbumAIInfo(
-      BuildContext context, spotify.AlbumSimple album) async {
-    if (_isLoadingAIInfo) return;
-
-    // Store the context before starting async work
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
-    final navigatorContext = Navigator.of(context).context;
-
-    setState(() {
-      _isLoadingAIInfo = true;
-    });
-
-    try {
-      final albumInfo = await _openAIService.getAlbumInfo(album);
-
-      if (mounted) {
-        // Show info dialog using the stored context
-        showDialog(
-          context: navigatorContext,
-          builder: (BuildContext dialogContext) {
-            return AIInfoDialog(
-              title: 'About "${album.name}"',
-              content: albumInfo,
-              imageUrl: album.images?.isNotEmpty == true
-                  ? album.images!.first.url
-                  : null,
-            );
-          },
-        );
-      }
-    } catch (e) {
-      debugPrint('Error showing album AI info: $e');
-      if (mounted) {
-        scaffoldMessenger.showSnackBar(
-          SnackBar(content: Text('Failed to get album information: $e')),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoadingAIInfo = false;
-        });
-      }
-    }
-  }
-
   Future<bool> _handleDismiss(DismissDirection direction, BuildContext context,
       spotify.Track track) async {
     if (direction == DismissDirection.endToStart) {
@@ -556,104 +345,9 @@ class _TracksTabState extends State<TracksTab>
           );
         },
       );
-    } else if (direction == DismissDirection.startToEnd) {
-      // Show track info and options in a single modal sheet
-      showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        builder: (BuildContext context) {
-          return DraggableScrollableSheet(
-            initialChildSize: 0.7,
-            minChildSize: 0.5,
-            maxChildSize: 0.95,
-            expand: false,
-            builder: (context, scrollController) {
-              return SingleChildScrollView(
-                controller: scrollController,
-                child: SafeArea(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Track Info Section
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            // Album Image
-                            if (track.album?.images?.isNotEmpty == true)
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: Image.network(
-                                  track.album!.images!.first.url!,
-                                  height: 150,
-                                  width: 150,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Container(
-                                      height: 150,
-                                      width: 150,
-                                      color: Colors.grey,
-                                      child: const Icon(Icons.music_note,
-                                          size: 64, color: Colors.white),
-                                    );
-                                  },
-                                ),
-                              ),
-                            const SizedBox(height: 16),
-                            // Track Details - now each row is tappable
-                            _buildInfoRow('Name', track.name ?? 'Unknown',
-                                onTap: () {
-                              // Navigator.pop(context); // Close the bottom sheet
-                              _showTrackAIInfo(context, track);
-                            }),
-                            if (track.artists != null &&
-                                track.artists!.isNotEmpty)
-                              _buildInfoRow(
-                                'Artist',
-                                track.artists!
-                                    .map((a) => a.name ?? 'Unknown Artist')
-                                    .join(', '),
-                                onTap: () {
-                                  // Navigator.pop(context); // Close the bottom sheet
-                                  if (track.artists != null &&
-                                      track.artists!.isNotEmpty) {
-                                    _showArtistAIInfo(
-                                        context, track.artists!.first);
-                                  }
-                                },
-                              ),
-                            if (track.album != null)
-                              _buildInfoRow(
-                                'Album',
-                                track.album!.name ?? 'Unknown',
-                                onTap: () {
-                                  // Navigator.pop(context); // Close the bottom sheet
-                                  if (track.album != null) {
-                                    _showAlbumAIInfo(context, track.album!);
-                                  }
-                                },
-                              ),
-                            _buildInfoRow('Duration',
-                                _formatDuration(track.durationMs ?? 0)),
-                            if (track.popularity != null)
-                              _buildInfoRow(
-                                  'Popularity', '${track.popularity}/100'),
-                          ],
-                        ),
-                      ),
-                      // Add some spacing at the bottom
-                      const SizedBox(height: 16),
-                    ],
-                  ),
-                ),
-              );
-            },
-          );
-        },
-      );
     }
+    // We've removed the startToEnd direction handler since those functionalities
+    // are now directly in the TrackCard widget
     return false; // Don't actually remove the item
   }
 
@@ -699,11 +393,11 @@ class _TracksTabState extends State<TracksTab>
     } else {
       // Use the simplest ListView implementation for maximum compatibility
       return ListView.builder(
-        // No custom physics or other parameters that might cause issues
         itemCount: _allTracks.length,
         itemBuilder: (context, index) {
           final track = _allTracks[index];
           return TrackCard(
+            key: ValueKey(track.id ?? 'unknown-${index}'),
             track: track,
             onDismiss: _handleDismiss,
           );
