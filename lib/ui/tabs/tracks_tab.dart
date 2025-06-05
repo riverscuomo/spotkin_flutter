@@ -300,16 +300,66 @@ class _TracksTabState extends State<TracksTab>
 
   Future<bool> _handleDismiss(DismissDirection direction, BuildContext context,
       spotify.Track track) async {
-    if (direction == DismissDirection.endToStart) {
-      // Negative options (ban)
-      showModalBottomSheet(
-        context: context,
-        builder: (BuildContext context) {
-          return SafeArea(
-            child: Wrap(
-              children: <Widget>[
+    // Now handling both directions the same way (both show tune menu)
+    // Show menu options regardless of swipe direction
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Small padding before first option
+                const SizedBox(height: 8),
+                
+                // Positive options
                 ListTile(
-                  leading: const Icon(Icons.block),
+                  leading: const Icon(Icons.music_note, color: Colors.green),
+                  title: const Text('Source Track'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    // Placeholder for source track functionality
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Sourcing track: ${track.name}')),
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.person, color: Colors.green),
+                  title: const Text('Source Artist'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    // Placeholder for source artist functionality
+                    final artistName = track.artists?.isNotEmpty == true ?
+                        track.artists!.first.name ?? 'Unknown Artist' : 'Unknown Artist';
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Sourcing artist: $artistName')),
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.album, color: Colors.green),
+                  title: const Text('Source Album'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    // Placeholder for source album functionality
+                    final albumName = track.album?.name ?? 'Unknown Album';
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Sourcing album: $albumName')),
+                    );
+                  },
+                ),
+                
+                // Simple divider between source and ban options
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8.0),
+                  child: Divider(),
+                ),
+                
+                // Negative options (existing ban options)
+                ListTile(
+                  leading: const Icon(Icons.block, color: Colors.red),
                   title: const Text('Ban Song'),
                   onTap: () {
                     Navigator.pop(context);
@@ -317,7 +367,7 @@ class _TracksTabState extends State<TracksTab>
                   },
                 ),
                 ListTile(
-                  leading: const Icon(Icons.person_off),
+                  leading: const Icon(Icons.person_off, color: Colors.red),
                   title: const Text('Ban Artist'),
                   onTap: () {
                     Navigator.pop(context);
@@ -325,7 +375,7 @@ class _TracksTabState extends State<TracksTab>
                   },
                 ),
                 ListTile(
-                  leading: const Icon(Icons.album_outlined),
+                  leading: const Icon(Icons.album_outlined, color: Colors.red),
                   title: const Text('Ban Album'),
                   onTap: () {
                     Navigator.pop(context);
@@ -333,7 +383,7 @@ class _TracksTabState extends State<TracksTab>
                   },
                 ),
                 ListTile(
-                  leading: const Icon(Icons.category_outlined),
+                  leading: const Icon(Icons.category_outlined, color: Colors.red),
                   title: const Text('Ban Genre'),
                   onTap: () {
                     Navigator.pop(context);
@@ -342,12 +392,10 @@ class _TracksTabState extends State<TracksTab>
                 ),
               ],
             ),
-          );
-        },
-      );
-    }
-    // We've removed the startToEnd direction handler since those functionalities
-    // are now directly in the TrackCard widget
+          ),
+        );
+      },
+    );
     return false; // Don't actually remove the item
   }
 

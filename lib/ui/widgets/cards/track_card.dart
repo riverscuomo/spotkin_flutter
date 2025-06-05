@@ -96,13 +96,13 @@ class _TrackCardState extends State<TrackCard> {
         color: Colors.green,
         alignment: Alignment.centerLeft,
         padding: const EdgeInsets.only(left: 16),
-        child: const Icon(Icons.info_outline, color: Colors.white),
+        child: const Icon(Icons.tune, color: Colors.white),
       ),
       secondaryBackground: Container(
-        color: Colors.red,
+        color: Colors.green,
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 16),
-        child: const Icon(Icons.block, color: Colors.white),
+        child: const Icon(Icons.tune, color: Colors.white),
       ),
       confirmDismiss: (direction) async {
         try {
