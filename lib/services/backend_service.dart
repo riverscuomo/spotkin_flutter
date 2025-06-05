@@ -102,6 +102,31 @@ class BackendService {
     }
   }
 
+  /// Add a source to a job based on a track, artist, or album
+  /// Type should be one of: 'track', 'artist', or 'album'
+  Future<Job> addSourceToJob(String jobId, String type, String itemId, String itemName) async {
+    final url = '$backendUrl/jobs/$jobId/sources';
+    debugPrint('Adding source to job: $type:$itemName');
+    
+    final payload = {
+      'type': type,
+      'item_id': itemId,
+      'item_name': itemName,
+    };
+    
+    final response = await http.post(
+      Uri.parse(url),
+      headers: await _getAuthHeaders(),
+      body: json.encode(payload),
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return Job.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to add source to job: ${response.statusCode}');
+    }
+  }
+
   Future<Map<String, String>> _getAuthHeaders() async {
     final spotifyService = getIt<SpotifyService>();
 

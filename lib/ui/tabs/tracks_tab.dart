@@ -187,6 +187,116 @@ class _TracksTabState extends State<TracksTab>
     }
   }
 
+  // Handler for Source Track functionality
+  void _handleSourceTrack(spotify.Track track) async {
+    try {
+      if (track.id == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Track ID is missing')),
+        );
+        return;
+      }
+      
+      final backendService = getIt<BackendService>();
+      final jobId = widget.job.id;
+      final trackName = track.name ?? 'Unknown Track';
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Adding source based on track: $trackName')),
+      );
+      
+      final updatedJob = await backendService.addSourceToJob(
+        jobId, 'track', track.id!, trackName,
+      );
+      
+      // Update the job in the provider
+      final jobProvider = Provider.of<JobProvider>(context, listen: false);
+      jobProvider.updateJob(widget.jobIndex, updatedJob);
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Added source based on track: $trackName')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to add source: $e')),
+      );
+    }
+  }
+  
+  // Handler for Source Artist functionality
+  void _handleSourceArtist(spotify.Track track) async {
+    try {
+      if (track.artists == null || track.artists!.isEmpty || track.artists!.first.id == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Artist information is missing')),
+        );
+        return;
+      }
+      
+      final artist = track.artists!.first;
+      final backendService = getIt<BackendService>();
+      final jobId = widget.job.id;
+      final artistName = artist.name ?? 'Unknown Artist';
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Adding source based on artist: $artistName')),
+      );
+      
+      final updatedJob = await backendService.addSourceToJob(
+        jobId, 'artist', artist.id!, artistName,
+      );
+      
+      // Update the job in the provider
+      final jobProvider = Provider.of<JobProvider>(context, listen: false);
+      jobProvider.updateJob(widget.jobIndex, updatedJob);
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Added source based on artist: $artistName')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to add source: $e')),
+      );
+    }
+  }
+  
+  // Handler for Source Album functionality
+  void _handleSourceAlbum(spotify.Track track) async {
+    try {
+      if (track.album == null || track.album!.id == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Album information is missing')),
+        );
+        return;
+      }
+      
+      final album = track.album!;
+      final backendService = getIt<BackendService>();
+      final jobId = widget.job.id;
+      final albumName = album.name ?? 'Unknown Album';
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Adding source based on album: $albumName')),
+      );
+      
+      final updatedJob = await backendService.addSourceToJob(
+        jobId, 'album', album.id!, albumName,
+      );
+      
+      // Update the job in the provider
+      final jobProvider = Provider.of<JobProvider>(context, listen: false);
+      jobProvider.updateJob(widget.jobIndex, updatedJob);
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Added source based on album: $albumName')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to add source: $e')),
+      );
+    }
+  }
+  
   // Show a dialog with the artist's genres for selection
   void _showGenreSelectionDialog(
       BuildContext context, spotify.Track track) async {
@@ -319,10 +429,7 @@ class _TracksTabState extends State<TracksTab>
                   title: const Text('Source Track'),
                   onTap: () {
                     Navigator.pop(context);
-                    // Placeholder for source track functionality
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Sourcing track: ${track.name}')),
-                    );
+                    _handleSourceTrack(track);
                   },
                 ),
                 ListTile(
@@ -330,12 +437,7 @@ class _TracksTabState extends State<TracksTab>
                   title: const Text('Source Artist'),
                   onTap: () {
                     Navigator.pop(context);
-                    // Placeholder for source artist functionality
-                    final artistName = track.artists?.isNotEmpty == true ?
-                        track.artists!.first.name ?? 'Unknown Artist' : 'Unknown Artist';
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Sourcing artist: $artistName')),
-                    );
+                    _handleSourceArtist(track);
                   },
                 ),
                 ListTile(
@@ -343,11 +445,7 @@ class _TracksTabState extends State<TracksTab>
                   title: const Text('Source Album'),
                   onTap: () {
                     Navigator.pop(context);
-                    // Placeholder for source album functionality
-                    final albumName = track.album?.name ?? 'Unknown Album';
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Sourcing album: $albumName')),
-                    );
+                    _handleSourceAlbum(track);
                   },
                 ),
                 
