@@ -281,6 +281,22 @@ class SpotifyService {
     await _initializeSpotify();
   }
 
+  /// Get the currently authenticated Spotify user profile
+  Future<User?> getCurrentUser() async {
+    try {
+      await _ensureAuthenticated();
+      
+      debugPrint('Getting current user profile');
+      final user = await _spotify.me.get();
+      debugPrint('Current user: ${user.id} - ${user.displayName}');
+      
+      return user;
+    } catch (e) {
+      debugPrint('Error getting current user: $e');
+      return null;
+    }
+  }
+  
   Future<Iterable<dynamic>> search(
     String query, {
     int limit = 20,

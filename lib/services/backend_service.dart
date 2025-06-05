@@ -108,10 +108,20 @@ class BackendService {
     final url = '$backendUrl/jobs/$jobId/sources';
     debugPrint('Adding source to job: $type:$itemName');
     
+    // Get user ID from SpotifyService
+    final spotifyService = getIt<SpotifyService>();
+    final spotifyUser = await spotifyService.getCurrentUser();
+    final userId = spotifyUser?.id;
+    
+    if (userId == null) {
+      throw Exception('Failed to get Spotify user ID');
+    }
+    
     final payload = {
       'type': type,
       'item_id': itemId,
       'item_name': itemName,
+      'user_id': userId,
     };
     
     final response = await http.post(
