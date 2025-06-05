@@ -5,11 +5,23 @@ import 'package:spotify/spotify.dart' as spotify;
 
 class OpenAIService {
   final String backendUrl;
+  
+  // Simple in-memory cache that only lasts for the current session
+  final Map<String, String> _cache = {};
 
   OpenAIService({required this.backendUrl});
 
   /// Gets information about a track using the backend server proxy to OpenAI
   Future<String> getTrackInfo(spotify.Track track) async {
+    // Generate unique cache key
+    final cacheKey = 'track_${track.id ?? track.name}';
+    
+    // Return cached response if available
+    if (_cache.containsKey(cacheKey)) {
+      debugPrint('Using cached track info for ${track.name}');
+      return _cache[cacheKey]!;
+    }
+    
     try {
       // Send track data to the server
       final response = await http.post(
@@ -27,7 +39,12 @@ class OpenAIService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return data['response'];
+        final responseText = data['response'];
+        
+        // Cache the response
+        _cache[cacheKey] = responseText;
+        
+        return responseText;
       } else {
         throw Exception(
             'Failed to get track info: ${response.statusCode} ${response.body}');
@@ -40,6 +57,15 @@ class OpenAIService {
 
   /// Gets information about an artist using the backend server proxy to OpenAI
   Future<String> getArtistInfo(spotify.Artist artist) async {
+    // Generate unique cache key
+    final cacheKey = 'artist_${artist.id ?? artist.name}';
+    
+    // Return cached response if available
+    if (_cache.containsKey(cacheKey)) {
+      debugPrint('Using cached artist info for ${artist.name}');
+      return _cache[cacheKey]!;
+    }
+    
     try {
       // Send artist data to the server
       final response = await http.post(
@@ -53,7 +79,12 @@ class OpenAIService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return data['response'];
+        final responseText = data['response'];
+        
+        // Cache the response
+        _cache[cacheKey] = responseText;
+        
+        return responseText;
       } else {
         throw Exception(
             'Failed to get artist info: ${response.statusCode} ${response.body}');
@@ -66,6 +97,15 @@ class OpenAIService {
 
   /// Gets information about an album using the backend server proxy to OpenAI
   Future<String> getAlbumInfo(spotify.AlbumSimple album) async {
+    // Generate unique cache key
+    final cacheKey = 'album_${album.id ?? album.name}';
+    
+    // Return cached response if available
+    if (_cache.containsKey(cacheKey)) {
+      debugPrint('Using cached album info for ${album.name}');
+      return _cache[cacheKey]!;
+    }
+    
     try {
       List<String> artistNames = [];
       // Use null-aware operator to safely access artists collection
@@ -96,7 +136,12 @@ class OpenAIService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return data['response'];
+        final responseText = data['response'];
+        
+        // Cache the response
+        _cache[cacheKey] = responseText;
+        
+        return responseText;
       } else {
         throw Exception(
             'Failed to get album info: ${response.statusCode} ${response.body}');
@@ -108,4 +153,10 @@ class OpenAIService {
   }
 
   // Prompt building is now handled server-side
+  
+  /// Clears the in-memory cache
+  void clearCache() {
+    _cache.clear();
+    debugPrint('AI response cache cleared');
+  }
 }
