@@ -26,6 +26,7 @@ class _TrackCardState extends State<TrackCard> {
   bool _isPlaying = false;
   bool _hasPreview = false;
   bool _isLoadingAIInfo = false;
+  String? _loadingAIType; // 'track', 'artist', or 'album'
 
   @override
   void initState() {
@@ -158,12 +159,14 @@ class _TrackCardState extends State<TrackCard> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Expanded(
-                              child: Text(
-                                widget.track.name ?? 'Unknown Track',
-                                style: Theme.of(context).textTheme.titleMedium,
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                              ),
+                              child: _isLoadingAIInfo && _loadingAIType == 'track'
+                                ? _buildLoadingIndicator()
+                                : Text(
+                                  widget.track.name ?? 'Unknown Track',
+                                  style: Theme.of(context).textTheme.titleMedium,
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
                             ),
                           ],
                         ),
@@ -178,12 +181,14 @@ class _TrackCardState extends State<TrackCard> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Expanded(
-                              child: Text(
-                                artistName,
-                                style: Theme.of(context).textTheme.bodyMedium,
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                              ),
+                              child: _isLoadingAIInfo && _loadingAIType == 'artist'
+                                ? _buildLoadingIndicator(height: 16)
+                                : Text(
+                                  artistName,
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
                             ),
                           ],
                         ),
@@ -195,12 +200,14 @@ class _TrackCardState extends State<TrackCard> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Expanded(
-                                child: Text(
-                                  widget.track.album!.name ?? 'Unknown Album',
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                ),
+                                child: _isLoadingAIInfo && _loadingAIType == 'album'
+                                  ? _buildLoadingIndicator(height: 14)
+                                  : Text(
+                                    widget.track.album!.name ?? 'Unknown Album',
+                                    style: Theme.of(context).textTheme.bodySmall,
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                  ),
                               ),
                             ],
                           ),
@@ -218,6 +225,32 @@ class _TrackCardState extends State<TrackCard> {
     );
   }
 
+  // Helper method to build a loading indicator with appropriate size
+  Widget _buildLoadingIndicator({double height = 20}) {
+    return SizedBox(
+      height: height,
+      child: Row(
+        children: [
+          SizedBox(
+            height: height,
+            width: height,
+            child: CircularProgressIndicator(
+              strokeWidth: height / 8,
+              valueColor: AlwaysStoppedAnimation<Color>(
+                Theme.of(context).colorScheme.secondary,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            'Loading...',
+            style: TextStyle(fontSize: height * 0.75),
+          ),
+        ],
+      ),
+    );
+  }
+
   // Shows AI-generated track info in a dialog
   Future<void> _showTrackAIInfo(BuildContext context, spotify.Track track) async {
     if (_isLoadingAIInfo) return;
@@ -228,6 +261,7 @@ class _TrackCardState extends State<TrackCard> {
 
     setState(() {
       _isLoadingAIInfo = true;
+      _loadingAIType = 'track';
     });
 
     try {
@@ -260,6 +294,7 @@ class _TrackCardState extends State<TrackCard> {
       if (mounted) {
         setState(() {
           _isLoadingAIInfo = false;
+          _loadingAIType = null;
         });
       }
     }
@@ -271,6 +306,7 @@ class _TrackCardState extends State<TrackCard> {
 
     setState(() {
       _isLoadingAIInfo = true;
+      _loadingAIType = 'artist';
     });
 
     try {
@@ -302,6 +338,7 @@ class _TrackCardState extends State<TrackCard> {
       if (mounted) {
         setState(() {
           _isLoadingAIInfo = false;
+          _loadingAIType = null;
         });
       }
     }
@@ -317,6 +354,7 @@ class _TrackCardState extends State<TrackCard> {
 
     setState(() {
       _isLoadingAIInfo = true;
+      _loadingAIType = 'album';
     });
 
     try {
@@ -348,6 +386,7 @@ class _TrackCardState extends State<TrackCard> {
       if (mounted) {
         setState(() {
           _isLoadingAIInfo = false;
+          _loadingAIType = null;
         });
       }
     }
