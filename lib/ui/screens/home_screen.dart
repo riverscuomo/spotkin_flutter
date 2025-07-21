@@ -5,6 +5,7 @@ import 'package:spotify/spotify.dart' hide Offset;
 import 'package:spotkin_flutter/app_core.dart';
 import '../widgets/playlist/target_playlist_widget.dart';
 import 'package:uuid/uuid.dart';
+import 'package:spotkin_flutter/data/models/job.dart' show FreezeStatus;
 
 class HomeScreen extends StatefulWidget {
   final Map<String, dynamic> config;
@@ -222,6 +223,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       onPlaylistSelected: (PlaylistSimple selectedPlaylist) {
         if (jobProvider.jobs.isEmpty) {
           final newJob = Job(
+            freezeStatus: const FreezeStatus(
+              daysSinceUpdate: 0,
+              daysUntilFreeze: 21,
+              freezeThresholdDays: 21,
+              isFrozen: false,
+            ),
             targetPlaylist: selectedPlaylist,
             id: const Uuid().v4(),
           );

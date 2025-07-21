@@ -5,6 +5,52 @@ import 'package:spotkin_flutter/data/models/ingredient.dart';
 import 'package:spotify/spotify.dart';
 import 'package:uuid/uuid.dart';
 
+// Freeze status information for a job returned by the backend
+class FreezeStatus {
+  final double daysSinceUpdate;
+  final double daysUntilFreeze;
+  final int freezeThresholdDays;
+  final bool isFrozen;
+
+  const FreezeStatus({
+    required this.daysSinceUpdate,
+    required this.daysUntilFreeze,
+    required this.freezeThresholdDays,
+    required this.isFrozen,
+  });
+
+  factory FreezeStatus.fromJson(Map<String, dynamic> json) {
+    return FreezeStatus(
+      daysSinceUpdate: (json['days_since_update'] as num?)?.toDouble() ?? 0.0,
+      daysUntilFreeze: (json['days_until_freeze'] as num?)?.toDouble() ?? 0.0,
+      freezeThresholdDays: json['freeze_threshold_days'] ?? 21,
+      isFrozen: json['is_frozen'] ?? false,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'days_since_update': daysSinceUpdate,
+        'days_until_freeze': daysUntilFreeze,
+        'freeze_threshold_days': freezeThresholdDays,
+        'is_frozen': isFrozen,
+      };
+
+  FreezeStatus copyWith({
+    double? daysSinceUpdate,
+    double? daysUntilFreeze,
+    int? freezeThresholdDays,
+    bool? isFrozen,
+  }) {
+    return FreezeStatus(
+      daysSinceUpdate: daysSinceUpdate ?? this.daysSinceUpdate,
+      daysUntilFreeze: daysUntilFreeze ?? this.daysUntilFreeze,
+      freezeThresholdDays: freezeThresholdDays ?? this.freezeThresholdDays,
+      isFrozen: isFrozen ?? this.isFrozen,
+    );
+  }
+}
+
+
 class Job {
   final String id;
   final PlaylistSimple targetPlaylist;
@@ -17,6 +63,9 @@ class Job {
   final List<String> bannedGenres;
   final List<Artist> exceptionsToBannedGenres;
   final List<Ingredient> recipe;
+
+  // Freeze status provided by backend
+  final FreezeStatus freezeStatus;
   final int scheduledTime;
 
   // Updated properties
@@ -42,6 +91,11 @@ class Job {
     this.bannedTracks = const [],
     this.bannedGenres = const [],
     this.exceptionsToBannedGenres = const [],
+    this.freezeStatus = const FreezeStatus(
+        daysSinceUpdate: 0,
+        daysUntilFreeze: 21,
+        freezeThresholdDays: 21,
+        isFrozen: false),
     this.recipe = const [],
     int? scheduledTime,
     this.minPopularity,
@@ -101,6 +155,7 @@ class Job {
       maxEnergy: json['max_energy'],
       minAcousticness: json['min_acousticness'],
       maxAcousticness: json['max_acousticness'],
+      freezeStatus: FreezeStatus.fromJson(json['freeze_status'] ?? {}),
     );
   }
 
@@ -128,11 +183,21 @@ class Job {
       'max_energy': maxEnergy,
       'min_acousticness': minAcousticness,
       'max_acousticness': maxAcousticness,
+      'freeze_status': freezeStatus.toJson(),
     };
   }
 
   // Empty constructor with a generated ID
-  Job.empty() : this(id: const Uuid().v4(), targetPlaylist: PlaylistSimple());
+  Job.empty()
+      : this(
+          id: const Uuid().v4(),
+          targetPlaylist: PlaylistSimple(),
+          freezeStatus: const FreezeStatus(
+              daysSinceUpdate: 0,
+              daysUntilFreeze: 21,
+              freezeThresholdDays: 21,
+              isFrozen: false),
+        );
 
   Job copyWith({
     String? id,
@@ -157,6 +222,7 @@ class Job {
     int? maxEnergy,
     int? minAcousticness,
     int? maxAcousticness,
+    FreezeStatus? freezeStatus,
   }) {
     return Job(
       id: id ?? this.id,
@@ -182,6 +248,7 @@ class Job {
       maxEnergy: maxEnergy ?? this.maxEnergy,
       minAcousticness: minAcousticness ?? this.minAcousticness,
       maxAcousticness: maxAcousticness ?? this.maxAcousticness,
+      freezeStatus: freezeStatus ?? this.freezeStatus,
     );
   }
 }

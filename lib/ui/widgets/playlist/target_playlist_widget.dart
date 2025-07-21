@@ -51,11 +51,65 @@ class TargetPlaylistWidget extends StatelessWidget {
               children: [
                 Column(
                   children: [
+                    // Freeze status banners
+                    if (job.freezeStatus.isFrozen)
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        margin: const EdgeInsets.only(bottom: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade700,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.error, color: Colors.white),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Job frozen – update needed!',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium!
+                                    .copyWith(color: Colors.white),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    else if (job.freezeStatus.daysUntilFreeze < 7)
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        margin: const EdgeInsets.only(bottom: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.amber.shade700,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.warning, color: Colors.black),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Job will freeze in ${job.freezeStatus.daysUntilFreeze.toStringAsFixed(0)} days',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium!
+                                    .copyWith(color: Colors.black),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     PlaylistImageIcon(
                       playlist: targetPlaylist,
                       size: 160,
                     ),
                     const SizedBox(height: 16),
+                    Text(
+                      'Last updated ${job.freezeStatus.daysSinceUpdate.toStringAsFixed(0)} days ago',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    const SizedBox(height: 8),
                     if (job.isNull)
                       Column(
                         children: [
