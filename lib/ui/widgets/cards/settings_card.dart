@@ -154,6 +154,21 @@ class _SettingsCardState extends State<SettingsCard> {
                   inactiveThumbColor: Colors.grey[600],
                   inactiveTrackColor: Colors.grey[800],
                 ),
+                SwitchListTile(
+                  title: Text('Allow Explicit Lyrics',
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyLarge
+                          ?.copyWith(color: Colors.white)),
+                  value: job.allowExplicit,
+                  onChanged: (bool value) {
+                    jobProvider.updateJob(
+                        widget.index, job.copyWith(allowExplicit: value));
+                  },
+                  activeColor: Colors.green,
+                  inactiveThumbColor: Colors.grey[600],
+                  inactiveTrackColor: Colors.grey[800],
+                ),
                 ListTile(
                   title: const Text('Description'),
                   trailing: const Icon(Icons.edit),

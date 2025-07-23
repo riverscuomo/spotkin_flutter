@@ -56,6 +56,7 @@ class Job {
   final PlaylistSimple targetPlaylist;
   final String description;
   final bool banSkits;
+  final bool allowExplicit;
   final List<Track> lastTracks;
   final List<Artist> bannedArtists;
   final List<AlbumSimple> bannedAlbums;
@@ -75,6 +76,7 @@ class Job {
     required this.targetPlaylist,
     this.description = '',
     this.banSkits = false,
+    this.allowExplicit = true,
     this.lastTracks = const [],
     this.bannedArtists = const [],
     this.bannedAlbums = const [],
@@ -108,6 +110,7 @@ class Job {
       description: json['description'] ?? '',
       scheduledTime: json['scheduled_time'] ?? _getLocalMidnightInUTC(),
       banSkits: json['ban_skits'] == true,
+      allowExplicit: json['allowExplicit'] != false, // Default to true unless explicitly set to false
       lastTracks: List<Track>.from(
           json['last_tracks']?.map((x) => Track.fromJson(x)) ?? []),
       bannedArtists: List<Artist>.from(
@@ -138,6 +141,7 @@ class Job {
       'description': description,
       'scheduled_time': scheduledTime,
       'ban_skits': banSkits,
+      'allowExplicit': allowExplicit,
       'last_tracks': lastTracks,
       'banned_artists': bannedArtists,
       'banned_albums': bannedAlbums,
@@ -168,6 +172,7 @@ class Job {
     String? description,
     int? scheduledTime,
     bool? banSkits,
+    bool? allowExplicit,
     List<Track>? lastTracks,
     List<Artist>? bannedArtists,
     List<AlbumSimple>? bannedAlbums,
@@ -184,6 +189,7 @@ class Job {
       description: description ?? this.description,
       scheduledTime: scheduledTime ?? this.scheduledTime,
       banSkits: banSkits ?? this.banSkits,
+      allowExplicit: allowExplicit ?? this.allowExplicit,
       lastTracks: lastTracks ?? this.lastTracks,
       bannedArtists: bannedArtists ?? this.bannedArtists,
       bannedAlbums: bannedAlbums ?? this.bannedAlbums,
