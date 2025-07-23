@@ -10,6 +10,7 @@ A Flutter web front-end for [Spotkin](<https://github.com/riverscuomo/spotkin>) 
 - set a target playlist. Choose one of your own or have the app create one for you. 
 - set any number of public playlists to source from, and the quantity of tracks to pull.
 - exclude any artists, songs, or genres by going to the Settings page.
+- get automatic warnings when a job is about to freeze (yellow) or already frozen (red).
 - click a button to update your playlist with the tracks from the source playlists.
 - the server will autoupdate your Spotify playlist every day at 5 am UTC.
 
@@ -35,6 +36,10 @@ To run locally,  I use these launch settings in vscode:
   ]
 }
 ```
+
+## Changelog
+
+See [`CHANGELOG.md`](CHANGELOG.md) for recent updates.
 
 ## DEPLOYMENT
 
