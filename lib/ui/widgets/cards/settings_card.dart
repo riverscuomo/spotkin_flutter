@@ -151,21 +151,24 @@ class _SettingsCardState extends State<SettingsCard> {
                     jobProvider.updateJob(
                         widget.index, job.copyWith(banSkits: value));
                   },
+                  activeTrackColor: Colors.red,
+                  activeColor: Colors.white,
                   inactiveThumbColor: Colors.grey[600],
                   inactiveTrackColor: Colors.grey[800],
                 ),
                 SwitchListTile(
-                  title: Text('Allow Explicit Lyrics',
+                  title: Text('Ban Explicit Lyrics',
                       style: Theme.of(context)
                           .textTheme
                           .bodyLarge
                           ?.copyWith(color: Colors.white)),
-                  value: job.allowExplicit,
+                  value: job.banExplicitLyrics,
                   onChanged: (bool value) {
                     jobProvider.updateJob(
-                        widget.index, job.copyWith(allowExplicit: value));
+                        widget.index, job.copyWith(banExplicitLyrics: value));
                   },
-                  activeColor: Colors.green,
+                  activeTrackColor: Colors.red,
+                  activeColor: Colors.white,
                   inactiveThumbColor: Colors.grey[600],
                   inactiveTrackColor: Colors.grey[800],
                 ),
@@ -202,12 +205,6 @@ class _SettingsCardState extends State<SettingsCard> {
                       );
                     }),
                   ),
-                ),
-                const SizedBox(height: 10),
-                Container(
-                  color: Theme.of(context).scaffoldBackgroundColor,
-                  padding: const EdgeInsets.all(16),
-                  child: Container(),  // Empty container since we removed the audio features
                 ),
               ],
             ),
