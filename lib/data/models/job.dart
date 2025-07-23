@@ -68,17 +68,7 @@ class Job {
   final FreezeStatus freezeStatus;
   final int scheduledTime;
 
-  // Updated properties
-  final int? minPopularity;
-  final int? maxPopularity;
-  final int? minDuration;
-  final int? maxDuration;
-  final int? minDanceability;
-  final int? maxDanceability;
-  final int? minEnergy;
-  final int? maxEnergy;
-  final int? minAcousticness;
-  final int? maxAcousticness;
+
 
   Job({
     required this.id,
@@ -98,16 +88,7 @@ class Job {
         isFrozen: false),
     this.recipe = const [],
     int? scheduledTime,
-    this.minPopularity,
-    this.maxPopularity,
-    this.minDuration,
-    this.maxDuration,
-    this.minDanceability,
-    this.maxDanceability,
-    this.minEnergy,
-    this.maxEnergy,
-    this.minAcousticness,
-    this.maxAcousticness,
+
   }) : scheduledTime = scheduledTime ?? _getLocalMidnightInUTC();
 
   static int _getLocalMidnightInUTC() {
@@ -145,16 +126,7 @@ class Job {
               ?.map((i) => Ingredient.fromJson(i as Map<String, dynamic>))
               .toList() ??
           [],
-      minPopularity: json['min_popularity'],
-      maxPopularity: json['max_popularity'],
-      minDuration: json['min_duration'],
-      maxDuration: json['max_duration'],
-      minDanceability: json['min_danceability'],
-      maxDanceability: json['max_danceability'],
-      minEnergy: json['min_energy'],
-      maxEnergy: json['max_energy'],
-      minAcousticness: json['min_acousticness'],
-      maxAcousticness: json['max_acousticness'],
+
       freezeStatus: FreezeStatus.fromJson(json['freeze_status'] ?? {}),
     );
   }
@@ -173,16 +145,7 @@ class Job {
       'banned_genres': bannedGenres,
       'exceptions_to_banned_genres': exceptionsToBannedGenres,
       'recipe': recipe.map((r) => r.toJson()).toList(),
-      'min_popularity': minPopularity,
-      'max_popularity': maxPopularity,
-      'min_duration': minDuration,
-      'max_duration': maxDuration,
-      'min_danceability': minDanceability,
-      'max_danceability': maxDanceability,
-      'min_energy': minEnergy,
-      'max_energy': maxEnergy,
-      'min_acousticness': minAcousticness,
-      'max_acousticness': maxAcousticness,
+
       'freeze_status': freezeStatus.toJson(),
     };
   }
@@ -212,16 +175,7 @@ class Job {
     List<String>? bannedGenres,
     List<Artist>? exceptionsToBannedGenres,
     List<Ingredient>? recipe,
-    int? minPopularity,
-    int? maxPopularity,
-    int? minDuration,
-    int? maxDuration,
-    int? minDanceability,
-    int? maxDanceability,
-    int? minEnergy,
-    int? maxEnergy,
-    int? minAcousticness,
-    int? maxAcousticness,
+
     FreezeStatus? freezeStatus,
   }) {
     return Job(
@@ -238,16 +192,7 @@ class Job {
       exceptionsToBannedGenres:
           exceptionsToBannedGenres ?? this.exceptionsToBannedGenres,
       recipe: recipe ?? this.recipe,
-      minPopularity: minPopularity ?? this.minPopularity,
-      maxPopularity: maxPopularity ?? this.maxPopularity,
-      minDuration: minDuration ?? this.minDuration,
-      maxDuration: maxDuration ?? this.maxDuration,
-      minDanceability: minDanceability ?? this.minDanceability,
-      maxDanceability: maxDanceability ?? this.maxDanceability,
-      minEnergy: minEnergy ?? this.minEnergy,
-      maxEnergy: maxEnergy ?? this.maxEnergy,
-      minAcousticness: minAcousticness ?? this.minAcousticness,
-      maxAcousticness: maxAcousticness ?? this.maxAcousticness,
+
       freezeStatus: freezeStatus ?? this.freezeStatus,
     );
   }

@@ -21,117 +21,14 @@ class SettingsCard extends StatefulWidget {
 
 class _SettingsCardState extends State<SettingsCard> {
   Timer? _debounce;
-  late RangeValues _energyValues;
-  late RangeValues _danceabilityValues;
-  late RangeValues _acousticnessValues;
-  late RangeValues _durationValues;
-  late RangeValues _popularityValues;
+
 
   @override
   void initState() {
     super.initState();
-    final job =
-        Provider.of<JobProvider>(context, listen: false).jobs[widget.index];
-    _energyValues = RangeValues(
-      (job.minEnergy ?? 0).toDouble(),
-      (job.maxEnergy ?? 100).toDouble(),
-    );
-    _danceabilityValues = RangeValues(
-      (job.minDanceability ?? 0).toDouble(),
-      (job.maxDanceability ?? 100).toDouble(),
-    );
-    _acousticnessValues = RangeValues(
-      (job.minAcousticness ?? 0).toDouble(),
-      (job.maxAcousticness ?? 100).toDouble(),
-    );
-    _durationValues = RangeValues(
-      (job.minDuration ?? 0) / 60000,
-      (job.maxDuration ?? 600000) / 60000,
-    );
-    _popularityValues = RangeValues(
-      (job.minPopularity?.toDouble() ?? 0),
-      (job.maxPopularity?.toDouble() ?? 100),
-    );
   }
 
-  void _onSliderChangeDebounced(
-      Function(RangeValues) updateJobCallback, RangeValues values) {
-    if (_debounce?.isActive ?? false) _debounce!.cancel();
 
-    _debounce = Timer(const Duration(milliseconds: 300), () {
-      updateJobCallback(values);
-    });
-  }
-
-  String _formatDuration(double value) {
-    int minutes = value.floor();
-    int seconds = ((value - minutes) * 60).round();
-    return '${minutes}m ${seconds}s';
-  }
-
-  Widget _buildRangeSlider(
-    BuildContext context,
-    String title,
-    double min,
-    double max,
-    RangeValues values,
-    Function(RangeValues) onChanged, {
-    String Function(double)? valueFormatter,
-    required Function(RangeValues) updateState,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Text(
-              title,
-              style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                    fontSize: 16,
-                  ),
-            ),
-            if (title == 'Acousticness') // add button for acousticness info
-              const AcousticnessInfoButton(),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              valueFormatter?.call(values.start) ??
-                  values.start.toStringAsFixed(0),
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            Text(
-              valueFormatter?.call(values.end) ?? values.end.toStringAsFixed(0),
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        RangeSlider(
-          min: min,
-          max: max,
-          values: values,
-          onChanged: (newValues) {
-            setState(() {
-              updateState(newValues);
-            });
-            _onSliderChangeDebounced(onChanged, newValues);
-          },
-          divisions: 100,
-          labels: RangeLabels(
-            valueFormatter?.call(values.start) ??
-                values.start.toStringAsFixed(0),
-            valueFormatter?.call(values.end) ?? values.end.toStringAsFixed(0),
-          ),
-          activeColor: Colors.green,
-          inactiveColor: Colors.grey[800],
-        ),
-      ],
-    );
-  }
 
   @override
   void dispose() {
@@ -295,105 +192,7 @@ class _SettingsCardState extends State<SettingsCard> {
                 Container(
                   color: Theme.of(context).scaffoldBackgroundColor,
                   padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 16),
-                      Text('Audio Features',
-                          style: Theme.of(context).textTheme.titleMedium),
-                      const SizedBox(height: 16),
-                      _buildRangeSlider(
-                        context,
-                        'Energy',
-                        0,
-                        100,
-                        _energyValues,
-                        (values) => jobProvider.updateJob(
-                          widget.index,
-                          job.copyWith(
-                            minEnergy: values.start.round(),
-                            maxEnergy: values.end.round(),
-                          ),
-                        ),
-                        updateState: (newValues) {
-                          _energyValues = newValues;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      _buildRangeSlider(
-                        context,
-                        'Danceability',
-                        0,
-                        100,
-                        _danceabilityValues,
-                        (values) => jobProvider.updateJob(
-                          widget.index,
-                          job.copyWith(
-                            minDanceability: values.start.round(),
-                            maxDanceability: values.end.round(),
-                          ),
-                        ),
-                        updateState: (newValues) {
-                          _danceabilityValues = newValues;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      _buildRangeSlider(
-                        context,
-                        'Acousticness',
-                        0,
-                        100,
-                        _acousticnessValues,
-                        (values) => jobProvider.updateJob(
-                          widget.index,
-                          job.copyWith(
-                            minAcousticness: values.start.round(),
-                            maxAcousticness: values.end.round(),
-                          ),
-                        ),
-                        updateState: (newValues) {
-                          _acousticnessValues = newValues;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      _buildRangeSlider(
-                        context,
-                        'Duration',
-                        0,
-                        10,
-                        _durationValues,
-                        (values) => jobProvider.updateJob(
-                          widget.index,
-                          job.copyWith(
-                            minDuration: (values.start * 60000).round(),
-                            maxDuration: (values.end * 60000).round(),
-                          ),
-                        ),
-                        valueFormatter:
-                            _formatDuration, // Format using minutes and seconds
-                        updateState: (newValues) {
-                          _durationValues = newValues;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      _buildRangeSlider(
-                        context,
-                        'Popularity',
-                        0,
-                        100,
-                        _popularityValues,
-                        (values) => jobProvider.updateJob(
-                          widget.index,
-                          job.copyWith(
-                            minPopularity: values.start.round(),
-                            maxPopularity: values.end.round(),
-                          ),
-                        ),
-                        updateState: (newValues) {
-                          _popularityValues = newValues;
-                        },
-                      ),
-                    ],
-                  ),
+                  child: Container(),  // Empty container since we removed the audio features
                 ),
               ],
             ),
