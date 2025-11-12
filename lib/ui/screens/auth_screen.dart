@@ -59,18 +59,19 @@ class _AuthScreenState extends State<AuthScreen> {
       _isInitiatingLogin = true;
     });
 
-    debugPrint(
-        "widget.config['SPOTIFY_REDIRECT_URI']: ${widget.config['SPOTIFY_REDIRECT_URI']}");
+    final redirectUriString = widget.config['SPOTIFY_REDIRECT_URI'];
+    debugPrint("widget.config['SPOTIFY_REDIRECT_URI']: $redirectUriString");
 
     final authUrl = Uri.https('accounts.spotify.com', '/authorize', {
       'client_id': widget.config['SPOTIFY_CLIENT_ID'],
       'response_type': 'code', // Authorization code flow
-      'redirect_uri': widget.config['SPOTIFY_REDIRECT_URI'],
+      'redirect_uri': redirectUriString,
       'scope': widget.config['SPOTIFY_SCOPE'],
     });
 
     try {
-      const callbackScheme = kReleaseMode ? 'https' : 'http';
+      final callbackScheme = Uri.parse(redirectUriString).scheme ??
+          (kReleaseMode ? 'https' : 'http');
 
       // Start the OAuth process using your existing SpotifyService logic
       final result = await FlutterWebAuth2.authenticate(
